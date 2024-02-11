@@ -586,7 +586,7 @@ An object that MUST conform to this format:
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `archive_name` | string | yes | The name of the component representing the archive that this component is contained in. |
-| `location` | string | The location of the file. This SHOULD be the path to the file starting at the root of its archive.  |
+| `component_path` | string | The location of the file inside the archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a slash and MUST include the full name of the file inside the archive.  |
 | `local_path` | string | yes | The path that the client should append to the base directory it has chosen for the asset. See [Local Storage of Asset Files](#local-storage-of-asset-files).  |
 | `length` | integer | no | The length of the file in bytes. |
 | `extension` | string | yes | The file extension indicating the format of this file.  |
