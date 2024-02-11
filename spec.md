@@ -571,7 +571,7 @@ More about the handling for `archive` and `file` in [Component Handling](#compon
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `uri` | string | yes | The location of the file. This SHOULD be an HTTP(S)-URI. |
+| `component_query` | `fixed_query` | The query to download the file. |
 | `unpack_all` | boolean | yes | `True`: Unpack all files from this archive into the local implementation directory or a subpath of it (determined by `local_path`) and treat them as [passive components](#handling-active-and-passive-components). `False`: Do not unpack all files from this archive, only copy those that are explicitly referenced as a component into the `local_path` they defined for themselves.|
 | `local_path` | string | yes | The path that the client should append to the base directory it has chosen for the asset. It is the place where the asset's contents get unpacked if the `unpack_all` field is set.  |
 | `length` | integer | no | The length of the file in bytes. |
@@ -600,7 +600,7 @@ More about the handling for `archive` and `file` in [Component Handling](#compon
 An object that MUST conform to this format:
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `uri` | string | The location of the file. This SHOULD be an HTTP(S)-URI |
+| `component_query` | `fixed_query` | The query to download the file. |
 | `local_path` | string | yes | The path that the client should append to the base directory it has chosen for the asset. |
 | `length` | integer | no | The length of the file in bytes. |
 | `extension` | string | yes | The file extension indicating the format of this file. |
