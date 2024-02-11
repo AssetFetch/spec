@@ -362,7 +362,6 @@ The response on this endpoint MUST have the following structure:
 - The `data` field MAY contain the datablocks `next_query`, `response_statistics` and/or `text`
 
 #### `asset` Structure
-*(kind: `asset`)*
 
 Every `asset` object MUST have the following structure:
 
