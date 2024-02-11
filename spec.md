@@ -642,8 +642,8 @@ An object that MUST conform to:
 Individual images must conform to the following fields:
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
+| `alt` | string | no | An "alt" String for the image. |
 | `uri` | string | yes | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`.
-| `alt` | string | yes | An "alt" String for the image. |
 
 ### [Asset?] `preview_image_thumbnail`
 Contains information about a thumbnail for an asset. The thumbnail can be provided in multiple resolutions.
@@ -651,8 +651,18 @@ Contains information about a thumbnail for an asset. The thumbnail can be provid
 An object that MUST conform to this format:
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `alt` | string | yes | An "alt" String for the image. |
-| `uri` | object | yes | An object whose keys are integers and whose values are Strings. The keys represent the resolution of the thumbnail, the value represents the URL for the thumbnail image in this resolution. The thumbnail image SHOULD be a square. If the image is not a square, its key MUST be set based on the pixel count of its longest site. The image's media type SHOULD be one of `image/png` or `image/jpeg`. If the provider does not have insight into the dimensions of the thumbnail that it is refering the client to, it MUST use use the key `0` for the thumbnail url.|
+| `alt` | string | no | An "alt" String for the image. |
+| `uris` | object | yes | See table below. |
+
+#### `uris` Structure
+
+The `uris` field MUST be an object whose keys are integers and whose values are strings.
+The object MUST have at least one member.
+The key represents the resolution of the thumbnail, the value represents the URI for the thumbnail image in this resolution.
+The thumbnail image SHOULD be a square.
+If the image is not a square, its key SHOULD be set based on the pixel count of its longest site.
+The image's media type SHOULD be one of `image/png` or `image/jpeg`.
+If the provider does not have insight into the dimensions of the thumbnail that it is referring the client to, it SHOULD use use the key `0` for the thumbnail url.
 
 ### [Component?] `loose_environment`
 The presence of this datablock on a component indicates that it is an environment map.
