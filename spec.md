@@ -703,7 +703,7 @@ Information about files with the extension `.obj`.
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `upaxis` | string | yes | Indicates which axis should be treated as up. MUST be `+y` or `+z` |
+| `up_axis` | string | yes | Indicates which axis should be treated as up. MUST be `+y` or `+z` |
 | `use_mtl` | boolean | yes | Indicates whether the client should attempt to read material data from the MTL files referenced inside the obj-file. |
 
 
