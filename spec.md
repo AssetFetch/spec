@@ -723,7 +723,7 @@ General text information to be displayed to the user.
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `title` | string | yes | A title for the datablock's subject. |
-| `description` | string | yes | A description text for the datablocks subject. |
+| `description` | string | no | A description text for the datablocks subject. |
 
 ### [Asset!*/Component!*] `unlock.state`
 Information relating to asset unlocking for an asset or a component.
