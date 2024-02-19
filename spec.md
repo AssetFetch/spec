@@ -301,7 +301,7 @@ All provider responses MUST carry the `meta` field to communicate key informatio
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `response_id` | string | no | An ID for this specific response from the provider. |
-| `version` | array | yes | The version of AssetFetch that this response is intended for. |
+| `version` | string | yes | The version of AssetFetch that this response is intended for. |
 | `kind` | string | yes | The kind of data that is being transmitted with this response. The exact value of this field is specified individually for each endpoint. |
 | `message` | string | no | An arbitrary message to attach to this response. |
 
