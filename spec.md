@@ -496,7 +496,7 @@ This template describes a variable query. The individual parameter objects conta
 #### `parameter` Structure
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `type` | string | yes| one of page / text / boolean / hidden / select / multiselect |
+| `type` | string | yes| one of text / boolean / hidden / select / multiselect |
 | `name` | string | yes| name of the HTTP parameter |
 | `title` | string | yes| Title to display to the user |
 | `default` | string | yes| The default value for this parameter |
