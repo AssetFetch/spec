@@ -802,9 +802,9 @@ Array of objects that MUST have this structure:
 
 | Field | Format | Required | Description
 | --- | --- |--- | --- |
-| `author_name` | string | yes | Name of the author. |
-| `author_uri` | string | yes | A URI for this author, for example a profile link. |
-| `author_role` | string | yes | The role that the author has had in the creation of this asset. |
+| `name` | string | yes | Name of the author. |
+| `uri` | string | no | A URI for this author, for example a profile link. |
+| `role` | string | no | The role that the author has had in the creation of this asset. |
 
 ### [Component!] `behavior`
 
