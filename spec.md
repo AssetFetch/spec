@@ -301,7 +301,7 @@ All provider responses MUST carry the `meta` field to communicate key informatio
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `response_id` | string | no | An ID for this specific response from the provider. |
-| `version` | array | yes | The version of AssetFetch that this response is intended for. |
+| `version` | string | yes | The version of AssetFetch that this response is intended for. |
 | `kind` | string | yes | The kind of data that is being transmitted with this response. The exact value of this field is specified individually for each endpoint. |
 | `message` | string | no | An arbitrary message to attach to this response. |
 
@@ -357,7 +357,7 @@ The response on this endpoint MUST have the following structure:
 | --- | --- |--- | --- |
 | `meta` | meta | yes| Metadata. |
 | `data` | datablocks | yes | Datablocks. |
-| `assets` | array | yes |Array of `asset`s, as described below.|
+| `assets` | array of `asset` | yes |Array of `asset`s, as described below.|
 
 - The `data` field MAY contain the datablocks `next_query`, `response_statistics` and/or `text`
 
@@ -371,7 +371,7 @@ Every `asset` object MUST have the following structure:
 | `data` | datablocks | yes | Object containing datablocks. |
 
 - The `name` field MUST be unique among all assets for this provider. Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the `text` datablock if it is set for this asset.
-- The `data` field MUST contain the datablock `implementations_query`.
+- The `data` field MUST contain the datablock `implementation_list_query`.
 - The `data` field SHOULD contain the datablocks `preview_image_thumbnail` and `text`.
 - The `data` field MAY contain the datablocks `preview_image_supplemental`,`license`,`authors` and/or `web_references`.
 - The `data` field MAY contain one of the datablocks `dimensions.*`.
@@ -381,7 +381,7 @@ Every `asset` object MUST have the following structure:
 *(kind: `implementation_list`)*
 
 This endpoint returns one or several implementations for one specific asset.
-The URI and available parameters for this endpoint are communicated by the server to the client using the `implementations_query` datablock on the corresponding asset in the asset list endpoint.
+The URI and available parameters for this endpoint are communicated by the server to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
 
 The response of this endpoint MUST have the following structure:
 
@@ -496,13 +496,13 @@ This template describes a variable query. The individual parameter objects conta
 #### `parameter` Structure
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `type` | string | yes| one of page / text / boolean / hidden / select / multiselect |
+| `type` | string | yes| one of text / boolean / hidden / select / multiselect |
 | `name` | string | yes| name of the HTTP parameter |
 | `title` | string | yes| Title to display to the user |
 | `default` | string | yes| The default value for this parameter |
 | `mandatory` | boolean | yes | Whether this parameter is mandatory and must be set to a non-empty string |
 | `choices` | array of string | yes | Possible choices when type `select` or `multiselect` is used |
-| `delimiter` | string | yes | When type `multiselect` is used. |
+| `delimiter` | string | yes | Delimiter to use for selected choices when type `multiselect` is used. |
 
 ### `fixed_query`
 This template describes a fixed query that can be sent by the client to the provider without additional user input or configuration.
@@ -528,7 +528,7 @@ A star (*) is used to indicate that there are special rules for when/if this dat
 Describes the variable query for fetching the list of available assets from a provider.
 Follows the `variable_query` template.
 
-### [Asset!] `implementations_query`
+### [Asset!] `implementation_list_query`
 Describes the variable query for fetching the list of available implementations for an asset from a provider.
 Follows the `variable_query` template.
 
@@ -552,14 +552,14 @@ Array of objects matching the following structure:
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `name` | string | yes | Name of the header |
-| `default` | string | yes | Default value as a suggestion to the client |
+| `default` | string | no | Default value as a suggestion to the client |
 | `is_required` | boolean | yes | Indicates if this header is required.|
 | `is_sensitive` | boolean | yes | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#storing-sensitive-headers) |
-| `prefix` | string | yes | Prefix that the client should prepend to the value entered by the user when sending it to the provider |
-| `suffix` | string | yes | Suffix that the client should append to the value entered by the user when sending it to the provider |
-| `title` | string | yes | Title to display inside the client. |
-| `acquisition_uri` | string | yes | URI to be opened in the users browser to help them obtain the header value |
-| `acquisition_uri_title` | string | yes | Title for the `acquisition_uri` |
+| `prefix` | string | no | Prefix that the client should prepend to the value entered by the user when sending it to the provider |
+| `suffix` | string | no | Suffix that the client should append to the value entered by the user when sending it to the provider |
+| `title` | string | no | Title to display inside the client. |
+| `acquisition_uri` | string | no | URI to be opened in the users browser to help them obtain the header value |
+| `acquisition_uri_title` | string | no | Title for the `acquisition_uri` |
 
 ### [Component!] The `fetch.*` family
 
@@ -613,7 +613,7 @@ The `local_path` MUST include the full name that the file should take in the des
 It MUST NOT start with a slash and MUST NOT contain relative path references (`.` or `..`) anywhere within it.
 
 ### [Asset?] `dimensions.3d`
-Contains general information about the dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but *may* also be used to scale mesh data.
+Contains general information about the physical dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh data.
 
 An object that MUST conform to this format:
 | Field | Format | Required | Description |
@@ -623,7 +623,7 @@ An object that MUST conform to this format:
 | `depth_m` | float | yes | Depth of the referenced asset |
 
 ### [Asset?] `dimensions.2d`
-Contains general information about the dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but *may* also be used to scale mesh data.
+Contains general information about the physical dimensions of a two-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh/texture/uv data.
 
 An object that MUST conform to this format:
 | Field | Format | Required | Description |
@@ -634,12 +634,7 @@ An object that MUST conform to this format:
 ### [Asset?] `preview_image_supplemental`
 Contains a list of preview images with `uri`s and `alt`-Strings associated to the asset.
 
-An object that MUST conform to:
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `images` | Array of object | yes | All objects must conform to the template outlined in the table below. |
-
-Individual images must conform to the following fields:
+An array where every field must conform to the following structure:
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `alt` | string | no | An "alt" String for the image. |
@@ -656,7 +651,7 @@ An object that MUST conform to this format:
 
 #### `uris` Structure
 
-The `uris` field MUST be an object whose keys are integers and whose values are strings.
+The `uris` field MUST be an object whose keys are strings containing an integer and whose values are strings representing.
 The object MUST have at least one member.
 The key represents the resolution of the thumbnail, the value represents the URI for the thumbnail image in this resolution.
 The thumbnail image SHOULD be a square.
@@ -698,17 +693,31 @@ When applied to a component, it indicates that this component makes use of a mat
 | `mtlx_material` | string | no | Optional reference for which material to use from the mtlx file, if it contains multiple. |
 | `apply_selectively_to` | string | no |  Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
 
-### [Component?] `blend`
+### [Component?] `format.blend`
 Information about files with the extension `.blend`.
 This information is intended to help the client understand the file.
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `version` | string | no | Blender Version in the format `Major.Minor.Patch` or `Major.Minor` or `Major` |
-| `is_asset` | boolean | no | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. |
-| `target_collections` | array of string | no | Names of the collections that are of interest for this file. |
+| `is_asset` | boolean | no | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
+| `targets` | array of `target` | no | Array containing the blender structures inside the file that are relevant to the asset. |
 
-### [Component?] `obj`
+#### `target` Structure
+
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `kind` | `string` | yes | One of `actions`, `armatures`, `brushes`, `cache_files`, `cameras`, `collections`, `curves`, `fonts`, `grease_pencils`, `hair_curves`, `images`, `lattices`, `lightprobes`, `lights`, `linestyles`, `masks`, `materials`, `meshes`, `metaballs`, `movieclips`, `node_groups`, `objects`, `paint_curves`, `palettes`, `particles`, `pointclouds`, `scenes`, `screens`, `simulations`, `sounds`, `speakers`, `texts`, `textures`, `volumes`, `workspaces`, `worlds` |
+| `names` | Array of `string` | yes | List of the names of the resources to import. |
+
+### [Component?] `format.usd`
+Information about files with the extension `.usd`.
+
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `is_crate` | boolean | no | Indicates whether this file is a "crate" (like .usdc) or not (like .usda).|
+
+### [Component?] `format.obj`
 Information about files with the extension `.obj`.
 
 | Field | Format | Required | Description |
@@ -729,26 +738,31 @@ General text information to be displayed to the user.
 Information relating to asset unlocking for an asset or a component.
 This datablock contains the query that the client needs to make in order to actually unlock the asset before initiating the download described in the `fetch.*` block.
 
+If the provider does not transmit an `unlock_query`, the client SHOULD still display the asset and allow the user to purchase the asset through the `unlock_query_fallback_uri`.
+If this field is not set either, the client SHOULD still display the resource, but SHOULD make it apparent that it is not accessible for the user.
+
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `locked` | Boolean | yes | `True`: The asset is not ready for download and must be unlocked first. `False`: The asset has already been unlocked and the data in `file` can be used as normal. |
-| `price` | Integer or Float | yes| The price that the provider will charge the user in the background if they unlock the asset. |
-| `unlock` | `fixed_query` | yes | |
+| `price` | Number | Only if `unlock_query` is set. | The price that the provider will charge the user in the background if they unlock the asset using the `unlock_query`. |
+| `unlock_query` | `fixed_query` | no | Query to perform to to make the purchase. |
+| `unlock_query_fallback_uri` | string | no | Website to direct the user to to purchase the resource manually without using AssetFetch. The client SHOULD allow the user to access this site in the browser if no `unlock_query` is provided. |
 
-### [Init!*] `unlock.balance_initialization`
+### [Init!*] `unlock.initialization`
 General information about how currency/balance is handled by this provider.
 
 | Field | Format | Required | Description | 
 | --- | --- |--- | --- |
-| `balance_unit` | string | yes | The currency or name of token that's used by this provider to be displayed alongside the price |
-| `balance_refill_url` | string | yes | URL to direct the user to in order to refill their balance (if the vendor uses it) |
-| `balance_check` | `query_fixed` | yes | |
+| `currency` | string | yes | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
+| `is_prepaid` | boolean| yes | Indicates whether the client should attempt to resolve an account balance. |
+| `prepaid_balance_refill_uri` | string | yes | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form. |
+| `prepaid_balance_check_query` | `query_fixed` | yes | The query the client should make to get the current prepaid balance.|
 
-### [UnlockBalance!] `unlock.balance`
+### [UnlockBalance!] `unlock.prepaid_balance`
 
 | Field | Format | Required | Description | 
 | --- | --- |--- | --- |
-| `balance` | int or float | yes | Balance.|
+| `prepaid_balance` | int or float | yes | Balance.|
 
 ### [Init?/Asset?] `web_references`
 References to external websites for documentation or support.
@@ -766,10 +780,10 @@ Brand information about the provider.
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `color_accent` | string | yes | Color for the provider, hex string in the format 'abcdef' (no #)
-| `logo_square_uri` | string | yes | URI to a square logo. It SHOULD be of the mediatype `image/png` and SHOULD be transparent.|
-| `logo_wide_uri` | string | yes | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD be transparent.
-| `banner_uri` | string | yes | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent.|
+| `color_accent` | string | no | Color for the provider, hex string in the format 'abcdef' (no #)
+| `logo_square_uri` | string | no | URI to a square logo. It SHOULD be of the mediatype `image/png` and SHOULD be transparent.|
+| `logo_wide_uri` | string | no | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD be transparent.
+| `banner_uri` | string | no | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent.|
 
 ### [Init?/Asset?] `license`
 Contains license information.
@@ -788,9 +802,9 @@ Array of objects that MUST have this structure:
 
 | Field | Format | Required | Description
 | --- | --- |--- | --- |
-| `author_name` | string | yes | Name of the author. |
-| `author_uri` | string | yes | A URI for this author, for example a profile link. |
-| `author_role` | string | yes | The role that the author has had in the creation of this asset. |
+| `name` | string | yes | Name of the author. |
+| `uri` | string | no | A URI for this author, for example a profile link. |
+| `role` | string | no | The role that the author has had in the creation of this asset. |
 
 ### [Component!] `behavior`
 
@@ -798,7 +812,7 @@ This field gives the client a hint about how to handle this component. See [Hand
 
 | Field | Format | Required | Description
 | --- | --- |--- | --- |
-| `behavior` | string | no, default=`active` | MUST be one of `active` or `passive`.  |
+| `style` | string | no, default=`active` | MUST be one of `active` or `passive`.  |
 
 # Component Handling
 
