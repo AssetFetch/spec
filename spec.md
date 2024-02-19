@@ -357,7 +357,7 @@ The response on this endpoint MUST have the following structure:
 | --- | --- |--- | --- |
 | `meta` | meta | yes| Metadata. |
 | `data` | datablocks | yes | Datablocks. |
-| `assets` | array | yes |Array of `asset`s, as described below.|
+| `assets` | array of `asset` | yes |Array of `asset`s, as described below.|
 
 - The `data` field MAY contain the datablocks `next_query`, `response_statistics` and/or `text`
 
