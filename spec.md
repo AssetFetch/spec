@@ -738,26 +738,31 @@ General text information to be displayed to the user.
 Information relating to asset unlocking for an asset or a component.
 This datablock contains the query that the client needs to make in order to actually unlock the asset before initiating the download described in the `fetch.*` block.
 
+If the provider does not transmit an `unlock_query`, the client SHOULD still display the asset and allow the user to purchase the asset through the `unlock_query_fallback_uri`.
+If this field is not set either, the client SHOULD still display the resource, but SHOULD make it apparent that it is not accessible for the user.
+
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `locked` | Boolean | yes | `True`: The asset is not ready for download and must be unlocked first. `False`: The asset has already been unlocked and the data in `file` can be used as normal. |
-| `price` | Integer or Float | yes| The price that the provider will charge the user in the background if they unlock the asset. |
-| `unlock` | `fixed_query` | yes | |
+| `price` | Number | Only if `unlock_query` is set. | The price that the provider will charge the user in the background if they unlock the asset using the `unlock_query`. |
+| `unlock_query` | `fixed_query` | no | Query to perform to to make the purchase. |
+| `unlock_query_fallback_uri` | string | no | Website to direct the user to to purchase the resource manually without using AssetFetch. The client SHOULD allow the user to access this site in the browser if no `unlock_query` is provided. |
 
-### [Init!*] `unlock.balance_initialization`
+### [Init!*] `unlock.initialization`
 General information about how currency/balance is handled by this provider.
 
 | Field | Format | Required | Description | 
 | --- | --- |--- | --- |
-| `balance_unit` | string | yes | The currency or name of token that's used by this provider to be displayed alongside the price |
-| `balance_refill_url` | string | yes | URL to direct the user to in order to refill their balance (if the vendor uses it) |
-| `balance_check` | `query_fixed` | yes | |
+| `currency` | string | yes | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
+| `is_prepaid` | boolean| yes | Indicates whether the client should attempt to resolve an account balance. |
+| `prepaid_balance_refill_uri` | string | yes | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form. |
+| `prepaid_balance_check_query` | `query_fixed` | yes | The query the client should make to get the current prepaid balance.|
 
-### [UnlockBalance!] `unlock.balance`
+### [UnlockBalance!] `unlock.prepaid_balance`
 
 | Field | Format | Required | Description | 
 | --- | --- |--- | --- |
-| `balance` | int or float | yes | Balance.|
+| `prepaid_balance` | int or float | yes | Balance.|
 
 ### [Init?/Asset?] `web_references`
 References to external websites for documentation or support.
