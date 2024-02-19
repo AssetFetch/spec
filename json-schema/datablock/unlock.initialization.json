@@ -1,0 +1,25 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Unlocking Initialization  Datablock",
+	"$id": "/datablock/unlock.initialization.json",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"balance_unit":{
+			"type":"string"
+		},
+		"is_prepaid":{
+			"type":"boolean"
+		},
+		"prepaid_balance_refill_uri":{
+			"type":"string"
+		},
+		"prepaid_balance_check_query":{
+			"$ref": "/template/fixed_query.json"
+		}
+	},
+	"required": [
+		"balance_unit",
+		"balance_check_query"
+	]
+}

@@ -1,0 +1,190 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Implementation List Endpoint",
+	"$id": "/endpoint/implementation_list.json",
+	"type": "object",
+	"properties": {
+		"meta": {
+			"$ref": "/template/meta.json"
+		},
+		"data": {
+			"type": "object",
+			"properties": {
+				"next_query": {
+					"$ref": "/datablock/next_query.json"
+				},
+				"response_statistics": {
+					"$ref": "/datablock/response_statistics.json"
+				},
+				"text": {
+					"$ref": "/datablock/text.json"
+				}
+			},
+			"required": []
+		},
+		"implementations": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"data": {
+						"type": "object",
+						"text": {
+							"$ref": "/datablock/text.json"
+						}
+					},
+					"components": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"data": {
+									"type": "object",
+									"additionalProperties": false,
+									"properties": {
+										"fetch.archive": {
+											"$ref": "/datablock/fetch.archive.json"
+										},
+										"fetch.archive_file": {
+											"$ref": "/datablock/fetch.archive_file.json"
+										},
+										"fetch.file": {
+											"$ref": "/datablock/fetch.file.json"
+										},
+										"unlock.state": {
+											"$ref": "/datablock/unlock.state.json"
+										},
+										"behavior": {
+											"$ref": "/datablock/behavior.json"
+										},
+										"loose_environment": {
+											"$ref": "/datablock/loose_environment.json"
+										},
+										"loose_material.apply_material": {
+											"$ref": "/datablock/loose_material.apply_material.json"
+										},
+										"loose_material.define_map": {
+											"$ref": "/datablock/loose_material.define_map.json"
+										},
+										"mtlx_apply_material": {
+											"$ref": "/datablock/mtlx_apply_material.json"
+										},
+										"blend": {
+											"$ref": "/datablock/blender.json"
+										},
+										"obj": {
+											"$ref": "/datablock/obj.json"
+										}
+									},
+									"required": [
+										"behavior"
+									],
+									"oneOf": [
+										{
+											"required": [
+												"fetch.archive"
+											]
+										},
+										{
+											"required": [
+												"fetch.archive_file"
+											]
+										},
+										{
+											"required": [
+												"fetch.file"
+											]
+										}
+									],
+									"$comment": "The 'allOf' section ensures that no two datablocks with the same prefix are used.",
+									"allOf": [
+										{
+											"if": {
+												"anyOf": [
+													{
+														"required": [
+															"fetch.file"
+														]
+													},
+													{
+														"required": [
+															"fetch.archive"
+														]
+													},
+													{
+														"required": [
+															"fetch.archive_file"
+														]
+													}
+												]
+											},
+											"then": {
+												"oneOf": [
+													{
+														"required": [
+															"fetch.file"
+														]
+													},
+													{
+														"required": [
+															"fetch.archive"
+														]
+													},
+													{
+														"required": [
+															"fetch.archive_file"
+														]
+													}
+												]
+											}
+										},
+										{
+											"if": {
+												"anyOf": [
+													{
+														"required": [
+															"loose_material.define_map"
+														]
+													},
+													{
+														"required": [
+															"loose_material.apply_material"
+														]
+													}
+												]
+											},
+											"then": {
+												"oneOf": [
+													{
+														"required": [
+															"loose_material.define_map"
+														]
+													},
+													{
+														"required": [
+															"loose_material.apply_material"
+														]
+													}
+												]
+											}
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"required": [
+		"name",
+		"data"
+	]
+}

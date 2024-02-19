@@ -1,0 +1,113 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Asset List Endpoint",
+	"$id": "/endpoint/asset_list.json",
+	"type": "object",
+	"properties": {
+		"meta": {
+			"$ref": "/template/meta.json"
+		},
+		"data": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"next_query": {
+					"$ref": "/datablock/next_query.json"
+				},
+				"response_statistics": {
+					"$ref": "/datablock/response_statistics.json"
+				},
+				"text": {
+					"$ref": "/datablock/text.json"
+				}
+			}
+		},
+		"assets": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"additionalProperties": false,
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"data": {
+						"type": "object",
+						"properties": {
+							"implementations_query": {
+								"$ref": "/datablock/implementations_query.json"
+							},
+							"unlock.state": {
+								"$ref": "/datablock/unlock.state.json"
+							},
+							"text": {
+								"$ref": "/datablock/text.json"
+							},
+							"dimensions.3d": {
+								"$ref": "/datablock/dimensions.3d.json"
+							},
+							"dimensions.2d": {
+								"$ref": "/datablock/dimensions.2d.json"
+							},
+							"preview_image_supplemental": {
+								"$ref": "/datablock/preview_image_supplemental.json"
+							},
+							"preview_image_thumbnail": {
+								"$ref": "/datablock/preview_image_thumbnail.json"
+							},
+							"web_references": {
+								"$ref": "/datablock/web_references.json"
+							},
+							"license": {
+								"$ref": "/datablock/license.json"
+							},
+							"authors": {
+								"$ref": "/datablock/authors.json"
+							}
+						},
+						"required": [
+							"implementations_query"
+						],
+						"$comment": "The 'allOf' section ensures that no two datablocks with the same prefix are used.",
+						"allOf": [
+							{
+								"if": {
+									"anyOf": [
+										{
+											"required": [
+												"dimensions.2d"
+											]
+										},
+										{
+											"required": [
+												"dimensions.3d"
+											]
+										}
+									]
+								},
+								"then": {
+									"oneOf": [
+										{
+											"required": [
+												"dimensions.2d"
+											]
+										},
+										{
+											"required": [
+												"dimensions.3d"
+											]
+										}
+									]
+								}
+							}
+						]
+					}
+				}
+			}
+		}
+	},
+	"required": [
+		"name",
+		"data"
+	]
+}

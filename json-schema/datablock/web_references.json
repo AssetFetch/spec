@@ -1,0 +1,23 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Web References Datablock",
+	"$id": "/datablock/web_references.json",
+	"type": "array",
+	"additionalItems": false,
+	"items": {
+		"properties": {
+			"title":{
+				"type":"string"
+			},
+			"uri":{
+				"type":"string"
+			},
+			"icon_uri":{
+				"type":"string"
+			}
+		}
+	},
+	"required": [
+		"locked"
+	]
+}

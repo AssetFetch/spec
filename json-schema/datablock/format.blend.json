@@ -1,0 +1,73 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": ".blend File Datablock",
+	"$id": "/datablock/format.blend.json",
+	"$comment": "This datablock describes details about a .blend file for Blender.",
+	"type": "object",
+	"properties": {
+		"version": {
+			"type":"string",
+			"pattern": "[0-9]+(\\.[0-9]+)(\\.[0-9]+)[a-z]?"
+		},
+		"is_asset":{
+			"type":"boolean"
+		},
+		"targets": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"required": ["kind","names"],
+				"properties": {
+					"kind": {
+						"type": "string",
+						"enum": [
+							"actions",
+							"armatures",
+							"brushes",
+							"cache_files",
+							"cameras",
+							"collections",
+							"curves",
+							"fonts",
+							"grease_pencils",
+							"hair_curves",
+							"images",
+							"lattices",
+							"lightprobes",
+							"lights",
+							"linestyles",
+							"masks",
+							"materials",
+							"meshes",
+							"metaballs",
+							"movieclips",
+							"node_groups",
+							"objects",
+							"paint_curves",
+							"palettes",
+							"particles",
+							"pointclouds",
+							"scenes",
+							"screens",
+							"simulations",
+							"sounds",
+							"speakers",
+							"texts",
+							"textures",
+							"volumes",
+							"workspaces",
+							"worlds"
+						]
+					},
+					"names": {
+						"type": "array",
+						"items": {
+							"type":"string"
+						}
+					}
+				}
+			}
+		}
+	},
+	"required": []
+}

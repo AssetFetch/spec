@@ -1,0 +1,39 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"type": "object",
+	"properties": {
+		"meta": { "$ref": "/template/meta.json" },
+		"data": { 
+			"type":"object",
+			"additionalProperties": false,
+			"properties": {
+				"text":{
+					"$ref": "/datablock/text.json"
+				},
+				"asset_list_query":{
+					"$ref": "/datablock/asset_list_query.json"
+				},
+				"headers":{
+					"$ref": "/datablock/headers.json"
+				},
+				"unlock.balance_initialization":{
+					"$ref": "/datablock/unlock.balance_initialization.json"
+				},
+				"web_references":{
+					"$ref": "/datablock/web_references.json"
+				},
+				"branding":{
+					"$ref": "/datablock/branding.json"
+				},
+				"license":{
+					"$ref": "/datablock/license.json"
+				}
+			},
+			"required": [
+				"asset_list_query"
+			]
+		}
+	},
+	"required": ["meta", "data"]
+}
+  

@@ -1,0 +1,43 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Headers Datablock",
+	"$id": "/datablock/headers.json",
+	"type": "array",
+	"items": {
+		"type": "object",
+		"properties": {
+			"name": {
+				"type": "string"
+			},
+			"default": {
+				"type": "string"
+			},
+			"is_required": {
+				"type": "boolean"
+			},
+			"is_sensitive": {
+				"type": "boolean"
+			},
+			"prefix": {
+				"type": "string"
+			},
+			"suffix": {
+				"type": "string"
+			},
+			"title": {
+				"type": "string"
+			},
+			"acquisition_uri": {
+				"type": "string"
+			},
+			"acquisition_uri_title": {
+				"type": "string"
+			}
+		}
+	},
+	"required": [
+		"name",
+		"is_sensitive",
+		"is_required"
+	]
+}
