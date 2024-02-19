@@ -634,12 +634,7 @@ An object that MUST conform to this format:
 ### [Asset?] `preview_image_supplemental`
 Contains a list of preview images with `uri`s and `alt`-Strings associated to the asset.
 
-An object that MUST conform to:
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `images` | Array of object | yes | All objects must conform to the template outlined in the table below. |
-
-Individual images must conform to the following fields:
+An array where every field must conform to the following structure:
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `alt` | string | no | An "alt" String for the image. |
