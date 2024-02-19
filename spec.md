@@ -613,7 +613,7 @@ The `local_path` MUST include the full name that the file should take in the des
 It MUST NOT start with a slash and MUST NOT contain relative path references (`.` or `..`) anywhere within it.
 
 ### [Asset?] `dimensions.3d`
-Contains general information about the dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but *may* also be used to scale mesh data.
+Contains general information about the physical dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh data.
 
 An object that MUST conform to this format:
 | Field | Format | Required | Description |
@@ -623,7 +623,7 @@ An object that MUST conform to this format:
 | `depth_m` | float | yes | Depth of the referenced asset |
 
 ### [Asset?] `dimensions.2d`
-Contains general information about the dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but *may* also be used to scale mesh data.
+Contains general information about the physical dimensions of a two-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh/texture/uv data.
 
 An object that MUST conform to this format:
 | Field | Format | Required | Description |
