@@ -502,7 +502,7 @@ This template describes a variable query. The individual parameter objects conta
 | `default` | string | yes| The default value for this parameter |
 | `mandatory` | boolean | yes | Whether this parameter is mandatory and must be set to a non-empty string |
 | `choices` | array of string | yes | Possible choices when type `select` or `multiselect` is used |
-| `delimiter` | string | yes | When type `multiselect` is used. |
+| `delimiter` | string | yes | Delimiter to use for selected choices when type `multiselect` is used. |
 
 ### `fixed_query`
 This template describes a fixed query that can be sent by the client to the provider without additional user input or configuration.
