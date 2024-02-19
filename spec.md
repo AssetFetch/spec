@@ -693,17 +693,31 @@ When applied to a component, it indicates that this component makes use of a mat
 | `mtlx_material` | string | no | Optional reference for which material to use from the mtlx file, if it contains multiple. |
 | `apply_selectively_to` | string | no |  Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
 
-### [Component?] `blend`
+### [Component?] `format.blend`
 Information about files with the extension `.blend`.
 This information is intended to help the client understand the file.
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `version` | string | no | Blender Version in the format `Major.Minor.Patch` or `Major.Minor` or `Major` |
-| `is_asset` | boolean | no | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. |
-| `target_collections` | array of string | no | Names of the collections that are of interest for this file. |
+| `is_asset` | boolean | no | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
+| `targets` | array of `target` | no | Array containing the blender structures inside the file that are relevant to the asset. |
 
-### [Component?] `obj`
+#### `target` Structure
+
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `kind` | `string` | yes | One of `actions`, `armatures`, `brushes`, `cache_files`, `cameras`, `collections`, `curves`, `fonts`, `grease_pencils`, `hair_curves`, `images`, `lattices`, `lightprobes`, `lights`, `linestyles`, `masks`, `materials`, `meshes`, `metaballs`, `movieclips`, `node_groups`, `objects`, `paint_curves`, `palettes`, `particles`, `pointclouds`, `scenes`, `screens`, `simulations`, `sounds`, `speakers`, `texts`, `textures`, `volumes`, `workspaces`, `worlds` |
+| `names` | Array of `string` | yes | List of the names of the resources to import. |
+
+### [Component?] `format.usd`
+Information about files with the extension `.usd`.
+
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `is_crate` | boolean | no | Indicates whether this file is a "crate" (like .usdc) or not (like .usda).|
+
+### [Component?] `format.obj`
 Information about files with the extension `.obj`.
 
 | Field | Format | Required | Description |
