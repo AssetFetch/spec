@@ -780,10 +780,10 @@ Brand information about the provider.
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `color_accent` | string | yes | Color for the provider, hex string in the format 'abcdef' (no #)
-| `logo_square_uri` | string | yes | URI to a square logo. It SHOULD be of the mediatype `image/png` and SHOULD be transparent.|
-| `logo_wide_uri` | string | yes | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD be transparent.
-| `banner_uri` | string | yes | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent.|
+| `color_accent` | string | no | Color for the provider, hex string in the format 'abcdef' (no #)
+| `logo_square_uri` | string | no | URI to a square logo. It SHOULD be of the mediatype `image/png` and SHOULD be transparent.|
+| `logo_wide_uri` | string | no | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD be transparent.
+| `banner_uri` | string | no | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent.|
 
 ### [Init?/Asset?] `license`
 Contains license information.
