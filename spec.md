@@ -812,7 +812,7 @@ This field gives the client a hint about how to handle this component. See [Hand
 
 | Field | Format | Required | Description
 | --- | --- |--- | --- |
-| `behavior` | string | no, default=`active` | MUST be one of `active` or `passive`.  |
+| `style` | string | no, default=`active` | MUST be one of `active` or `passive`.  |
 
 # Component Handling
 
