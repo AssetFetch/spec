@@ -651,7 +651,7 @@ An object that MUST conform to this format:
 
 #### `uris` Structure
 
-The `uris` field MUST be an object whose keys are integers and whose values are strings.
+The `uris` field MUST be an object whose keys are strings containing an integer and whose values are strings representing.
 The object MUST have at least one member.
 The key represents the resolution of the thumbnail, the value represents the URI for the thumbnail image in this resolution.
 The thumbnail image SHOULD be a square.
