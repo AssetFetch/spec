@@ -371,7 +371,7 @@ Every `asset` object MUST have the following structure:
 | `data` | datablocks | yes | Object containing datablocks. |
 
 - The `name` field MUST be unique among all assets for this provider. Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the `text` datablock if it is set for this asset.
-- The `data` field MUST contain the datablock `implementations_query`.
+- The `data` field MUST contain the datablock `implementation_list_query`.
 - The `data` field SHOULD contain the datablocks `preview_image_thumbnail` and `text`.
 - The `data` field MAY contain the datablocks `preview_image_supplemental`,`license`,`authors` and/or `web_references`.
 - The `data` field MAY contain one of the datablocks `dimensions.*`.
@@ -381,7 +381,7 @@ Every `asset` object MUST have the following structure:
 *(kind: `implementation_list`)*
 
 This endpoint returns one or several implementations for one specific asset.
-The URI and available parameters for this endpoint are communicated by the server to the client using the `implementations_query` datablock on the corresponding asset in the asset list endpoint.
+The URI and available parameters for this endpoint are communicated by the server to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
 
 The response of this endpoint MUST have the following structure:
 
@@ -528,7 +528,7 @@ A star (*) is used to indicate that there are special rules for when/if this dat
 Describes the variable query for fetching the list of available assets from a provider.
 Follows the `variable_query` template.
 
-### [Asset!] `implementations_query`
+### [Asset!] `implementation_list_query`
 Describes the variable query for fetching the list of available implementations for an asset from a provider.
 Follows the `variable_query` template.
 
