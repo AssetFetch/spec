@@ -552,14 +552,14 @@ Array of objects matching the following structure:
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `name` | string | yes | Name of the header |
-| `default` | string | yes | Default value as a suggestion to the client |
+| `default` | string | no | Default value as a suggestion to the client |
 | `is_required` | boolean | yes | Indicates if this header is required.|
 | `is_sensitive` | boolean | yes | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#storing-sensitive-headers) |
-| `prefix` | string | yes | Prefix that the client should prepend to the value entered by the user when sending it to the provider |
-| `suffix` | string | yes | Suffix that the client should append to the value entered by the user when sending it to the provider |
-| `title` | string | yes | Title to display inside the client. |
-| `acquisition_uri` | string | yes | URI to be opened in the users browser to help them obtain the header value |
-| `acquisition_uri_title` | string | yes | Title for the `acquisition_uri` |
+| `prefix` | string | no | Prefix that the client should prepend to the value entered by the user when sending it to the provider |
+| `suffix` | string | no | Suffix that the client should append to the value entered by the user when sending it to the provider |
+| `title` | string | no | Title to display inside the client. |
+| `acquisition_uri` | string | no | URI to be opened in the users browser to help them obtain the header value |
+| `acquisition_uri_title` | string | no | Title for the `acquisition_uri` |
 
 ### [Component!] The `fetch.*` family
 
