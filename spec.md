@@ -418,7 +418,7 @@ Every `component` object MUST have the following structure:
 
 - The `name` field MUST be unique for among all components inside one implementation, but MAY be reused for a component in a different implementation. It MAY be used as an alternative to the `title` field in the `text` datablock, if its not set.
 - The `data` field on every `component` MUST contain one of the `fetch.*` datablocks.
-- The `data` field on every `component` MAY contain any of the following datablocks: `environment_map`, `loose_material.define_map`, `loose_material.apply_material`, `mtlx_apply_material`,`text`
+- The `data` field on every `component` MAY contain any of the following datablocks: `environment_map`, `loose_material.define_map`, `loose_material.apply_material`, `mtlx_apply`,`text`
 - If the file extension defined inside the `fetch.*` field has a datablock defined with the same name (minus the dot-prefix) then the `data` field on that `component` SHOULD have that corresponding datablock to provide more format-specific information about the file.
 - If the provider wants to use [unlocking](#asset-unlocking) on the component-level then the component's `data` field MUST contain the datablock `unlock.state`.
 
@@ -667,7 +667,7 @@ An object that MUST conform to this format:
 | --- | --- |--- | --- |
 | `projection` | string | yes | One of `equirectangular`, `mirror_ball` |
 
-### [Component?] `loose_material.define_map`
+### [Component?] `loose_material_define`
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
@@ -675,7 +675,7 @@ An object that MUST conform to this format:
 | `map` | string | yes | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission`|
 | `colorspace` | string | no | One of `srgb`, `linear` |
 
-### [Component?] `loose_material.apply_material`
+### [Component?] `loose_material_apply`
 When applied to a component, it indicates that this component uses one or multiple materials defined using `material.loose.define_map` datablocks.
 Array of objects with this structure:
 
@@ -684,7 +684,7 @@ Array of objects with this structure:
 | `material_name` | string | yes | Name of the material used in the definition datablocks |
 | `apply_selectively_to` | string | no | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
 
-### [Component?] `mtlx_apply_material`
+### [Component?] `mtlx_apply`
 When applied to a component, it indicates that this component makes use of a material defined in mtlx document represented by another component.
 
 | Field | Format | Required | Description |
@@ -823,7 +823,7 @@ When processing the components of an implementation, the `behavior` datablock de
 
 If the behavior is `active`, then the client SHOULD make an attempt to load this file directly, for example through the host application's native import functionality.
 
-If the behavior is `passive`, then the client SHOULD NOT make a direct attempt to load this file and only load it if it is referenced by another (active) component, either through a native reference in the component file itself or through a reference in the AssetFetch data (like `loose_material.*`).
+If the behavior is `passive`, then the client SHOULD NOT make a direct attempt to load this file and only load it if it is referenced by another (active) component, either through a native reference in the component file itself or through a reference in the AssetFetch data (like `loose_material_apply`).
 
 ## Local Storage of Asset Files
 As described in the previous section, individual asset components/files may have implicit relationships to each other that are not directly visible from any of the datablocks such as relative file paths within project files.
@@ -848,10 +848,10 @@ This allows the use of `.mtlx` files with mesh file formats that do not have the
 ### Using loose material declarations
 The workflow outlined in the previous section is not always easily achievable since not all file 3D file formats offer up-to-date (or any) support for defining materials.
 In those cases it is common practice to simply distribute the necessary material maps along with the mesh files without any concrete machine-readable description for how the maps should be applied
-The `loose_material.*` family of datablocks exists to limit the negative impacts of this limitation.
-The `loose_material.define_map` and `loose_material.apply_material` make it possible to define basic PBR materials through datablocks on the individual map components and reference them on the mesh component.
+The `loose_material_*` datablocks exist to limit the negative impacts of this limitation.
+The `loose_material_define` and `loose_material_apply` make it possible to define basic PBR materials through datablocks on the individual map components and reference them on the mesh component.
 
-Providers SHOULD make use of this notation if, and only if, other more native material representations of the material are unavailable of severely insufficient.
+Providers SHOULD make use of this notation if, and only if, other more native representations of the material are unavailable of severely insufficient.
 
 ## Environments
 HDRI environments or skyboxes face a similar situation as materials: They can be represented using native formats, but a common practice is to provide them as a singular image file whose projection must be manually set by the artist.
