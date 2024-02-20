@@ -10,10 +10,12 @@
 				"type":"string"
 			},
 			"uri":{
-				"type":"string"
+				"type":"string",
+				"format": "uri"
 			},
 			"icon_uri":{
-				"type":"string"
+				"type":"string",
+				"format": "uri"
 			}
 		}
 	},

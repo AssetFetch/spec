@@ -10,13 +10,16 @@
 			"pattern": "[0-9a-f]{6}"
 		},
 		"logo_square_uri": {
-			"type": "string"
+			"type": "string",
+			"format":"uri"
 		},
 		"logo_wide_uri":{
-			"type":"string"
+			"type":"string",
+			"format":"uri"
 		},
 		"banner_uri":{
-			"type":"string"
+			"type":"string",
+			"format":"uri"
 		}
 	},
 	"required": []

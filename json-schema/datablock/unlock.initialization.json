@@ -12,7 +12,8 @@
 			"type":"boolean"
 		},
 		"prepaid_balance_refill_uri":{
-			"type":"string"
+			"type":"string",
+			"format":"uri"
 		},
 		"prepaid_balance_check_query":{
 			"$ref": "/template/fixed_query.json"

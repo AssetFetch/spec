@@ -28,10 +28,12 @@
 				"type": "string"
 			},
 			"acquisition_uri": {
-				"type": "string"
+				"type": "string",
+				"format":"uri"
 			},
 			"acquisition_uri_title": {
-				"type": "string"
+				"type": "string",
+				"format":"uri"
 			}
 		}
 	},

@@ -5,7 +5,8 @@
 	"type": "object",
 	"properties": {
 		"uri": {
-			"type": "string"
+			"type": "string",
+			"format": "uri"
 		},
 		"method": {
 			"type": "string",

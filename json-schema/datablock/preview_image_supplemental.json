@@ -10,7 +10,8 @@
 				"type": "string"
 			},
 			"uri": {
-				"type": "string"
+				"type": "string",
+				"format":"uri"
 			}
 		},
 		"required": [

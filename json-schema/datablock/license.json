@@ -15,7 +15,8 @@
 			]
 		},
 		"license_uri":{
-			"type":"string"
+			"type":"string",
+			"format":"uri"
 		}
 	}
 }

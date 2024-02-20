@@ -15,7 +15,8 @@
 			"$ref": "/template/fixed_query.json"
 		},
 		"unlock_query_fallback_uri":{
-			"type":"string"
+			"type":"string",
+			"format": "uri"
 		}
 	},
 	"required": ["locked"],
