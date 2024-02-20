@@ -6,20 +6,20 @@
 			"$ref": "/template/meta.json"
 		},
 		"data": {
-			"oneOf": [
-				{
-					"type": "object",
-					"patternProperties": {
-						"^[a-z0-9_]+(\\.[a-z0-9_]+)?$": {
+			"type": "object",
+			"patternProperties": {
+				"^[a-z0-9_]+(\\.[a-z0-9_]+)?$": {
+					"oneOf": [
+						{
 							"type": "object"
+						},
+						{
+							"type": "array"
 						}
-					},
-					"additionalProperties": false
-				},
-				{
-					"type": "array"
+					]
 				}
-			]
+			},
+			"additionalProperties": false
 		}
 	},
 	"required": [
