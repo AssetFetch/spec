@@ -344,7 +344,7 @@ The response on this endpoint MUST have the following structure:
 - The `data` field SHOULD always contain the datablock `text`.
 - The `data` field MAY contain the datablocks `branding`, `authors`, `license`, and/or `web_references`.
 - The `data` field MUST contain the datablock `headers` if other parts of the API require header-based authentication to function. It MAY still be used for other purposes.
-- If the provider wants to use [unlocking](#asset-unlocking) anywhere during later API calls the `data` field MUST contain the datablock `unlock.balance_initialization`.
+- If the provider wants to use [unlocking](#asset-unlocking) anywhere during later API calls the `data` field MUST contain the datablock `unlock_balance_initialization`.
 
 ### Asset List
 *(kind: `asset_list`)*
@@ -375,7 +375,7 @@ Every `asset` object MUST have the following structure:
 - The `data` field SHOULD contain the datablocks `preview_image_thumbnail` and `text`.
 - The `data` field MAY contain the datablocks `preview_image_supplemental`,`license`,`authors` and/or `web_references`.
 - The `data` field MAY contain one of the datablocks `dimensions.*`.
-- If the provider wants to use [unlocking](#asset-unlocking) on the asset-level then the asset's `data` field MUST contain the datablock `unlock.state`.
+- If the provider wants to use [unlocking](#asset-unlocking) on the asset-level then the asset's `data` field MUST contain the datablock `unlock_state`.
 
 ### Implementation List
 *(kind: `implementation_list`)*
@@ -420,7 +420,7 @@ Every `component` object MUST have the following structure:
 - The `data` field on every `component` MUST contain one of the `fetch.*` datablocks.
 - The `data` field on every `component` MAY contain any of the following datablocks: `environment_map`, `loose_material.define_map`, `loose_material.apply_material`, `mtlx_apply`,`text`
 - If the file extension defined inside the `fetch.*` field has a datablock defined with the same name (minus the dot-prefix) then the `data` field on that `component` SHOULD have that corresponding datablock to provide more format-specific information about the file.
-- If the provider wants to use [unlocking](#asset-unlocking) on the component-level then the component's `data` field MUST contain the datablock `unlock.state`.
+- If the provider wants to use [unlocking](#asset-unlocking) on the component-level then the component's `data` field MUST contain the datablock `unlock_state`.
 
 ## Additional Endpoints
 
@@ -434,7 +434,7 @@ Unless noted otherweise in the specification, these endpoints MUST use the follo
 | `data` | datablocks | yes | Datablocks.|
 
 ### Unlocking Endpoint
-*(kind: `unlock.unlock`)*
+*(kind: `unlock_invoke`)*
 
 This endpoint type is used to "unlock" (usually meaning "purchase" an asset or asset component).
 The client MUST call this endpoint before attempting download resources through the `file` or `archive` datablock.
@@ -443,11 +443,11 @@ The URI and parameters for this endpoint are communicated through the `unlock` f
 This endpoint currently does not use any datablocks specified for it. Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
 
 ### Balance Endpoint
-*(kind: `unlock.balance`)*
+*(kind: `unlock_balance`)*
 
-The URI and parameters for the balance endpoint are communicated by the provider to the client through the [`unlock.balance_initialization`](#init-unlockbalance_initialization)
+The URI and parameters for the balance endpoint are communicated by the provider to the client through the [`unlock_balance_initialization`](#init-unlockbalance_initialization)
 
-- The `data` field for this endpoint MUST contain the `unlock.balance` datablock.
+- The `data` field for this endpoint MUST contain the `unlock_balance` datablock.
 
 ## About Datablocks
 
@@ -465,8 +465,8 @@ The example below illustrates a data object with two datablocks (`block_type_1` 
             "example_key": "example_value"
         },
         "block_type_2.a":{
-            "example_data": [1,2,4],
-            "example_structure": {
+            "example_array": [1,2,4],
+            "example_object": {
                 "a": 7
             }
         }
@@ -476,9 +476,11 @@ The example below illustrates a data object with two datablocks (`block_type_1` 
 
 ### Datablock names
 
-The name of a datablock MUST be a JSON-compatible string.
+The name of a datablock MUST be a string composed of small alphanumerical characters, underscores and dots .
 Datablock names MUST contain either 0 or 1 instance of the dot (`.`) character which indicates that a datablock has multiple variations.
 One resource MUST NOT have two datablocks that share the same string *before* the dot separator.
+
+The resulting regular expression from these rules is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
 
 ## Datablock element templates
 This section describes additional data types that can be used within other datablocks.
@@ -734,7 +736,7 @@ General text information to be displayed to the user.
 | `title` | string | yes | A title for the datablock's subject. |
 | `description` | string | no | A description text for the datablocks subject. |
 
-### [Asset!*/Component!*] `unlock.state`
+### [Asset!*/Component!*] `unlock_state`
 Information relating to asset unlocking for an asset or a component.
 This datablock contains the query that the client needs to make in order to actually unlock the asset before initiating the download described in the `fetch.*` block.
 
@@ -748,7 +750,7 @@ If this field is not set either, the client SHOULD still display the resource, b
 | `unlock_query` | `fixed_query` | no | Query to perform to to make the purchase. |
 | `unlock_query_fallback_uri` | string | no | Website to direct the user to to purchase the resource manually without using AssetFetch. The client SHOULD allow the user to access this site in the browser if no `unlock_query` is provided. |
 
-### [Init!*] `unlock.initialization`
+### [Init!*] `unlock_initialization`
 General information about how currency/balance is handled by this provider.
 
 | Field | Format | Required | Description | 
@@ -758,7 +760,9 @@ General information about how currency/balance is handled by this provider.
 | `prepaid_balance_refill_uri` | string | yes | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form. |
 | `prepaid_balance_check_query` | `query_fixed` | yes | The query the client should make to get the current prepaid balance.|
 
-### [UnlockBalance!] `unlock.prepaid_balance`
+### [] `unlock_prepaid_balance`
+
+This datablock is only applicable to the `unlock_balance` endpoint type.
 
 | Field | Format | Required | Description | 
 | --- | --- |--- | --- |

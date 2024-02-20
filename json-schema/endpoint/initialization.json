@@ -16,7 +16,7 @@
 				"headers":{
 					"$ref": "/datablock/headers.json"
 				},
-				"unlock.balance_initialization":{
+				"unlock_balance_initialization":{
 					"$ref": "/datablock/unlock.balance_initialization.json"
 				},
 				"web_references":{

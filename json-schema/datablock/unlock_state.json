@@ -1,7 +1,7 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Unlocking State Datablock",
-	"$id": "/datablock/unlock.state.json",
+	"$id": "/datablock/unlock_state.json",
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {

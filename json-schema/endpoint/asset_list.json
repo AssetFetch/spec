@@ -37,8 +37,8 @@
 							"implementations_query": {
 								"$ref": "/datablock/implementations_query.json"
 							},
-							"unlock.state": {
-								"$ref": "/datablock/unlock.state.json"
+							"unlock_state": {
+								"$ref": "/datablock/unlock_state.json"
 							},
 							"text": {
 								"$ref": "/datablock/text.json"

@@ -57,8 +57,8 @@
 										"fetch.file": {
 											"$ref": "/datablock/fetch.file.json"
 										},
-										"unlock.state": {
-											"$ref": "/datablock/unlock.state.json"
+										"unlock_state": {
+											"$ref": "/datablock/unlock_state.json"
 										},
 										"behavior": {
 											"$ref": "/datablock/behavior.json"
