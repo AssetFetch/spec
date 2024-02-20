@@ -1,0 +1,16 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Dimensions (2D) Datablock",
+	"$id": "/datablock/dimensions.2d.json",
+	"$comment": "This datablock describes physical dimensions for 2D assets.",
+	"type": "object",
+	"properties": {
+		"width_m": {
+			"type": "number"
+		},
+		"height_m": {
+			"type": "number"
+		}
+	},
+	"required": []
+}

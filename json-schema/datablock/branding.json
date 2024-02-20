@@ -1,0 +1,26 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Branding Datablock",
+	"$id": "/datablock/branding.json",
+	"$comment": "This datablock contains branding information about a provider.",
+	"type": "object",
+	"properties": {
+		"color_accent": {
+			"type": "string",
+			"pattern": "[0-9a-f]{6}"
+		},
+		"logo_square_uri": {
+			"type": "string",
+			"format":"uri"
+		},
+		"logo_wide_uri":{
+			"type":"string",
+			"format":"uri"
+		},
+		"banner_uri":{
+			"type":"string",
+			"format":"uri"
+		}
+	},
+	"required": []
+}

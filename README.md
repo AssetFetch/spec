@@ -24,5 +24,9 @@ There are still numerous milestones to hit before a version 1.0 can be released.
 
 - ...
 
+# JSON Schema
+
+JSON-Schemas for AssetFetch are provided in the `/json-schema` subdirectory of this repository.
+
 # Contributing
 Currently the best way to contribute is by opening issues with questions, contradictions in the specifications, suggestions for datablocks or any other thoughts about the specification.

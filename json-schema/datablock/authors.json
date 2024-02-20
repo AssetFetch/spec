@@ -1,0 +1,23 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Authors Datablock",
+	"$id": "/datablock/authors.json",
+	"$comment": "This datablock contains information about the authors of a provider or an individual asset.",
+	"type":"array",
+	"items": {
+		"type":"object",
+		"properties": {
+			"name":{
+				"type":"string"
+			},
+			"uri":{
+				"type":"string",
+				"format": "uri"
+			},
+			"role":{
+				"type":"string"
+			}
+		},
+		"required": ["name"]
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Unlocking Prepaid Balance Datablock",
+	"$id": "/datablock/unlock.prepaid_balance.json",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"prepaid_balance":{
+			"type":"number"
+		}
+	},
+	"required": [
+		"prepaid_balance"
+	]
+}

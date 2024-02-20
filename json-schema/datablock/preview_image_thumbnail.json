@@ -1,0 +1,24 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Preview Image (Thumbnail) Datablock",
+	"$id": "/datablock/preview_image_thumbnail.json",
+	"type": "object",
+	"properties": {
+		"alt":{
+			"type":"string"
+		},
+		"uris":{
+			"properties": {},
+			"patternProperties": {
+				"[0-9]+":{
+					"type":"string"
+				}
+			},
+			"additionalProperties": false,
+			"minProperties": 1
+		}
+	},
+	"required": [
+		"uris"
+	]
+}
