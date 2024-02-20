@@ -52,6 +52,37 @@
 						"type": "string"
 					}
 				},
+				"allOf": [
+					{
+						"if": {
+							"properties": {
+								"type": {
+									"const": "select"
+								}
+							}
+						},
+						"then": {
+							"required": [
+								"choices"
+							]
+						}
+					},
+					{
+						"if": {
+							"properties": {
+								"type": {
+									"const": "multiselect"
+								}
+							}
+						},
+						"then": {
+							"required": [
+								"choices",
+								"delimiter"
+							]
+						}
+					}
+				],
 				"required": [
 					"type",
 					"name"
