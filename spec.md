@@ -678,7 +678,7 @@ An object that MUST conform to this format:
 | `colorspace` | string | no | One of `srgb`, `linear` |
 
 ### [Component?] `loose_material_apply`
-When applied to a component, it indicates that this component uses one or multiple materials defined using `material.loose.define_map` datablocks.
+When applied to a component, it indicates that this component uses one or multiple materials defined using `loose_material_define` datablocks.
 Array of objects with this structure:
 
 | Field | Format | Required | Description |
