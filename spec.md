@@ -500,11 +500,11 @@ This template describes a variable query. The individual parameter objects conta
 | --- | --- |--- | --- |
 | `type` | string | yes| one of text / boolean / hidden / select / multiselect |
 | `name` | string | yes| name of the HTTP parameter |
-| `title` | string | yes| Title to display to the user |
-| `default` | string | yes| The default value for this parameter |
-| `mandatory` | boolean | yes | Whether this parameter is mandatory and must be set to a non-empty string |
-| `choices` | array of string | yes | Possible choices when type `select` or `multiselect` is used |
-| `delimiter` | string | yes | Delimiter to use for selected choices when type `multiselect` is used. |
+| `title` | string | no| Title to display to the user |
+| `default` | string | no | The default value for this parameter |
+| `mandatory` | boolean | no | Whether this parameter is mandatory and must be set to a non-empty string |
+| `choices` | array of string | only if `select` or `multiselect` type is used | Possible choices when type `select` or `multiselect` is used |
+| `delimiter` | string | only if `multiselect` type is used | Delimiter to use for selected choices when type `multiselect` is used. |
 
 ### `fixed_query`
 This template describes a fixed query that can be sent by the client to the provider without additional user input or configuration.
