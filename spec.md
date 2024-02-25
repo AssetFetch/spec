@@ -267,12 +267,11 @@ Every response sent from an AssetFetch provider MUST use HTTP Status codes appro
 
 In concrete terms, this means:
 
-- If a provider managed to successfully process the query then the response code SHOULD be `200 - OK`. Even if the query sent by the client leads to zero results in the context of a search, the response code SHOULD still be `200`.
+- If a provider managed to successfully process the query then the response code SHOULD be `200 - OK`. Even if the query sent by the client leads to zero results in the context of a search with potentially zero to infinitely many results, the response code SHOULD still be `200 - OK`.
+- If a provider receives a query that references a specific resource which does not exist, such as a query for implementations of an asset that the provider does not recognize, it SHOULD respond with code `404 - Not Found`.
 - If the provider can not parse the query data sent by the client properly, it SHOULD respond with code `400 - Bad Request`.
 - If a provider receives a query an any other endpoint than the initialization endpoint without one of the headers it defined as mandatory during the initialization it SHOULD send status code `401 - Unauthorized`. This indicates that the client is unaware of required headers and SHOULD cause the client to contact the initialization endpoint for that provider again in order to receive updated information about required headers.
 - If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to download a component that has not been [unlocked](#asset-unlocking), the provider MAY respond with code `402 - Payment Required` instead.
-- If a provider receives a query on an endpoint whose path it does not recognize at all it should respond with code `404 - Not Found`.
-- If a provider receives a query that is properly authenticated/authorized and syntactically valid but contains a reference to other data that the provider can not resolve, such as a query for implementations of an asset that the provider does not recognize, it SHOULD respond with code `404 - Not Found`.
 
 If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
 This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#the-meta-field), if they have content.
