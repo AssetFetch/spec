@@ -129,32 +129,68 @@ These are the key steps that any interaction between a user, client and provider
 
 ### Initialization
 The client makes an initial connection to the provider to learn how to communicate with it for the rest of the interaction and how to query for assets.
-At this point, the user may have to enter credentials such as an access token.
+
+### Authentication (optional)
+During initialization, the provider MAY request specific headers to be submitted.
+These header values are entered by the user into the client and are stored in and MUST be sent along with every `variable_query` or `fixed_query` performed by the client.
+
+The names of these headers are declared by the provider during the initialization using a [`headers`](#provider-afheaders) datablock.
+The value (for example a random secret API key identifying the user) is communicated to the user through other channels, for example on the provider's website.
+
+After getting the required values from the user, the client calls the status endpoint with its newly defined headers in order to receive confirmation of their correctness from the provider.
+
+### Status Checking (optional)
+The provider has the oppourtunity to define a "status endpoint" during initialization.
+This status endpoint is used to communicate general data like user profile information or account balance (if applicable).
+When using header-based authentication the client MUST call this endpoint once after the initialization in order to verify the validity of the credentials that the user entered.
+After that the client can call the status endpoint at any time to update user data or account balance information.
+Appropriate times for calling the status endpoint will be mentioned later TODO.
+
 ### Browsing assets
-The client collects parameters such as a list of keywords to search for from the user, loads a list of available assets from the provider and presents it to the user, who selects an asset they wish to load.
+After successful initialization the user enters the asset search parameters which were defined by the provider during the initialization step.
+The client then loads a list of available assets from the provider and presents it to the user, who selects an asset they wish to load.
+
 ### Choosing an implementation
 In order to load an asset a specific implementation of that asset needs to be chosen.
 This step might involve asking the user about additional asset-specific parameters, such as texture resolution, level of detail, etc. if such variations are available from that provider.
+The variables for this query are defined by the provider for every asset.
 The preselection ensures that all the proposed implementations returned by the provider already have the desired qualities and only differ in terms of how the asset is encoded (file structure and formats).
-After getting the choice from the user (if one needed to be made) the client retrieves the list of available implementations for this asset and the user's quality choices from the provider. 
-
+After getting the choice from the user (if one needed to be made) the client requests the list of available implementations for this asset. 
 The provider responds with one or multiple implementations.
 The implementations consist of a list of components, each of which have metadata attached to them containing information about file formats and relationships.
 The client analyzes the declarations of each component in every proposed implementation for compatibility.
-If more than one implementation turns out to be fully compatible with the client and its environment it MAY ask the user to make the final choice or choose one based on pre-programmed preferences.
-This process is similar to the otherwise rarely used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
+If more than one implementation turns out to be compatible with the client and its environment it MAY ask the user to make the final choice or choose one implementation based on pre-programmed preferences.
+This process is comparable to the rarely used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
+
+### Unlocking (Optional)
+The provider might allow any user to download any asset for free but it might also require payment for an asset.
+In that case an asset (or a part of it) can be marked as "unlockable" by the provider.
+
+AssetFetch offers a mechanism through which users can purchase or otherwise "unlock" content.
+Unlocking can happen with varying degrees of granularity, either for entire assets, specific implementations or individual components.
+Implementing the unlocking process adds additional steps to the interaction between provider and client.
+
+In the response of its status endpoint, the provider sends the client information about the currency it uses (which may be real or vendor specific ('credits') and can be different based on the user) and the account balance, since many providers use a prepaid token or credit system instead of selling assets directly.
+Notably, the actual payment details or configuration are not handled by AssetFetch. Users still need to sign up on the providers website and handle payment settings there.
+
+In order to be able to download files, the client MUST then make one or multiple additional "unlocking queries".
+These queries to the provider's backend perform the actual purchase and payment and respond with a new copy of the asset's data containing the actual download link(s) which would normally be transmitted right along with the other data.
+This also allows providers to use temporary download links, for example with a randomized token that is only valid for a certain amount of time.
 
 ### Downloading and importing
-After provider and client (and possible the user through manual choice) have determined a suitable implementation the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
+After client (and possibly the user through manual choice) has determined a suitable implementation and unlocked all relevant components it can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
 The choice about where this directory should be created is made between the client and user through configuration and is not part of the specification.
 
-Inside this directory the client arranges the files as described by the provider and processes them.
-In the context of a 3D suite this usually involves importing the data into the current scene or a software-specific repository of local assets.
-This processing is aided by the metadata in the datablocks of every component which describes relevant attributes or relationships.
+Inside this directory the client arranges the files as described by the provider in the implementation data and processes them.
+In the context of a 3D suite this "processing" usually involves importing the data into the current scene or a software-specific repository of local assets.
+This processing is aided by the metadata in the datablocks of every component which describes relevant attributes, recommended configurations or relationships.
 
 ## Sequence Diagram
+The following diagrams illustrate the general flow of information between the user,[their client software](#client) and the provider as well as the most important actions taken by each party.
 
-The following diagram illustrates the general flow of information between the user,[their client software](#client) and the provider as well as the most important actions taken by each party.
+### Simple Version
+This diagram shows a simple implementation, requiring no authentication or unlocking.
+All assets are freely available for everyone.
 
 ```mermaid
 sequenceDiagram
@@ -167,17 +203,70 @@ sequenceDiagram
 		participant Provider
 	end
 
-    User->>Client: Requests connection to example.com/init
-	note left of User: The provider URI might be<br>bookmarked in the client,<br>if it supports that.
-    Client->>Provider: Query: Initialization
+    User->>Client: Requests connection to free.example.com/init
+	Client->>Provider: Query: free.example.com/init
 	Provider->>Client: Response: Initialization data
 	Client->>User: Presents available parameters<br>for querying assets<br>as a GUI/form
-	note left of User: Some data (like authentication)<br>might be cached by the<br> client and does not need<br>to be re-entered. 
-	User->>User: Fills out general provider data<br>(mainly authentication, if requested)
 
-	User->>User: Fills out asset query<br>as sent by provider<br>(tags, categories, ...)
+	User->>User: Fills out asset query<br>as defined by provider<br>(tags, categories, ...)
 	User->>Client: Confirms choices and requests asset list
-	Client->>Provider: Query: example.com/assets?q=<search term>
+	Client->>Provider: Query: free.example.com/assets?q=<search term>
+	note right of Client: The asset query URI<br>was included in the<br>initialization data
+	Provider->>Provider: Searches its database for assets<br>based on query parameters
+	Provider->>Client: Response: List of assets
+	Client->>User: Presents asset list
+	User->>User: Selects asset from list
+	User->>Client: Confirms asset selection
+	Client->>User: Presents available parameters<br>for querying implementations<br>as GUI/form
+	User->>User: Fills out implementation query<br>(texture resolution,LOD,...)
+	User->>Client: Confirms choices and<br>requests implementations
+	Client->>Provider: Query: free.example.com/implementations?asset=<asset id>&resolution=<resolution>
+	note right of Client: The implementations query URI and parameters<br>were included in the asset data
+	Provider->>Provider: Loads implementations<br>for this asset from its database,<br>based on query
+	Provider->>Client: Returns list of possible implementations
+	Client->>Client: Validates proposed implementations and<br>selects those that it can handle<br>(based on metadata<br> about file formats and relationships)
+	Client->>User: Presents implementation(s)<br>and asks for confirmation
+	User->>User: Reviews suggested implementation(s)<br>(files, download size, etc.)
+	User->>Client: Confirms asset import
+	loop For every file
+		Client->>Provider: Initiates HTTP download of component file
+		Provider->>Client: Transmits file
+	end
+	Client->>Client: Processes files locally based<br>on implementation metadata<br>(usually by importing them<br>into the current project)
+	Client->>User: Shows confirmation message
+	note left of User: User can now utilize<br>the asset in their project.
+```
+
+### Complete Version
+
+This diagram shows a more complete interaction, including authentication and asset unlocking.
+
+```mermaid
+sequenceDiagram
+
+	box Local Workstation
+		participant User
+		participant Client
+	end
+	box Remote Server
+		participant Provider
+	end
+
+    User->>Client: Requests connection to paid.example.com/init
+	note left of User: The provider URI might be<br>bookmarked in the client,<br>if it supports that.
+    Client->>Provider: Query: paid.example.com/init
+	Provider->>Client: Response: Initialization data, containing requirement for authentication
+	Client->>User: Presents required headers<br>as a GUI/form
+	note left of User: Some data <br>might be cached by the<br> client and does not need<br>to be re-entered. 
+	User->>User: Fills out required header values
+	User->>Client: Confirms inputs of provider data.
+
+	Client->>Provider: Query: paid.example.com/status
+	Provider->>Client: Responds with status data<br>(Login confirmation, username, account balance, ...)
+
+	User->>User: Fills out asset query<br>as defined by provider<br>(tags, categories, ...)
+	User->>Client: Confirms choices and requests asset list
+	Client->>Provider: Query: paid.example.com/assets?q=<search term>
 	note right of Client: The asset query URI<br>was included in the<br>initialization data
 	Provider->>Provider: Searches its database for assets<br>based on query parameters
 	Provider->>Client: Response: List of assets
@@ -188,45 +277,35 @@ sequenceDiagram
 	Client->>User: Presents available parameters<br>for querying implementations<br>as GUI/form
 	User->>User: Fills out implementation query<br>(texture resolution,LOD,...)
 	User->>Client: Confirms choices and<br>requests implementations
-	Client->>Provider: Query: example.com/implementations?asset=<asset id>
+	Client->>Provider: Query: paid.example.com/implementations?asset=<asset id>&resolution=<resolution>
 	note right of Client: The implementations query URI<br>was included in the asset data
 	Provider->>Provider: Loads implementations<br>for this asset from its database,<br>based on query
-	Provider->>Client: Returns list of possible implementations
+	Provider->>Client: Returns list of possible implementations<br>*without download information*
 	Client->>Client: Validates proposed implementations and<br>selects those that it can handle<br>(based on metadata<br> about file formats and relationships)
 	Client->>User: Presents implementation(s)<br>and asks for confirmation
-	User->>User: Reviews suggested implementation(s)<br>(files, download size, etc.)
+	User->>User: Reviews suggested implementation(s)<br>(*price*,files, download size, etc.)
 	User->>Client: Confirms asset import
-	Client->>Provider: Initiates HTTP download of files
-	Provider->>Client: Transmits files
+
+	loop Possibly multiple times, depending on granularity of <br>provider's unlocking model
+		Client->>Provider: Query: paid.example.com/unlock?asset=<asset id>&component=<component id>
+		Provider->>Client: Confirms the unlocking action.
+	end
+
+	Client->>Provider: Query: paid.example.com/implementations?asset=<asset id>&resolution=<resolution>
+	note right of Client: The client calls the implementations endpoint again <br>with the same parameters to get the <br>updated implementations data (with downloads!)
+	Provider->>Provider: Loads implementations<br>for this asset from its database,<br>based on query
+	Provider->>Client: Returns list of possible implementations,<br>*now with download information*
+
+	loop For every file
+		Client->>Provider: Initiates HTTP download of component file
+		Provider->>Client: Transmits file
+	end
+
 	Client->>Client: Processes files locally based<br>on implementation metadata<br>(usually by importing them<br>into the current project)
 	Client->>User: Confirms asset import
 	note left of User: User can now utilize<br>the asset in their project.
 	User->>User: Fills out asset query<br>again for next asset, if desired
 ```
-
-## Additional Operational Steps
-
-### Authentication Using Headers
-
-The provider can request specific headers to be submitted.
-These header values are entered by the user into the client and are stored in it to be sent with every future request.
-
-The names of these headers are declared by the provider during the initialization using a [`headers`](#provider-afheaders) datablock.
-The value (for example a random secret API key identifying the user) is communicated to the user through other channels, for example on the provider's website.
-
-### Asset Unlocking
-AssetFetch offers a mechanism through which users can purchase or otherwise "unlock" assets.
-Unlocking can happen with varying degrees of granularity, either for entire assets or individual components.
-Implementing the unlocking process adds additional steps to the interaction between provider and client.
-
-During the initialization step the provider sends the client information about the currency it uses (which may be real or vendor specific, i.e. "credits") and the query to retrieve the account balance, since many providers use a prepaid token or credit system instead of selling assets directly.
-The client is then able to retrieve the current account balance at the same time it fetches the asset list and at any time in the future.
-Notably, the actual payment details or configuration are not handled by AssetFetch. Users still need to sign up on the providers website and handle payment settings there.
-
-Before making the requests to download the files for every asset component the client MUST then make one or multiple additional "unlocking queries" for the asset or every one of its components.
-These queries to the provider's backend perform the actual purchase and payment.
-
-After this step the client is able to proceed normally and download the files.
 
 # Communication
 
@@ -433,20 +512,21 @@ Unless noted otherweise in the specification, these endpoints MUST use the follo
 | `data` | datablocks | yes | Datablocks.|
 
 ### Unlocking Endpoint
-*(kind: `unlock_invoke`)*
+*(kind: `unlock`)*
 
-This endpoint type is used to "unlock" (usually meaning "purchase" an asset or asset component).
-The client MUST call this endpoint before attempting download resources through the `file` or `archive` datablock.
+This endpoint type is used to "unlock" (usually meaning "purchase") an asset or asset component.
+The client calls this endpoint in order to receive the `fixed_query` for downloading the .
 The URI and parameters for this endpoint are communicated through the `unlock` field in a `unlock_state` datablock.
 
 This endpoint currently does not use any datablocks specified for it. Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
 
-### Balance Endpoint
-*(kind: `unlock_balance`)*
+### Status Endpoint
+*(kind: `status`)*
 
 The URI and parameters for the balance endpoint are communicated by the provider to the client through the [`unlock_balance_initialization`](#init-unlockbalance_initialization)
 
-- The `data` field for this endpoint MUST contain the `unlock_balance` datablock.
+- The `data` field for this endpoint SHOULD contain the `unlock_balance` datablock, if asset unlocking is used.
+- The `data` field for this endpoint MAY contain the `user` datablock.
 
 ## About Datablocks
 
@@ -540,7 +620,6 @@ Follows the `fixed_query` template.
 
 ### [AssetList?/ImplementationList?] `response_statistics`
 
-
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `result_count_total` | int | yes | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. | 
@@ -562,56 +641,61 @@ Array of objects matching the following structure:
 | `acquisition_uri` | string | no | URI to be opened in the users browser to help them obtain the header value |
 | `acquisition_uri_title` | string | no | Title for the `acquisition_uri` |
 
-### [Component!] The `fetch.*` family
+### [Component!] `file_info`
 
-`fetch.*` datablocks describe how files are downloaded from the provider and how they should be arranged in the directory the client has designated for this asset implementation (See [Local Storage of Asset Files](#local-storage-of-asset-files)).
+This datablock contains metadata for handling a file.
 
-#### [Component!] `fetch.archive`
-This datablock indicates that this component represents an archive which can be unpacked in its entirety and/or referenced by other components.
-More about the handling for `archive` and `file` in [Component Handling](#component-handling).
-
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `component_query` | `fixed_query` | The query to download the file. |
-| `unpack_all` | boolean | yes | `True`: Unpack all files from this archive into the local implementation directory or a subpath of it (determined by `local_path`) and treat them as [passive components](#handling-active-and-passive-components). `False`: Do not unpack all files from this archive, only copy those that are explicitly referenced as a component into the `local_path` they defined for themselves.|
-| `local_path` | string | yes | The path that the client should append to the base directory it has chosen for the asset. It is the place where the asset's contents get unpacked if the `unpack_all` field is set.  |
+| Filed | Format | Required | Description |
+| --- | --- | --- | --- |
+| `local_path` | string | yes, unless `behavior=archive` | The path that the client should append to the base directory it has chosen for the asset.  |
 | `length` | integer | no | The length of the file in bytes. |
 | `extension` | string | yes | The file extension indicating the format of this file. |
-
-#### [Component!] `fetch.archive_file`
-This datablock indicates that this component represents a file from within an archive.
-This file might also be contained in an archive described by another component.
-More about the handling for `archive` and `file` in [Component Handling](#component-handling).
-
-An object that MUST conform to this format:
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `archive_name` | string | yes | The name of the component representing the archive that this component is contained in. |
-| `component_path` | string | The location of the file inside the archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a slash and MUST include the full name of the file inside the archive.  |
-| `local_path` | string | yes | The path that the client should append to the base directory it has chosen for the asset. See [Local Storage of Asset Files](#local-storage-of-asset-files).  |
-| `length` | integer | no | The length of the file in bytes. |
-| `extension` | string | yes | The file extension indicating the format of this file.  |
-
-
-#### [Component!] `fetch.file`
-This datablock indicates that this component represents a file to be downloaded to local storage.
-This file might also be contained in an archive described by another component.
-More about the handling for `archive` and `file` in [Component Handling](#component-handling).
-
-An object that MUST conform to this format:
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `component_query` | `fixed_query` | The query to download the file. |
-| `local_path` | string | yes | The path that the client should append to the base directory it has chosen for the asset. |
-| `length` | integer | no | The length of the file in bytes. |
-| `extension` | string | yes | The file extension indicating the format of this file. |
-
-#### Requirements for all `fetch.*` datablocks
+| `behavior` | string | yes | One of `file_active`,`file_passive`,`archive` |
 
 The `extension` MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and can include further dots required for properly expressing the format (eg. `.tar.gz` for a gzipped tar-archive).
 
-The `local_path` MUST include the full name that the file should take in the destination, unless it is for a `fetch.archive` datablock in which case it MUST end with a slash (`/`).
-It MUST NOT start with a slash and MUST NOT contain relative path references (`.` or `..`) anywhere within it.
+The `behavior` describes whether this file should be treated as an active or passive component (see TODO).
+
+If `behavior=archive` and the `local_path` is not `null`, the entire archive MUST be unpacked into the local path.
+
+If `behavior=file_active` or `behavior=file_passive` the `local_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash" (`example.txt` or `sub/dir/example.txt` would be correct, `/example.txt` or `/sub/dir/example.txt` would be incorrect).
+
+If `behavior=archive` the local path MUST end with a slash ("trailing slash").
+It MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`) and MUST NOT contain relative path references (`./` or `../`) anywhere within it (`contents/` or `my/contents/` would be correct, `contents`,`./contents/`,`./contents`,`my/../../contents` or `../contents` would all be incorrect).
+
+<!--
+### [Component!] The `file_fetch.*` family
+
+`file_fetch.*` datablocks describe how files are downloaded from the provider into in the directory the client has designated for this asset implementation (See [Local Storage of Asset Files](#local-storage-of-asset-files)).
+-->
+#### [Component!] `file_fetch.download`
+
+This datablock indicates that this is a file which can be downloaded directly using the provided query.
+The download destination is defined via the `file_info` datablock.
+
+<!--
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `download_query` | `fixed_query` | The query to download the file. |
+-->
+The structure of this datablock follows the `fixed_query` template.
+#### [Component!] `file_fetch.from_archive`
+This datablock indicates that this component represents a file from within an archive that needs to be downloaded separetely.
+More about the handling in [Component Handling](#component-handling).
+The destination is defined via the `file_info` datablock.
+
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `archive_component_name` | string | yes | The name of the component representing the archive that this component is contained in. |
+| `component_path` | string | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`).  |
+
+
+#### [Component!] `file_fetch.unlock_download`
+This datablock indicates that this file should be downloaded but that the (possibly temporary) download link must be requested ("unlocked") separately.
+This "unlocking" may incur charges which are defined in the `unlock_price` datablock either on the component itself or on its Implementation/ImplementationList.
+More about the handling in [Component Handling](#component-handling).
+
+The structure follows the `fixed_query` template.
 
 ### [Asset?] `dimensions.3d`
 Contains general information about the physical dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh data.
@@ -734,7 +818,43 @@ General text information to be displayed to the user.
 | --- | --- |--- | --- |
 | `title` | string | yes | A title for the datablock's subject. |
 | `description` | string | no | A description text for the datablocks subject. |
+<!--
+## [Asset?] `unlock_price_preview`
 
+This datablock contains preliminary pricing information for an asset, before more concrete implementation-specific choices have been made.
+It is intended as a placeholder to be displayed until the real price
+-->
+### [ImplementationList?/Implementation?/Component?] `unlock_price`
+
+This datablock contains exact pricing information.
+It can be applied to an Asset, Implementation or Component.
+
+**When applied to a Component** it indicates that running the `unlock_query` for this specific component will incur the charges listed in it.
+As an example, this level of granularity would be applicable when a provider wishes to charge individually for every map file of a PBR material.
+
+**When applied to an Implementation** it indicates that charges will incur when the first time the `unlock_query` of any component in this Implementation is run and not for any following unlock queries of that Implementation.
+As an example, this level of granularity would be applicable when a provider wishes to charge per software (i.e. purchasing an asset for application A includes all those files but it does not include all the files for application B).
+
+**When applied to an entire Implementation List** it indicates that charges will incur the first time the `unlock_query` is run on any component belonging to any implementation and not for any following unlock queries for any implementations in that list.
+As an example, this level of granularity would be applicable when a provider wishes to charge only once per asset.
+
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `locked` | Boolean | yes | Indicates whether the subject of this datablock is locked (`True`) or already unlocked (`False`) |
+| `price` | Number | only if `locked=True` | The price that the provider will charge the user in the background if they unlock the component (or one of the child components in the case of an Implementation or Asset) using the `unlock_query`. If the asset is already unlocked the provider MAY use this field to show the price that the subject was purchased for or leave it on `null` or not send it at all. |
+
+### [Component?] `unlock_query`
+
+The structure follows the `fixed_query` template.
+The structure for the response to this query is described in TODO.
+
+### [UnlockQuery!] `fetch.query`
+
+This datablock contains the query to download the component that was just unlocked.
+
+Its structure follows the `fixed_query` template.
+
+<!--
 ### [Asset!*/Component!*] `unlock_state`
 Information relating to asset unlocking for an asset or a component.
 This datablock contains the query that the client needs to make in order to actually unlock the asset before initiating the download described in the `fetch.*` block.
@@ -748,7 +868,7 @@ If this field is not set either, the client SHOULD still display the resource, b
 | `price` | Number | Only if `unlock_query` is set. | The price that the provider will charge the user in the background if they unlock the asset using the `unlock_query`. |
 | `unlock_query` | `fixed_query` | no | Query to perform to to make the purchase. |
 | `unlock_query_fallback_uri` | string | no | Website to direct the user to to purchase the resource manually without using AssetFetch. The client SHOULD allow the user to access this site in the browser if no `unlock_query` is provided. |
-
+-->
 ### [Init!*] `unlock_initialization`
 General information about how currency/balance is handled by this provider.
 
@@ -817,7 +937,7 @@ This field gives the client a hint about how to handle this component. See [Hand
 | --- | --- |--- | --- |
 | `style` | string | no, default=`active` | MUST be one of `active` or `passive`.  |
 
-### [AssetList?] `user`
+### [Init?] `user`
 
 This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
 
