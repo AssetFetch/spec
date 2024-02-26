@@ -813,9 +813,18 @@ Array of objects that MUST have this structure:
 
 This field gives the client a hint about how to handle this component. See [Handling Active and Passive Components](#handling-active-and-passive-components).
 
-| Field | Format | Required | Description
+| Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `style` | string | no, default=`active` | MUST be one of `active` or `passive`.  |
+
+### [AssetList?] `user`
+
+This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
+
+| Field | Format | Required | Description |
+| --- | --- | --- | --- |
+| `display_name` | string | no | The name of the user to display. |
+| `display_plan` | string | no | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.|
 
 # Component Handling
 
