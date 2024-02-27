@@ -355,10 +355,9 @@ In concrete terms, this means:
 If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
 This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#the-meta-field), if they have content.
 
-# Data Model
+# Endpoints
 
-This section describes all the data structures used by AssetFetch.
-This includes the description multiple HTTP(S)-Endpoints as well as the 'datablock' system for attaching data to the output of endpoints.
+This section describes all kinds of HTTP(s) endpoints used by AssetFetch.
 
 ## About Endpoints
 
@@ -530,9 +529,9 @@ The URI and parameters for the balance endpoint are communicated by the provider
 - The `data` field for this endpoint SHOULD contain the `unlock_balance` datablock, if asset unlocking is used.
 - The `data` field for this endpoint MAY contain the `user` datablock.
 
-## About Datablocks
+# Datablocks
 
-### Data object format
+## Data field format
 Throughout the entire interaction data is exchanged in pre-defined datablocks which are of a certain type, identified by a string key, and MUST follow the specified structure for that type.
 One datablock never stands on its own, it MUST always be contained within a parent data object.
 Every key of this data object is the identifier for the datablock stored in that key's field.
@@ -565,7 +564,8 @@ The resulting regular expression from these rules is `^[a-z0-9_]+(\.[a-z0-9_]+)?
 
 ## Datablock element templates
 This section describes additional data types that can be used within other datablocks.
-They exist to eliminate the need to re-specify the same data structure in two different places and can not be used directly as datablocks under their template name.
+They exist to eliminate the need to re-specify the same data structure in two different places.
+The templates can not be used directly as datablocks under their template name.
 
 ### `variable_query`
 This template describes a variable query. The individual parameter objects contain information on how to get the right values for making the query from the user through a GUI or other means of input.
@@ -599,13 +599,17 @@ This template describes a fixed query that can be sent by the client to the prov
 ### `component_ref`
 A field marked as `component_ref` is just a string, which represents the name of another component in the same implementation.
 
-## Datablocks
+# Datablock List
 
 This section displays all datablocks that are currently part of the standard.
 
 The text in brackets before the title indicates which kind of AssetFetch resources this block can be applied to.
 To aid with reading this list, exclamation marks and question marks are used to indicate whether this datablock MUST be applied to that resource (!) or if it SHOULD/MAY (?) be applied.
 A star (*) is used to indicate that there are special rules for when/if this datablock is to be used.
+
+## Browsing-related datablocks
+
+These datablocks all relate to the process of browsing for assets or implementations.
 
 ### [Init!] `asset_list_query`
 Describes the variable query for fetching the list of available assets from a provider.
@@ -626,6 +630,9 @@ Follows the `fixed_query` template.
 | --- | --- |--- | --- |
 | `result_count_total` | int | yes | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. | 
 
+
+## Configuration and authentication-related datablocks
+
 ### [Init!*] `headers`
 Headers that the provider expects to receive from the client on every subsequent request.
 
@@ -640,6 +647,8 @@ Headers that the provider expects to receive from the client on every subsequent
 | `title` | string | no | Title to display inside the client |
 | `acquisition_uri` | string | no | URI to be opened in the users browser to help them obtain the header value |
 | `acquisition_uri_title` | string | no | Title for the `acquisition_uri` |
+
+## File-related datablocks
 
 ### [Component!] `file_info`
 
@@ -662,14 +671,14 @@ If `behavior=file_active` or `behavior=file_passive` then the `local_path` MUST 
 
 If `behavior=archive` the local path MUST end with a slash ("trailing slash") and MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`) and MUST NOT contain relative path references (`./` or `../`) anywhere within it (`contents/` or `my/contents/` would be correct, `contents`,`./contents/`,`./contents`,`my/../../contents` or `../contents` would all be incorrect).
 
-#### [Component!] `file_fetch.download`
+### [Component!*] `file_fetch.download`
 
 This datablock indicates that this is a file which can be downloaded directly using the provided query.
 The download destination is defined via the `file_info` datablock.
 
 The structure of this datablock follows the `fixed_query` template.
 #### [Component!] `file_fetch.from_archive`
-This datablock indicates that this component represents a file from within an archive that needs to be downloaded separetely.
+This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
 More about the handling in [Component Handling](#component-handling).
 The destination is defined via the `file_info` datablock.
 
@@ -678,13 +687,69 @@ The destination is defined via the `file_info` datablock.
 | `archive_component_name` | string | yes | The name of the component representing the archive that this component is contained in. |
 | `component_path` | string | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`).  |
 
+## Display related datablocks
 
-#### [Component!] `file_fetch.unlock_download`
-This datablock indicates that this file should be downloaded but that the (possibly temporary) download link must be requested ("unlocked") separately.
-This "unlocking" may incur charges which are defined in the `unlock_price` datablock either on the component itself or on its Implementation/ImplementationList.
-More about the handling in [Component Handling](#component-handling).
+These datablocks relate to how assets and their details are displayed to the user.
 
-The structure follows the `fixed_query` template.
+### [Init?/Asset?/AssetList?/ImplementationList?/Implementation?/Component?] `text`
+General text information to be displayed to the user.
+
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `title` | string | yes | A title for the datablock's subject. |
+| `description` | string | no | A description text for the datablocks subject. |
+
+### [Status?] `user`
+
+This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
+
+| Field | Format | Required | Description |
+| --- | --- | --- | --- |
+| `display_name` | string | no | The name of the user to display. |
+| `display_plan` | string | no | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.|
+| `display_icon_uri` | string | no | URI to an image with an aspect ratio of 1:1, for example a profile picture. |
+
+
+### [Init?/Asset?] `web_references`
+References to external websites for documentation or support.
+
+An array of objects each of which MUST follow this format:
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `title` | string | yes | The title to display for this web reference. |
+| `uri` | string | yes | The URL to be opened in the users browser. |
+| `icon_uri` | string | yes | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
+
+### [Init?] `branding`
+Brand information about the provider.
+
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `color_accent` | string | no | Color for the provider, hex string in the format 'abcdef' (no #)
+| `logo_square_uri` | string | no | URI to a square logo. It SHOULD be of the mediatype `image/png` and SHOULD be transparent.|
+| `logo_wide_uri` | string | no | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD be transparent.
+| `banner_uri` | string | no | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent.|
+
+### [Init?/Asset?] `license`
+Contains license information.
+When attached to an asset, it means that the license information only applies to that asset, when applied to a provider, it means that the license information applies to all assets offered through that provider.
+
+| Field | Format | Required | Description |
+| --- | --- | --- | --- |
+| `license_spdx` | string | no | MUST be an [SPDX license identifier](https://spdx.org/licenses/) or be left unset/null if not applicable. |
+| `license_uri` | string | no | URI which the client SHOULD offer to open in the user's web browser to learn more about the license. |
+
+### [Asset?] `authors`
+
+This datablock can be used to communicate the author(s) of a particular asset.
+
+Array of objects that MUST have this structure:
+
+| Field | Format | Required | Description
+| --- | --- |--- | --- |
+| `name` | string | yes | Name of the author. |
+| `uri` | string | no | A URI for this author, for example a profile link. |
+| `role` | string | no | The role that the author has had in the creation of this asset. |
 
 ### [Asset?] `dimensions.3d`
 Contains general information about the physical dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh data.
@@ -697,7 +762,7 @@ An object that MUST conform to this format:
 | `depth_m` | float | yes | Depth of the referenced asset |
 
 ### [Asset?] `dimensions.2d`
-Contains general information about the physical dimensions of a two-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh/texture/uv data.
+Contains general information about the physical dimensions of a two-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh-,texture-, or uv data.
 
 An object that MUST conform to this format:
 | Field | Format | Required | Description |
@@ -733,6 +798,19 @@ If the image is not a square, its key SHOULD be set based on the pixel count of 
 The image's media type SHOULD be one of `image/png` or `image/jpeg`.
 If the provider does not have insight into the dimensions of the thumbnail that it is referring the client to, it SHOULD use use the key `0` for the thumbnail url.
 
+## File handling and relationship datablocks
+
+These datablocks describe how files relate to each other.
+In many cases the relationships can be represented purely by placing component files adjacently in one directory and making only some of them "active", but in some cases it is necessary to declare relationships explicitly in AssetFetch.
+
+### [Component!] `behavior`
+
+This field gives the client a hint about how to handle this component. See [Handling Active and Passive Components](#handling-active-and-passive-components).
+
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `style` | string | no, default=`active` | MUST be one of `active` or `passive`.  |
+
 ### [Component?] `loose_environment`
 The presence of this datablock on a component indicates that it is an environment map.
 This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR), not if the environment is already wrapped in another format with native support.
@@ -767,6 +845,8 @@ When applied to a component, it indicates that this component makes use of a mat
 | `mtlx_material` | string | no | Optional reference for which material to use from the mtlx file, if it contains multiple. |
 | `apply_selectively_to` | string | no |  Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
 
+## File-format specific datablocks
+
 ### [Component?] `format.blend`
 Information about files with the extension `.blend`.
 This information is intended to help the client understand the file.
@@ -800,13 +880,9 @@ Information about files with the extension `.obj`.
 | `use_mtl` | boolean | yes | Indicates whether the client should attempt to read material data from the MTL files referenced inside the obj-file. |
 
 
-### [Init?/Asset?/AssetList?/Implementation?/Component?] `text`
-General text information to be displayed to the user.
+## Unlocking-related datablocks
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `title` | string | yes | A title for the datablock's subject. |
-| `description` | string | no | A description text for the datablocks subject. |
+These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch.
 
 ### [ImplementationList?/Implementation?/Component?] `unlock`
 
@@ -817,87 +893,19 @@ It indicates that this component (or all the components in the implementation or
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `locked` | Boolean | yes | Indicates whether the subject of this datablock is locked (`True`) or already unlocked (`False`) |
-| `price` | Number | only if `locked=True` | The price that the provider will charge the user in the background if they run the `unlock_query`. If the resource is already unlocked (`locked=False`) the provider MAY use this field to show the price that the subject was purchased for or leave it on `null` or not send it at all. |
-| `unlock_query` | `fixed_query` | yes, unless `locked=False` | Query to perform to to make the purchase. |
-| `unlock_query_fallback_uri` | string | no | Website to direct the user to to purchase the resource manually without using AssetFetch. The client SHOULD allow the user to access this site in the browser. |
+| `locked` | boolean | yes | Indicates whether the subject of this datablock is locked (`True`) or already unlocked (`False`) |
+| `price` | number | only if `locked=True` | The price that the provider will charge the user in the background if they run the `unlock_query`. |
+| `unlock_query` | `fixed_query` | only if `locked=True` | Query to perform to to make the purchase. |
 
-### [Init!*] `unlock_initialization`
+### [Status?] `unlock_status`
 General information about how currency/balance is handled by this provider.
 
 | Field | Format | Required | Description | 
 | --- | --- |--- | --- |
+| `balance` | number | yes | Balance.|
 | `currency` | string | yes | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
-| `is_prepaid` | boolean| yes | Indicates whether the client should attempt to resolve an account balance. |
-| `prepaid_balance_refill_uri` | string | yes | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form. |
-| `prepaid_balance_check_query` | `query_fixed` | yes | The query the client should make to get the current prepaid balance.|
-
-### [] `unlock_prepaid_balance`
-
-This datablock is only applicable to the `unlock_balance` endpoint type.
-
-| Field | Format | Required | Description | 
-| --- | --- |--- | --- |
-| `prepaid_balance` | int or float | yes | Balance.|
-
-### [Init?/Asset?] `web_references`
-References to external websites for documentation or support.
-
-An array of objects each of which MUST follow this format:
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `title` | string | yes | The title to display for this web reference. |
-| `uri` | string | yes | The URL to be opened in the users browser. |
-| `icon_uri` | string | yes | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
-
-
-### [Init?] `branding`
-Brand information about the provider.
-
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `color_accent` | string | no | Color for the provider, hex string in the format 'abcdef' (no #)
-| `logo_square_uri` | string | no | URI to a square logo. It SHOULD be of the mediatype `image/png` and SHOULD be transparent.|
-| `logo_wide_uri` | string | no | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD be transparent.
-| `banner_uri` | string | no | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent.|
-
-### [Init?/Asset?] `license`
-Contains license information.
-When attached to an asset, it means that the license information only applies to that asset, when applied to a provider, it means that the license information applies to all assets offered through that provider.
-
-| Field | Format | Required | Description |
-| --- | --- | --- | --- |
-| `license_spdx` | string | no | MUST be an [SPDX license identifier](https://spdx.org/licenses/) or be left unset/null if not applicable. |
-| `license_uri` | string | no | URI which the client SHOULD offer to open in the user's web browser to learn more about the license. |
-
-### [Asset?] `authors`
-
-This datablock can be used to communicate the author(s) of a particular asset.
-
-Array of objects that MUST have this structure:
-
-| Field | Format | Required | Description
-| --- | --- |--- | --- |
-| `name` | string | yes | Name of the author. |
-| `uri` | string | no | A URI for this author, for example a profile link. |
-| `role` | string | no | The role that the author has had in the creation of this asset. |
-
-### [Component!] `behavior`
-
-This field gives the client a hint about how to handle this component. See [Handling Active and Passive Components](#handling-active-and-passive-components).
-
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `style` | string | no, default=`active` | MUST be one of `active` or `passive`.  |
-
-### [Init?] `user`
-
-This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
-
-| Field | Format | Required | Description |
-| --- | --- | --- | --- |
-| `display_name` | string | no | The name of the user to display. |
-| `display_plan` | string | no | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.|
+| `balance_refill_uri` | string | yes | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form. |
+| `balance_check_query` | `query_fixed` | yes | The query the client should make to get the current prepaid balance.|
 
 # Component Handling
 
