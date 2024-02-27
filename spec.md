@@ -621,7 +621,7 @@ Follows the `variable_query` template.
 
 ### [AssetList?/ImplementationList?] `next_query`
 
-Describes a fixed query to fetch more assets using the same parameters as the current query.
+Describes a fixed query to fetch more results using the same parameters as the current query.
 Follows the `fixed_query` template.
 
 ### [AssetList?/ImplementationList?] `response_statistics`
