@@ -629,8 +629,6 @@ Follows the `fixed_query` template.
 ### [Init!*] `headers`
 Headers that the provider expects to receive from the client on every subsequent request.
 
-Array of objects matching the following structure:
-
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `name` | string | yes | Name of the header |
@@ -639,47 +637,36 @@ Array of objects matching the following structure:
 | `is_sensitive` | boolean | yes | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#storing-sensitive-headers) |
 | `prefix` | string | no | Prefix that the client should prepend to the value entered by the user when sending it to the provider |
 | `suffix` | string | no | Suffix that the client should append to the value entered by the user when sending it to the provider |
-| `title` | string | no | Title to display inside the client. |
+| `title` | string | no | Title to display inside the client |
 | `acquisition_uri` | string | no | URI to be opened in the users browser to help them obtain the header value |
 | `acquisition_uri_title` | string | no | Title for the `acquisition_uri` |
 
 ### [Component!] `file_info`
 
-This datablock contains metadata for handling a file.
+This datablock contains information about a file.
 
 | Filed | Format | Required | Description |
 | --- | --- | --- | --- |
-| `local_path` | string | yes, unless `behavior=archive` | The path that the client should append to the base directory it has chosen for the asset.  |
+| `local_path` | string | yes, unless `behavior=archive` | The sub-path that this file should take in the directory of this implementation. |
 | `length` | integer | no | The length of the file in bytes. |
 | `extension` | string | yes | The file extension indicating the format of this file. |
 | `behavior` | string | yes | One of `file_active`,`file_passive`,`archive` |
 
-The `extension` MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and can include further dots required for properly expressing the format (eg. `.tar.gz` for a gzipped tar-archive).
+The `extension` MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and can include multiple dots required for properly expressing the format (eg. `.tar.gz` for a gzipped tar-archive).
 
-The `behavior` describes whether this file should be treated as an active or passive component (see TODO).
+The `behavior` describes whether this file should be treated as an [active or passive file component](#active-vs-passive-components) or as an archive.
 
 If `behavior=archive` and the `local_path` is not `null`, the entire archive MUST be unpacked into the local path.
 
-If `behavior=file_active` or `behavior=file_passive` the `local_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash" (`example.txt` or `sub/dir/example.txt` would be correct, `/example.txt` or `/sub/dir/example.txt` would be incorrect).
+If `behavior=file_active` or `behavior=file_passive` then the `local_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash" and MUST NOT contain relative path references (`example.txt` or `sub/dir/example.txt` would be correct, `/example.txt`, `./example.txt` or `/sub/dir/example.txt` would be incorrect).
 
-If `behavior=archive` the local path MUST end with a slash ("trailing slash").
-It MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`) and MUST NOT contain relative path references (`./` or `../`) anywhere within it (`contents/` or `my/contents/` would be correct, `contents`,`./contents/`,`./contents`,`my/../../contents` or `../contents` would all be incorrect).
+If `behavior=archive` the local path MUST end with a slash ("trailing slash") and MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`) and MUST NOT contain relative path references (`./` or `../`) anywhere within it (`contents/` or `my/contents/` would be correct, `contents`,`./contents/`,`./contents`,`my/../../contents` or `../contents` would all be incorrect).
 
-<!--
-### [Component!] The `file_fetch.*` family
-
-`file_fetch.*` datablocks describe how files are downloaded from the provider into in the directory the client has designated for this asset implementation (See [Local Storage of Asset Files](#local-storage-of-asset-files)).
--->
 #### [Component!] `file_fetch.download`
 
 This datablock indicates that this is a file which can be downloaded directly using the provided query.
 The download destination is defined via the `file_info` datablock.
 
-<!--
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `download_query` | `fixed_query` | The query to download the file. |
--->
 The structure of this datablock follows the `fixed_query` template.
 #### [Component!] `file_fetch.from_archive`
 This datablock indicates that this component represents a file from within an archive that needs to be downloaded separetely.
@@ -820,57 +807,21 @@ General text information to be displayed to the user.
 | --- | --- |--- | --- |
 | `title` | string | yes | A title for the datablock's subject. |
 | `description` | string | no | A description text for the datablocks subject. |
-<!--
-## [Asset?] `unlock_price_preview`
 
-This datablock contains preliminary pricing information for an asset, before more concrete implementation-specific choices have been made.
-It is intended as a placeholder to be displayed until the real price
--->
-### [ImplementationList?/Implementation?/Component?] `unlock_price`
+### [ImplementationList?/Implementation?/Component?] `unlock`
 
 This datablock contains exact pricing information.
 It can be applied to an Asset, Implementation or Component.
 
-**When applied to a Component** it indicates that running the `unlock_query` for this specific component will incur the charges listed in it.
-As an example, this level of granularity would be applicable when a provider wishes to charge individually for every map file of a PBR material.
-
-**When applied to an Implementation** it indicates that charges will incur when the first time the `unlock_query` of any component in this Implementation is run and not for any following unlock queries of that Implementation.
-As an example, this level of granularity would be applicable when a provider wishes to charge per software (i.e. purchasing an asset for application A includes all those files but it does not include all the files for application B).
-
-**When applied to an entire Implementation List** it indicates that charges will incur the first time the `unlock_query` is run on any component belonging to any implementation and not for any following unlock queries for any implementations in that list.
-As an example, this level of granularity would be applicable when a provider wishes to charge only once per asset.
+It indicates that this component (or all the components in the implementation or implemenation list) need to be unlocked using a dedicated query in order to be downloadable.
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `locked` | Boolean | yes | Indicates whether the subject of this datablock is locked (`True`) or already unlocked (`False`) |
-| `price` | Number | only if `locked=True` | The price that the provider will charge the user in the background if they unlock the component (or one of the child components in the case of an Implementation or Asset) using the `unlock_query`. If the asset is already unlocked the provider MAY use this field to show the price that the subject was purchased for or leave it on `null` or not send it at all. |
+| `price` | Number | only if `locked=True` | The price that the provider will charge the user in the background if they run the `unlock_query`. If the resource is already unlocked (`locked=False`) the provider MAY use this field to show the price that the subject was purchased for or leave it on `null` or not send it at all. |
+| `unlock_query` | `fixed_query` | yes, unless `locked=False` | Query to perform to to make the purchase. |
+| `unlock_query_fallback_uri` | string | no | Website to direct the user to to purchase the resource manually without using AssetFetch. The client SHOULD allow the user to access this site in the browser. |
 
-### [Component?] `unlock_query`
-
-The structure follows the `fixed_query` template.
-The structure for the response to this query is described in TODO.
-
-### [UnlockQuery!] `fetch.query`
-
-This datablock contains the query to download the component that was just unlocked.
-
-Its structure follows the `fixed_query` template.
-
-<!--
-### [Asset!*/Component!*] `unlock_state`
-Information relating to asset unlocking for an asset or a component.
-This datablock contains the query that the client needs to make in order to actually unlock the asset before initiating the download described in the `fetch.*` block.
-
-If the provider does not transmit an `unlock_query`, the client SHOULD still display the asset and allow the user to purchase the asset through the `unlock_query_fallback_uri`.
-If this field is not set either, the client SHOULD still display the resource, but SHOULD make it apparent that it is not accessible for the user.
-
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `locked` | Boolean | yes | `True`: The asset is not ready for download and must be unlocked first. `False`: The asset has already been unlocked and the data in `file` can be used as normal. |
-| `price` | Number | Only if `unlock_query` is set. | The price that the provider will charge the user in the background if they unlock the asset using the `unlock_query`. |
-| `unlock_query` | `fixed_query` | no | Query to perform to to make the purchase. |
-| `unlock_query_fallback_uri` | string | no | Website to direct the user to to purchase the resource manually without using AssetFetch. The client SHOULD allow the user to access this site in the browser if no `unlock_query` is provided. |
--->
 ### [Init!*] `unlock_initialization`
 General information about how currency/balance is handled by this provider.
 
