@@ -312,7 +312,7 @@ sequenceDiagram
 ### Query payloads
 
 The payload of all queries sent from a client to a provider MUST be encoded as [`application/x-www-form-urlencoded`](https://url.spec.whatwg.org/#application/x-www-form-urlencoded), the same format that is used by standard HTML forms.
-Simple lists of items are implemented using a delimiter of the provider's choice. This choice is communicated by the provider to the client along with the other query variables.
+When using variable queries, lists of items are implemented using a delimiter of the provider's choice. This choice is communicated by the provider to the client along with the other query parameters.
 
 An example for a valid query payload is shown below. 
 ```
@@ -332,7 +332,7 @@ The client SHOULD send an appropriate user-agent header as defined in the [speci
 
 If the client is embedded in another application, for example as an addon inside a 3D suite, it SHOULD set its first `product` and `product-version` identifier based on the "parent" application and then describe the product and version of the client plugin itself afterwards.
 
-Examples for compliant user-agents are:
+Examples for proper user-agents are:
 
 ```
 cinema4d/2024.2 MyAssetFetchPlugin/1.2.3
@@ -362,19 +362,24 @@ This includes the description multiple HTTP(S)-Endpoints as well as the 'datablo
 
 ## About Endpoints
 
-The interaction model described in the [General Operation](#general-operation) section principally requires three kinds of HTTP(s)-based endpoints to be implemented by the provider:
+The interaction model described in the [General Operation](#general-operation) section principally implies that there are three kinds of HTTP(s)-based endpoints that a provider MUST implement and  to be implemented by the provider:
 
+The provider MUST implement:
 - An initialization endpoint
 - An endpoint for querying assets
 - An endpoint for querying implementations of one specific asset
 
+The provider MAY implement, based on their needs:
+- A status endpoint
+- An endpoint for unlocking resources
+
 The URI for the initialization endpoint is communicated by the provider to the user through external means (such as listing it on the provider's website).
-The URIs and parameters for all subsequent endpoints are not defined specifically and are communicated from the provider to the client step-by-step.
-This gives the provider great flexibility in how to structure its data and implementation.
-Providers with simple data formats, small collections and no need for authentication are theoretically even able to pre-generate all responses and upload them as JSON files to a static web hosting service.
+The URIs and parameters for all subsequent endpoints are not defined explicitly by the specification and are communicated from the provider to the client.
+This gives the provider great flexibility in how to structure its data and backend implementation.
+Providers with simple data formats, small collections and no need for authentication or asset unlocking are theoretically even able to pre-generate all responses and upload them as JSON files to a static web hosting service.
 
 ### The `meta` field
-All provider responses MUST carry the `meta` field to communicate key information about the current response.
+All provider responses on all endpoints MUST carry the `meta` field to communicate key information about the current response.
 ### Structure
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
@@ -384,14 +389,14 @@ All provider responses MUST carry the `meta` field to communicate key informatio
 | `message` | string | no | An arbitrary message to attach to this response. |
 
 The `response_id` field is designed to aid with logging and troubleshooting, should the need arise.
-The provider MAY set this field, in which case they SHOULD keep a log of the responses and their ids.
+The provider MAY set this field, in which case they SHOULD keep a log of the responses and their ids, especially in the case of an error.
 
 If a request fails, the provider SHOULD use the `message` field to communicate more details for troubleshooting.
 
 Clients SHOULD display the `response_id` and `message` fields to the user if a query was unsuccessful, as indicated by the HTTP status code.
 
 ### The `data` field
-Some provider responses have a `data` field at some place in their structure requirements.
+Nearly all provider endpoint responses have a `data` field at some place in their structure requirements.
 This data field contains most of the relevant information for any resource and always has the same general structure which is explained in more detail in the [Datablocks section](#datablocks).
 
 | Field | Format | Required | Description |
@@ -402,14 +407,14 @@ This data field contains most of the relevant information for any resource and a
 
 ## Core Endpoints
 
-This section describes the required formats for the three core endpoint types.
+This section describes the required formats for the three core endpoint types which MUST be implemented by any provider.
 
 ### Initialization 
 *(kind: `initialization`)*
 
 This endpoint is the first point of contact between a client and a provider.
 The provider MUST NOT require any kind of authentication for interaction with it.
-It's URI is initially typed or copy-pasted by the user into a client application and is used to communicate key details about the provider as well as how the interaction between client and provider should proceed.
+It's URI is initially typed or copy-pasted by the user into a client and is used to communicate key details about the provider as well as how the interaction between client and provider should proceed.
 
 The response on this endpoint MUST have the following structure:
 
@@ -437,7 +442,7 @@ The response on this endpoint MUST have the following structure:
 | `data` | datablocks | yes | Datablocks. |
 | `assets` | array of `asset` | yes |Array of `asset`s, as described below.|
 
-- The `data` field MAY contain the datablocks `next_query`, `response_statistics` and/or `text`
+- The `data` field MAY contain the datablocks `next_query`, `response_statistics` and/or `text`.
 
 #### `asset` Structure
 
@@ -445,7 +450,7 @@ Every `asset` object MUST have the following structure:
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `name` | string | yes | Internal name for this asset. |
+| `name` | string | yes | Unique name for this asset. |
 | `data` | datablocks | yes | Object containing datablocks. |
 
 - The `name` field MUST be unique among all assets for this provider. Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the `text` datablock if it is set for this asset.
@@ -453,15 +458,12 @@ Every `asset` object MUST have the following structure:
 - The `data` field SHOULD contain the datablocks `preview_image_thumbnail` and `text`.
 - The `data` field MAY contain the datablocks `preview_image_supplemental`,`license`,`authors` and/or `web_references`.
 - The `data` field MAY contain one of the datablocks `dimensions.*`.
-- If the provider wants to use [unlocking](#asset-unlocking) on the asset-level then the asset's `data` field MUST contain the datablock `unlock_state`.
 
 ### Implementation List
 *(kind: `implementation_list`)*
 
 This endpoint returns one or several implementations for one specific asset.
 The URI and available parameters for this endpoint are communicated by the server to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
-
-The response of this endpoint MUST have the following structure:
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
