@@ -119,6 +119,31 @@ Datablocks are extremely flexible and sometimes reusable pieces of metadata that
 - A client automatically reloading the user's account balance from the provider after purchasing an asset is an implicit query. The user's input such as authentication headers entered earlier may technically have an impact on the query but its request payload is generated without specific user-input for this query.
 - The file download of a specific model requires the use of a fixed query. It may be initiated by the user but its exact parameters are determined by data returned by the provider in the response to an earlier *variable query* for said model's files.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # General Operation
 
 This section describes the general mechanisms by which AssetFetch operates.
@@ -163,18 +188,15 @@ If more than one implementation turns out to be compatible with the client and i
 This process is comparable to the rarely used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
 
 ### Unlocking (Optional)
-The provider might allow any user to download any asset for free but it might also require payment for an asset.
-In that case an asset (or a part of it) can be marked as "unlockable" by the provider.
+The provider might allow any user to download any asset for free and without authentication, but it might also require payment for an asset.
+To accommodate this, providers are able to mark resources as "unlockable", requiring further deliberate action by the client and user to access them.
 
-AssetFetch offers a mechanism through which users can purchase or otherwise "unlock" content.
-Unlocking can happen with varying degrees of granularity, either for entire assets, specific implementations or individual components.
-Implementing the unlocking process adds additional steps to the interaction between provider and client.
+Unlocking can happen with varying degrees of granularity, either for all implementations of an asset at once, only for specific implementations or even on a component-by-component basis.
+In the response of its status endpoint, the provider sends the client information about the currency it uses (which may be a real one or vendor specific 'credits') and the account balance, since it is common for providers to use a prepaid system instead of selling assets directly.
 
-In the response of its status endpoint, the provider sends the client information about the currency it uses (which may be real or vendor specific ('credits') and can be different based on the user) and the account balance, since many providers use a prepaid token or credit system instead of selling assets directly.
-Notably, the actual payment details or configuration are not handled by AssetFetch. Users still need to sign up on the providers website and handle payment settings there.
+Thus, after choosing an implementation the client performs one or multiple additional "unlocking queries" to the provider's backend to perform the actual purchase for the user's account.
 
-In order to be able to download files, the client MUST then make one or multiple additional "unlocking queries".
-These queries to the provider's backend perform the actual purchase and payment and respond with a new copy of the asset's data containing the actual download link(s) which would normally be transmitted right along with the other data.
+After that,  and respond with a new copy of the asset's data containing the actual download link(s) which would normally be transmitted right along with the other data.
 This also allows providers to use temporary download links, for example with a randomized token that is only valid for a certain amount of time.
 
 ### Downloading and importing
@@ -307,6 +329,38 @@ sequenceDiagram
 	User->>User: Fills out asset query<br>again for next asset, if desired
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Communication
 
 ### Query payloads
@@ -354,6 +408,36 @@ In concrete terms, this means:
 
 If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
 This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#the-meta-field), if they have content.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Endpoints
 
@@ -529,6 +613,34 @@ The URI and parameters for the balance endpoint are communicated by the provider
 - The `data` field for this endpoint SHOULD contain the `unlock_balance` datablock, if asset unlocking is used.
 - The `data` field for this endpoint MAY contain the `user` datablock.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Datablocks
 
 ## Data field format
@@ -599,7 +711,39 @@ This template describes a fixed query that can be sent by the client to the prov
 ### `component_ref`
 A field marked as `component_ref` is just a string, which represents the name of another component in the same implementation.
 
-# Datablock List
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Datablock Index
 
 This section displays all datablocks that are currently part of the standard.
 
@@ -902,6 +1046,29 @@ General information about how currency/balance is handled by this provider.
 | `balance_unit` | string | yes | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
 | `balance_refill_uri` | string | yes | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form. |
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Component Handling
 
 After the client chooses a final implementation for which it is confident that it will be able to handle all components based on the contents of their datablocks, the client can then perform all the required downloads downloads and then process the components.
@@ -944,6 +1111,30 @@ Providers SHOULD make use of this notation if, and only if, other more native re
 ## Environments
 HDRI environments or skyboxes face a similar situation as materials: They can be represented using native formats, but a common practice is to provide them as a singular image file whose projection must be manually set by the artist.
 The `loose_environment` datablock works similar to the `loose_material` block and allows the provider to communicate that a component should be treated as an environment and what projection should be used.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Security Considerations
 
