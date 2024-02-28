@@ -636,6 +636,10 @@ Follows the `fixed_query` template.
 ### [Init!*] `headers`
 Headers that the provider expects to receive from the client on every subsequent request.
 
+This datablock is an array of `header` objects.
+
+#### `header` structure
+
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `name` | string | yes | Name of the header |
@@ -706,7 +710,7 @@ This datablock allows the provider to transmit information about the user to the
 | Field | Format | Required | Description |
 | --- | --- | --- | --- |
 | `display_name` | string | no | The name of the user to display. |
-| `display_plan` | string | no | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.|
+| `display_tier` | string | no | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.|
 | `display_icon_uri` | string | no | URI to an image with an aspect ratio of 1:1, for example a profile picture. |
 
 
@@ -803,14 +807,6 @@ If the provider does not have insight into the dimensions of the thumbnail that 
 These datablocks describe how files relate to each other.
 In many cases the relationships can be represented purely by placing component files adjacently in one directory and making only some of them "active", but in some cases it is necessary to declare relationships explicitly in AssetFetch.
 
-### [Component!] `behavior`
-
-This field gives the client a hint about how to handle this component. See [Handling Active and Passive Components](#handling-active-and-passive-components).
-
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `style` | string | no, default=`active` | MUST be one of `active` or `passive`.  |
-
 ### [Component?] `loose_environment`
 The presence of this datablock on a component indicates that it is an environment map.
 This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR), not if the environment is already wrapped in another format with native support.
@@ -903,9 +899,8 @@ General information about how currency/balance is handled by this provider.
 | Field | Format | Required | Description | 
 | --- | --- |--- | --- |
 | `balance` | number | yes | Balance.|
-| `currency` | string | yes | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
+| `balance_unit` | string | yes | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
 | `balance_refill_uri` | string | yes | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form. |
-| `balance_check_query` | `query_fixed` | yes | The query the client should make to get the current prepaid balance.|
 
 # Component Handling
 
