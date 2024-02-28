@@ -150,68 +150,85 @@ This section describes the general mechanisms by which AssetFetch operates.
 
 ## Overview
 
-These are the key steps that any interaction between a user, client and provider follows.
+These are the key steps that are necessary to successfully browse for and download an asset from a provider.
 
 ### Initialization
-The client makes an initial connection to the provider to learn how to communicate with it for the rest of the interaction and how to query for assets.
+The client makes an initial connection to the provider by making a call to an initialization endpoint communicated by the provider to the user through external channels.
+This initialization endpoint is freely accessible via HTTP GET and communicates key information for further usage of the provider's interface, such as:
+
+- The name and other metadata about the provider itself.
+- Whether the provider requires the client to authenticate itself through additional HTTP headers.
+- The URI through which assets can be queried.
+- What parameters can be used to query for assets.
+
 
 ### Authentication (optional)
-During initialization, the provider MAY request specific headers to be submitted.
-These header values are entered by the user into the client and are stored in and MUST be sent along with every `variable_query` or `fixed_query` performed by the client.
+The provider MAY require custom authentication headers, in which case the client MUST send these headers along with every `variable_query` or `fixed_query` it performs for that provider, except for initialization.
+The names of these headers, if any, MUST be declared by the provider during the initialization.
+The client obtains the required header values, such as passwords or randomly generated access tokens, from the user through a GUI or from a cache or other storage location.
+The implementation of this possible storage is not part of the specification and left up to the client implementor.
 
-The names of these headers are declared by the provider during the initialization using a [`headers`](#provider-afheaders) datablock.
-The value (for example a random secret API key identifying the user) is communicated to the user through other channels, for example on the provider's website.
+### Session Status (optional)
+If the provider uses authentication, then it MUST offer a session status endpoint whose URI is communicated during initialization and which the client SHOULD contact at least once after initialization to verify the correctness of the headers entered by the user.
 
-After getting the required values from the user, the client calls the status endpoint with its newly defined headers in order to receive confirmation of their correctness from the provider.
+The session status endpoint has two primary uses:
 
-### Status Checking (optional)
-The provider has the oppourtunity to define a "status endpoint" during initialization.
-This status endpoint is used to communicate general data like user profile information or account balance (if applicable).
-When using header-based authentication the client MUST call this endpoint once after the initialization in order to verify the validity of the credentials that the user entered.
-After that the client can call the status endpoint at any time to update user data or account balance information.
-Appropriate times for calling the status endpoint will be mentioned later TODO.
+- The provider SHOULD respond with user-specific metadata, such as a username or other account details which the client MAY display to the user to verify to them that they are properly connected to the provider.
+- If the provider wants to charge users for downloading assets using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance.
+
+After the initial call the client SHOULD call the session status endpoint again after specific events to receive updated user data or account balance information.
+Recommended times for calling the session status endpoint will be mentioned later TODO.
 
 ### Browsing assets
-After successful initialization the user enters the asset search parameters which were defined by the provider during the initialization step.
-The client then loads a list of available assets from the provider and presents it to the user, who selects an asset they wish to load.
+After successful initialization (and possibly authentication) the user MAY (or depending on the requirements by the provider MUST) enter values for the asset search parameters which were defined by the provider during the initialization step.
+Examples include keywords or a category selection.
+The client then loads a list of available assets from the provider.
+This list SHOULD includes general metadata about every asset, such as a name, a thumbnail image, license and other information.
+It also MUST include information on how to query the provider for implementations of that asset.
+The user chooses one of the assets they wish to receive.
 
 ### Choosing an implementation
 In order to load an asset a specific implementation of that asset needs to be chosen.
-This step might involve asking the user about additional asset-specific parameters, such as texture resolution, level of detail, etc. if such variations are available from that provider.
-The variables for this query are defined by the provider for every asset.
-The preselection ensures that all the proposed implementations returned by the provider already have the desired qualities and only differ in terms of how the asset is encoded (file structure and formats).
+The first step of this process involves receiving a list of possible implementations from the provider using the information on how to request it sent by the provider along with the other asset metadata.
+The provider MAY decide to request additional parameters for querying implementations, in which case the user MAY (or MUST) provide additional asset-specific query data like texture resolution, level of detail, etc.
+The exact parameters are defined by the provider.
+This preselection ensures that all the proposed implementations returned by the provider already have the desired qualities and only differ in terms of how the asset is encoded in terms of file structure and formats.
 After getting the choice from the user (if one needed to be made) the client requests the list of available implementations for this asset. 
-The provider responds with one or multiple implementations.
-The implementations consist of a list of components, each of which have metadata attached to them containing information about file formats and relationships.
-The client analyzes the declarations of each component in every proposed implementation for compatibility.
-If more than one implementation turns out to be compatible with the client and its environment it MAY ask the user to make the final choice or choose one implementation based on pre-programmed preferences.
-This process is comparable to the rarely used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
+The provider responds with a list of possible implementations available for this asset and the quality parameters chosen by the user.
+The implementations each consist of a list of components, each of which have metadata attached to them containing information about file formats, relationships and downloads.
+The client analyzes the metadata declarations of each component in every proposed implementation in order to test it for compatibility.
+If at least one implementation turns out to be compatible with the client and its host application, the process can proceed.
+If more than one implementation is valid for the given client and its host application, it MAY ask the user to make the final choice or choose one implementation based on pre-programmed preferences.
+This whole process is comparable to the rarely used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
 
 ### Unlocking (Optional)
-The provider might allow any user to download any asset for free and without authentication, but it might also require payment for an asset.
+The provider MAY allow any user to download any asset for free and without authentication, but it MAY also require payment for an asset.
 To accommodate this, providers are able to mark resources as "unlockable", requiring further deliberate action by the client and user to access them.
+Unlocking can happen with varying degrees of granularity, either in one go for all implementations of an asset at once, only for specific implementations or even on a component-by-component basis.
 
-Unlocking can happen with varying degrees of granularity, either for all implementations of an asset at once, only for specific implementations or even on a component-by-component basis.
-In the response of its status endpoint, the provider sends the client information about the currency it uses (which may be a real one or vendor specific 'credits') and the account balance, since it is common for providers to use a prepaid system instead of selling assets directly.
+When responding with the implementation list the provider MAY withhold certain datablocks relating to downloading from the implementation's components.
+If it does that, then it MUST instead provide two additional datablocks describing possible "unlocking queries" that the client can perform (along with their prices) and a query for how to obtain the actual download link for any component that does not have one yet.
 
-Thus, after choosing an implementation the client performs one or multiple additional "unlocking queries" to the provider's backend to perform the actual purchase for the user's account.
+The client SHOULD then present the required unlocking action (along with the accompanying charges to their account) to the user.
+If the user agrees, the client first performs the unlocking query (or queries) and then queries the provider for the previously withheld datablocks which contain the real (possibly temporary) download links.
 
-After that,  and respond with a new copy of the asset's data containing the actual download link(s) which would normally be transmitted right along with the other data.
-This also allows providers to use temporary download links, for example with a randomized token that is only valid for a certain amount of time.
-
-### Downloading and importing
-After client (and possibly the user through manual choice) has determined a suitable implementation and unlocked all relevant components it can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
+### Downloading and Handling
+After choosing a suitable implementation and unlocking all of it's datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
 The choice about where this directory should be created is made between the client and user through configuration and is not part of the specification.
 
-Inside this directory the client arranges the files as described by the provider in the implementation data and processes them.
-In the context of a 3D suite this "processing" usually involves importing the data into the current scene or a software-specific repository of local assets.
-This processing is aided by the metadata in the datablocks of every component which describes relevant attributes, recommended configurations or relationships.
+Inside this directory the client SHOULD arrange the files as described by the provider in the implementation metadata to ensure that relative links between files remain intact.
+
+At this point the client can - either by itself or through calls to its host application - handle the files that it obtained.
+In the context of a 3D suite this usually involves importing the data into the current scene or a software-specific repository of local assets.
+This processing is aided by the metadata in the datablocks of every component sent by the provider which describes relevant attributes, recommended vendor-specific configurations or relationships between files.
+
+At this point the interaction is complete and the user MAY start a new query for assets.
 
 ## Sequence Diagram
 The following diagrams illustrate the general flow of information between the user,[their client software](#client) and the provider as well as the most important actions taken by each party.
 
 ### Simple Version
-This diagram shows a simple implementation, requiring no authentication or unlocking.
+This diagram shows a simple implementation without any ability for dynamic filtering or dynamically generated implementations and without requiring authentication or unlocking.
 All assets are freely available for everyone.
 
 ```mermaid
@@ -228,29 +245,21 @@ sequenceDiagram
     User->>Client: Requests connection to free.example.com/init
 	Client->>Provider: Query: free.example.com/init
 	Provider->>Client: Response: Initialization data
-	Client->>User: Presents available parameters<br>for querying assets<br>as a GUI/form
-
-	User->>User: Fills out asset query<br>as defined by provider<br>(tags, categories, ...)
-	User->>Client: Confirms choices and requests asset list
-	Client->>Provider: Query: free.example.com/assets?q=<search term>
+	
+	Client->>Provider: Query: free.example.com/assets
 	note right of Client: The asset query URI<br>was included in the<br>initialization data
 	Provider->>Provider: Searches its database for assets<br>based on query parameters
 	Provider->>Client: Response: List of assets
 	Client->>User: Presents asset list
-	User->>User: Selects asset from list
-	User->>Client: Confirms asset selection
-	Client->>User: Presents available parameters<br>for querying implementations<br>as GUI/form
-	User->>User: Fills out implementation query<br>(texture resolution,LOD,...)
-	User->>Client: Confirms choices and<br>requests implementations
-	Client->>Provider: Query: free.example.com/implementations?asset=<asset id>&resolution=<resolution>
+	User->>Client: Selects asset from list
+	Client->>Provider: Query: free.example.com/implementations?asset=<asset id>
 	note right of Client: The implementations query URI and parameters<br>were included in the asset data
-	Provider->>Provider: Loads implementations<br>for this asset from its database,<br>based on query
+	Provider->>Provider: Loads implementations<br>for this asset from its database
 	Provider->>Client: Returns list of possible implementations
 	Client->>Client: Validates proposed implementations and<br>selects those that it can handle<br>(based on metadata<br> about file formats and relationships)
 	Client->>User: Presents implementation(s)<br>and asks for confirmation
-	User->>User: Reviews suggested implementation(s)<br>(files, download size, etc.)
 	User->>Client: Confirms asset import
-	loop For every file
+	loop For every component in implementation
 		Client->>Provider: Initiates HTTP download of component file
 		Provider->>Client: Transmits file
 	end
@@ -293,11 +302,10 @@ sequenceDiagram
 	Provider->>Provider: Searches its database for assets<br>based on query parameters
 	Provider->>Client: Response: List of assets
 	Client->>User: Presents asset list
-	User->>User: Selects asset from list
-	User->>Client: Confirms asset selection
+	User->>Client: Selects asset from list
 
 	Client->>User: Presents available parameters<br>for querying implementations<br>as GUI/form
-	User->>User: Fills out implementation query<br>(texture resolution,LOD,...)
+	User->>User: Fills out implementations query<br>(texture resolution,LOD,...)
 	User->>Client: Confirms choices and<br>requests implementations
 	Client->>Provider: Query: paid.example.com/implementations?asset=<asset id>&resolution=<resolution>
 	note right of Client: The implementations query URI<br>was included in the asset data
@@ -313,12 +321,12 @@ sequenceDiagram
 		Provider->>Client: Confirms the unlocking action.
 	end
 
-	Client->>Provider: Query: paid.example.com/implementations?asset=<asset id>&resolution=<resolution>
-	note right of Client: The client calls the implementations endpoint again <br>with the same parameters to get the <br>updated implementations data (with downloads!)
-	Provider->>Provider: Loads implementations<br>for this asset from its database,<br>based on query
-	Provider->>Client: Returns list of possible implementations,<br>*now with download information*
+	loop For every component that <br>had its download-related datablocks withheld
+		Client->>Provider: Query: paid.example.com/downloads?asset=<asset id>&component=<component id>
+		Provider->>Client: Responds with actual download information<br>(possibly temporarily generated)
+	end
 
-	loop For every file
+	loop For every component
 		Client->>Provider: Initiates HTTP download of component file
 		Provider->>Client: Transmits file
 	end
@@ -365,7 +373,7 @@ sequenceDiagram
 
 ### Query payloads
 
-The payload of all queries sent from a client to a provider MUST be encoded as [`application/x-www-form-urlencoded`](https://url.spec.whatwg.org/#application/x-www-form-urlencoded), the same format that is used by standard HTML forms.
+The payload of both the `fixed_query` and the `variable_query` from a client to a provider MUST be encoded as [`application/x-www-form-urlencoded`](https://url.spec.whatwg.org/#application/x-www-form-urlencoded), the same format that is used by standard HTML forms.
 When using variable queries, lists of items are implemented using a delimiter of the provider's choice. This choice is communicated by the provider to the client along with the other query parameters.
 
 An example for a valid query payload is shown below. 
@@ -384,7 +392,7 @@ The exact structure of the data for individual endpoints is specified in the [Da
 
 The client SHOULD send an appropriate user-agent header as defined in the [specification](https://www.rfc-editor.org/rfc/rfc9110#field.user-agent).
 
-If the client is embedded in another application, for example as an addon inside a 3D suite, it SHOULD set its first `product` and `product-version` identifier based on the "parent" application and then describe the product and version of the client plugin itself afterwards.
+If the client is embedded in a host application, for example as an addon inside a 3D suite, it SHOULD set its first `product` and `product-version` identifier based on the "parent" application and then describe the product and version of the client plugin itself afterwards.
 
 Examples for proper user-agents are:
 
@@ -453,13 +461,14 @@ The provider MUST implement:
 - An endpoint for querying implementations of one specific asset
 
 The provider MAY implement, based on their needs:
-- A status endpoint
+- A session status endpoint
 - An endpoint for unlocking resources
+- An endpoint for loading previously withheld datablocks after the unlocking step
 
 The URI for the initialization endpoint is communicated by the provider to the user through external means (such as listing it on the provider's website).
 The URIs and parameters for all subsequent endpoints are not defined explicitly by the specification and are communicated from the provider to the client.
 This gives the provider great flexibility in how to structure its data and backend implementation.
-Providers with simple data formats, small collections and no need for authentication or asset unlocking are theoretically even able to pre-generate all responses and upload them as JSON files to a static web hosting service.
+Providers with simple data formats, small asset collections and no need for authentication or asset unlocking are theoretically even able to pre-generate all API responses and upload them as JSON files to a static web hosting service.
 
 ### The `meta` field
 All provider responses on all endpoints MUST carry the `meta` field to communicate key information about the current response.
