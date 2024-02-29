@@ -1,0 +1,22 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "User Datablock",
+	"$id": "/datablock/user.json",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"display_name": {
+			"type": "string"
+		},
+		"display_tier": {
+			"type":"string"
+		},
+        "display_icon_uri":{
+            "type":"string",
+            "format": "uri"
+        }
+	},
+	"required": [
+		"title"
+	]
+}

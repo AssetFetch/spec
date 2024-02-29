@@ -8,19 +8,16 @@
 		"balance_unit":{
 			"type":"string"
 		},
-		"is_prepaid":{
-			"type":"boolean"
+		"balance":{
+			"type":"number"
 		},
-		"prepaid_balance_refill_uri":{
+		"balance_refill_uri":{
 			"type":"string",
 			"format":"uri"
-		},
-		"prepaid_balance_check_query":{
-			"$ref": "/template/fixed_query.json"
 		}
 	},
 	"required": [
 		"balance_unit",
-		"balance_check_query"
+		"balance"
 	]
 }
