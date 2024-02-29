@@ -1062,6 +1062,9 @@ General information about how currency/balance is handled by this provider.
 | `balance_unit` | string | yes | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
 | `balance_refill_uri` | string | yes | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form. |
 
+### [Component?] `unlockable_data_query`
+This datablock contains the query to receive the previously withheld datablocks for one component after it (or its parent implementation/asset) has been unlocked.
+It follows the `fixed_query` template.
 
 
 
