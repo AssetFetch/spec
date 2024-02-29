@@ -57,9 +57,9 @@ The crucial difference to existing provider-specific plugins/addons is that only
 In reality there may of course still be multiple client plugins developed for the same application, but the choice for one of them should have less of an impact.
 
 ### Provider
->The place that offers assets by hosting an AssetFetch-complient HTTP(S)-Endpoint.
+>The place that offers assets by hosting an AssetFetch-compliant HTTP(S)-Endpoint.
 
-This provider may be a commercial platform that is offering 3D assets for sale or an open repository providing content for free.
+This provider can be a commercial platform that is offering 3D assets for sale or an open repository providing content for free.
 
 ### Asset
 >A reusable *logical* media element in the context of a digital project.
@@ -176,7 +176,7 @@ In order to load an asset a specific implementation of that asset needs to be ch
 The first step of this process involves receiving a list of possible implementations from the provider using the information on how to request it sent by the provider along with the other asset metadata.
 The provider MAY decide to request additional parameters for querying implementations, in which case the user MAY (or MUST) provide additional asset-specific query data like texture resolution, level of detail, etc.
 The exact parameters are defined by the provider.
-This preselection ensures that all the proposed implementations returned by the provider already have the desired qualities and only differ in terms of how the asset is encoded in terms of file structure and formats.
+This pre-selection ensures that all the proposed implementations returned by the provider already have the desired qualities and only differ in terms of how the asset is encoded in terms of file structure and formats.
 After getting the choice from the user (if one needed to be made) the client requests the list of available implementations for this asset. 
 The provider responds with a list of possible implementations available for this asset and the quality parameters chosen by the user.
 The implementations each consist of a list of components, each of which have metadata attached to them containing information about file formats, relationships and downloads.
@@ -942,7 +942,7 @@ These datablocks are used if the provider is utilizing the asset unlocking syste
 This datablock contains exact pricing information.
 It can be applied to an Asset, Implementation or Component.
 
-It indicates that this component (or all the components in the implementation or implemenation list) need to be unlocked using a dedicated query in order to be downloadable.
+It indicates that this component (or all the components in the implementation or implementation list) need to be unlocked using a dedicated query in order to be downloadable.
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
