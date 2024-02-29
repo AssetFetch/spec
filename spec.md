@@ -447,11 +447,8 @@ This message SHOULD contain the contents of the `message` and `id` field in the 
 
 
 
-# Endpoints
 
-This section describes all kinds of HTTP(s) endpoints used by AssetFetch.
-
-## About Endpoints
+# About Endpoints
 
 The interaction model described in the [General Operation](#general-operation) section principally implies that there are three kinds of HTTP(s)-based endpoints that a provider MUST implement and  to be implemented by the provider:
 
@@ -497,11 +494,11 @@ This data field contains most of the relevant information for any resource and a
 | \<string-key\> | object or array | yes | Exact structure is defined in the [Datablocks section](#datablocks) |
 | ... (arbitrary number of datablocks)
 
-## Core Endpoints
+# Endpoint List
 
 This section describes the required formats for the three core endpoint types which MUST be implemented by any provider.
 
-### Initialization 
+## Initialization 
 *(kind: `initialization`)*
 
 This endpoint is the first point of contact between a client and a provider.
@@ -521,7 +518,7 @@ The response on this endpoint MUST have the following structure:
 - The `data` field MUST contain the datablock `headers` if other parts of the API require header-based authentication to function. It MAY still be used for other purposes.
 - If the provider wants to use [unlocking](#asset-unlocking) anywhere during later API calls the `data` field MUST contain the datablock `unlock_balance_initialization`.
 
-### Asset List
+## Asset List
 *(kind: `asset_list`)*
 
 The URI and available parameters for this endpoint are communicated by the server to the client using the `asset_list_query` datablock on the initialization endpoint.
@@ -536,7 +533,7 @@ The response on this endpoint MUST have the following structure:
 
 - The `data` field MAY contain the datablocks `next_query`, `response_statistics` and/or `text`.
 
-#### `asset` Structure
+### `asset` Structure
 
 Every `asset` object MUST have the following structure:
 
@@ -551,7 +548,7 @@ Every `asset` object MUST have the following structure:
 - The `data` field MAY contain the datablocks `preview_image_supplemental`,`license`,`authors` and/or `web_references`.
 - The `data` field MAY contain one of the datablocks `dimensions.*`.
 
-### Implementation List
+## Implementation List
 *(kind: `implementation_list`)*
 
 This endpoint returns one or several implementations for one specific asset.
@@ -565,7 +562,7 @@ The URI and available parameters for this endpoint are communicated by the serve
 
 - The `data` field MAY contain the datablocks `response_statics` and/or `next_query`
 
-#### `implementation` Structure
+### `implementation` Structure
 
 Every `implementation` object MUST have the following structure:
 
@@ -579,7 +576,7 @@ Every `implementation` object MUST have the following structure:
 
 - The `name` MUST be unique among all implementations for this asset, but MAY be reused for an implementation of another asset. It SHOULD be used by the client as alternative to the `title` field in the `text` datablock if it is not set for an implementation.
 
-#### `component` Structure
+### `component` Structure
 
 Every `component` object MUST have the following structure:
 
@@ -594,18 +591,18 @@ Every `component` object MUST have the following structure:
 - If the file extension defined inside the `fetch.*` field has a datablock defined with the same name (minus the dot-prefix) then the `data` field on that `component` SHOULD have that corresponding datablock to provide more format-specific information about the file.
 - If the provider wants to use [unlocking](#asset-unlocking) on the component-level then the component's `data` field MUST contain the datablock `unlock_state`.
 
-## Additional Endpoints
+# Additional Endpoints
 
 Additional endpoint types can be used to perform certain actions or retrieve additional information.
 
-Unless noted otherweise in the specification, these endpoints MUST use the following format:
+Unless noted otherwise in the specification, these endpoints MUST use the following format:
 
 | Field | Format | Required | Description|
 | --- | --- |--- | --- |
 | `meta` | metadata | yes | Metadata. |
 | `data` | datablocks | yes | Datablocks.|
 
-### Unlocking Endpoint
+## Unlocking Endpoint
 *(kind: `unlock`)*
 
 This endpoint type is used to "unlock" (usually meaning "purchase") an asset or asset component.
@@ -614,7 +611,17 @@ The URI and parameters for this endpoint are communicated through the `unlock` f
 
 This endpoint currently does not use any datablocks specified for it. Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
 
-### Status Endpoint
+## Unlocked Datablocks Endpoint
+*(kind:`unlocked_datablocks`)*
+
+This endpoint type responds with the previously withheld datablocks for one component, assuming that the client has made all the necessary calls to the unlocking endpoint.
+It gets called by the client for every component that had an `unlockable_data_query` datablock assigned to it.
+
+
+- The `data` field contains all the datablocks that are only available for the component after it has been unlocked. 
+This field is open to extension, but currently the provider MUST NOT include any other datablock than `file_fetch.download` in this list.
+
+## Status Endpoint
 *(kind: `status`)*
 
 The URI and parameters for the balance endpoint are communicated by the provider to the client through the [`unlock_balance_initialization`](#init-unlockbalance_initialization)
