@@ -709,6 +709,21 @@ This datablock is an array of `header` objects.
 | `acquisition_uri` | string | no | URI to be opened in the users browser to help them obtain the header value |
 | `acquisition_uri_title` | string | no | Title for the `acquisition_uri` |
 
+### [Init!*] `session_status_query`
+
+Query to use for checking whether the provided headers are valid und for obtaining session status information.
+This datablock follows the `fixed_query` template.
+
+### [Status?] `user`
+
+This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
+
+| Field | Format | Required | Description |
+| --- | --- | --- | --- |
+| `display_name` | string | no | The name of the user to display. |
+| `display_tier` | string | no | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.|
+| `display_icon_uri` | string | no | URI to an image with an aspect ratio of 1:1, for example a profile picture. |
+
 ## File-related datablocks
 
 ### [Component!] `file_info`
@@ -759,16 +774,6 @@ General text information to be displayed to the user.
 | --- | --- |--- | --- |
 | `title` | string | yes | A title for the datablock's subject. |
 | `description` | string | no | A description text for the datablocks subject. |
-
-### [Status?] `user`
-
-This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
-
-| Field | Format | Required | Description |
-| --- | --- | --- | --- |
-| `display_name` | string | no | The name of the user to display. |
-| `display_tier` | string | no | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.|
-| `display_icon_uri` | string | no | URI to an image with an aspect ratio of 1:1, for example a profile picture. |
 
 
 ### [Init?/Asset?] `web_references`
