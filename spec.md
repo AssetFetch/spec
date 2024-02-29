@@ -128,22 +128,6 @@ Datablocks are extremely flexible and sometimes reusable pieces of metadata that
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # General Operation
 
 This section describes the general mechanisms by which AssetFetch operates.
@@ -346,29 +330,6 @@ sequenceDiagram
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Communication
 
 ### Query payloads
@@ -416,28 +377,6 @@ In concrete terms, this means:
 
 If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
 This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#the-meta-field), if they have content.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -638,25 +577,6 @@ The URI and parameters for the balance endpoint are communicated by the provider
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Datablocks
 
 ## Data field format
@@ -726,29 +646,6 @@ This template describes a fixed query that can be sent by the client to the prov
 
 ### `component_ref`
 A field marked as `component_ref` is just a string, which represents the name of another component in the same implementation.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1078,19 +975,6 @@ It follows the `fixed_query` template.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Component Handling
 
 After the client chooses a final implementation for which it is confident that it will be able to handle all components based on the contents of their datablocks, the client can then perform all the required downloads downloads and then process the components.
@@ -1133,21 +1017,6 @@ Providers SHOULD make use of this notation if, and only if, other more native re
 ## Environments
 HDRI environments or skyboxes face a similar situation as materials: They can be represented using native formats, but a common practice is to provide them as a singular image file whose projection must be manually set by the artist.
 The `loose_environment` datablock works similar to the `loose_material` block and allows the provider to communicate that a component should be treated as an environment and what projection should be used.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
