@@ -690,10 +690,15 @@ Follows the `fixed_query` template.
 
 ## Configuration and authentication-related datablocks
 
-### [Init!*] `headers`
+### [Init!*] `provider_configuration`
 Headers that the provider expects to receive from the client on every subsequent request.
 
-This datablock is an array of `header` objects.
+This datablock has the following structure:
+
+| Field | Format | Required | Description |
+| --- | --- | --- | --- |
+| `headers` | Array of `header` | yes | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request. |
+| `session_status_query` | `fixed_query` | yes | Query to use for checking whether the provided headers are valid und for obtaining session status information. |
 
 #### `header` structure
 
@@ -708,11 +713,6 @@ This datablock is an array of `header` objects.
 | `title` | string | no | Title to display inside the client |
 | `acquisition_uri` | string | no | URI to be opened in the users browser to help them obtain the header value |
 | `acquisition_uri_title` | string | no | Title for the `acquisition_uri` |
-
-### [Init!*] `session_status_query`
-
-Query to use for checking whether the provided headers are valid und for obtaining session status information.
-This datablock follows the `fixed_query` template.
 
 ### [Status?] `user`
 
