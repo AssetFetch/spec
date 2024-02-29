@@ -1053,6 +1053,9 @@ It indicates that this component (or all the components in the implementation or
 | `price` | number | only if `locked=True` | The price that the provider will charge the user in the background if they run the `unlock_query`. |
 | `unlock_query` | `fixed_query` | only if `locked=True` | Query to perform to to make the purchase. |
 
+This datablock can be applied to resources in multiple hierarchies in an implementation list: Either to the entire list itself, an individual implementation or even an individual implementation component.
+Providers MUST NOT apply the `unlock` block in multiple places in the same hierarchy, meaning that if in implementation list receives an `unlock` datablock, it MUST NOT define additional `unlock` datablocks on any of the implementations or components inside it.
+
 ### [Status?] `unlock_status`
 General information about how currency/balance is handled by this provider.
 
