@@ -699,6 +699,9 @@ This datablock has the following structure:
 | --- | --- | --- | --- |
 | `headers` | Array of `header` | yes | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request. |
 | `connection_status_query` | `fixed_query` | yes | Query to use for checking whether the provided headers are valid und for obtaining connection status information. |
+| `acquisition_uri` | string | no | A URI that the client MAY offer to open in the user's web browser to help them obtain the header values. |
+| `acquisition_uri_title` | string | no | Title for the `acquisition_uri`. |
+
 
 #### `header` structure
 
@@ -711,8 +714,6 @@ This datablock has the following structure:
 | `prefix` | string | no | Prefix that the client should prepend to the value entered by the user when sending it to the provider |
 | `suffix` | string | no | Suffix that the client should append to the value entered by the user when sending it to the provider |
 | `title` | string | no | Title to display inside the client |
-| `acquisition_uri` | string | no | URI to be opened in the users browser to help them obtain the header value |
-| `acquisition_uri_title` | string | no | Title for the `acquisition_uri` |
 
 ### [Status?] `user`
 

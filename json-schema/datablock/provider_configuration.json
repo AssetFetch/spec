@@ -4,6 +4,14 @@
 	"$id": "/datablock/provider_configuration.json",
 	"type": "object",
 	"properties": {
+		"acquisition_uri": {
+			"type": "string",
+			"format": "uri"
+		},
+		"acquisition_uri_title": {
+			"type": "string",
+			"format": "uri"
+		},
 		"headers": {
 			"type": "array",
 			"items": {
@@ -29,14 +37,6 @@
 					},
 					"title": {
 						"type": "string"
-					},
-					"acquisition_uri": {
-						"type": "string",
-						"format": "uri"
-					},
-					"acquisition_uri_title": {
-						"type": "string",
-						"format": "uri"
 					}
 				},
 				"required": [
@@ -46,7 +46,7 @@
 				]
 			}
 		},
-		"connection_status_query":{
+		"connection_status_query": {
 			"$ref": "/template/fixed_query.json"
 		}
 	},
@@ -54,5 +54,4 @@
 		"headers",
 		"connection_status_query"
 	]
-	
 }
