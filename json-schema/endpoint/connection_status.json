@@ -1,0 +1,23 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Connection Status Endpoint",
+	"$id": "/endpoint/asset_list.json",
+	"type": "object",
+	"properties": {
+		"meta": {
+			"$ref": "/template/meta.json"
+		},
+		"data": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"unlock_status": {
+					"$ref": "/datablock/unlock_status.json"
+				},
+				"user": {
+					"$ref": "/datablock/user.json"
+				}
+			}
+		}
+	}
+}

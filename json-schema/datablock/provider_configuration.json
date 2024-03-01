@@ -1,0 +1,58 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Provider Configuration Datablock",
+	"$id": "/datablock/provider_configuration.json",
+	"type": "object",
+	"properties": {
+		"headers": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"default": {
+						"type": "string"
+					},
+					"is_required": {
+						"type": "boolean"
+					},
+					"is_sensitive": {
+						"type": "boolean"
+					},
+					"prefix": {
+						"type": "string"
+					},
+					"suffix": {
+						"type": "string"
+					},
+					"title": {
+						"type": "string"
+					},
+					"acquisition_uri": {
+						"type": "string",
+						"format": "uri"
+					},
+					"acquisition_uri_title": {
+						"type": "string",
+						"format": "uri"
+					}
+				},
+				"required": [
+					"name",
+					"is_sensitive",
+					"is_required"
+				]
+			}
+		},
+		"connection_status_query":{
+			"$ref": "/template/fixed_query.json"
+		}
+	},
+	"required": [
+		"headers",
+		"connection_status_query"
+	]
+	
+}
