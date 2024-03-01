@@ -716,6 +716,16 @@ This datablock has the following structure:
 | `title` | string | no | Title to display inside the client |
 | `encoding` | string | no, default=`plain` | The encoding that the client MUST apply to the header value. MUST be one of `plain` or `base64`. | 
 
+### [Status?] `provider_reconfiguration`
+
+This datablock allows the provider to communicate to the client a new set of headers that it MUST sent along with every request.
+The client MUST fully replace the values defined in the  `provider_configuration` with the values defined in this datablock.
+
+| Field | Format | Required | Description |
+| --- | --- | --- | --- |
+| `headers` | Object | yes | An object whose properties MUST all be strings. The keys indicate the new header names, the property values represent the new header values to be used. |
+
+
 ### [Status?] `user`
 
 This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
