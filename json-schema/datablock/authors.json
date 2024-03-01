@@ -6,16 +6,17 @@
 	"type":"array",
 	"items": {
 		"type":"object",
+		"additionalProperties": false,
 		"properties": {
 			"name":{
 				"type":"string"
 			},
 			"uri":{
-				"type":"string",
+				"type":["string","null"],
 				"format": "uri"
 			},
 			"role":{
-				"type":"string"
+				"type":["string","null"]
 			}
 		},
 		"required": ["name"]
