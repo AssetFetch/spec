@@ -621,7 +621,7 @@ This template describes a variable query. The individual parameter objects conta
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `uri` | string | yes| The URI to send the request to. |
-| `method` | string | yes| One of `GET`, `POST` |
+| `method` | string | yes| One of `get`, `post` |
 | `parameters` | array of `parameter` | yes| The configurable parameters for this query. |
 
 #### `parameter` Structure
@@ -641,7 +641,7 @@ This template describes a fixed query that can be sent by the client to the prov
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `uri` | string | yes | The URI to contact for getting more results. |
-| `method` | string | yes | MUST be one of `GET` or `POST` |
+| `method` | string | yes | MUST be one of `get` or `post` |
 | `payload` | object with string keys and string values | yes  |  |
 
 ### `component_ref`

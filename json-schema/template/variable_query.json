@@ -11,8 +11,8 @@
 		"method": {
 			"type": "string",
 			"enum": [
-				"GET",
-				"POST"
+				"get",
+				"post"
 			]
 		},
 		"parameters": {

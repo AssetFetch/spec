@@ -10,7 +10,7 @@
 		},
 		"method": {
 			"type": "string",
-			"enum": ["GET", "POST"]
+			"enum": ["get", "post"]
 		},
 		"payload": {
 			"type": "object",
