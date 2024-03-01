@@ -152,16 +152,16 @@ The names of these headers, if any, MUST be declared by the provider during the 
 The client obtains the required header values, such as passwords or randomly generated access tokens, from the user through a GUI or from a cache or other storage location.
 The implementation of this possible storage is not part of the specification and left up to the client implementor.
 
-### Session Status (optional)
-If the provider uses authentication, then it MUST offer a session status endpoint whose URI is communicated during initialization and which the client SHOULD contact at least once after initialization to verify the correctness of the headers entered by the user.
+### Connection Status (optional)
+If the provider uses authentication, then it MUST offer a connection status endpoint whose URI is communicated during initialization and which the client SHOULD contact at least once after initialization to verify the correctness of the headers entered by the user.
 
-The session status endpoint has two primary uses:
+The connection status endpoint has two primary uses:
 
 - The provider SHOULD respond with user-specific metadata, such as a username or other account details which the client MAY display to the user to verify to them that they are properly connected to the provider.
 - If the provider wants to charge users for downloading assets using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance.
 
-After the initial call the client SHOULD call the session status endpoint again after specific events to receive updated user data or account balance information.
-Recommended times for calling the session status endpoint will be mentioned later TODO.
+After the initial call the client SHOULD call the connection status endpoint again after specific events to receive updated user data or account balance information.
+Recommended times for calling the connection status endpoint will be mentioned later TODO.
 
 ### Browsing assets
 After successful initialization (and possibly authentication) the user MAY (or depending on the requirements by the provider MUST) enter values for the asset search parameters which were defined by the provider during the initialization step.
@@ -397,7 +397,7 @@ The provider MUST implement:
 - An endpoint for querying implementations of one specific asset
 
 The provider MAY implement, based on their needs:
-- A session status endpoint
+- A connection status endpoint
 - An endpoint for unlocking resources
 - An endpoint for loading previously withheld datablocks after the unlocking step
 
@@ -560,10 +560,10 @@ It gets called by the client for every component that had an `unlockable_data_qu
 - The `data` field contains all the datablocks that are only available for the component after it has been unlocked. 
 This field is open to extension, but currently the provider MUST NOT include any other datablock than `file_fetch.download` in this list.
 
-## Status Endpoint
-*(kind: `status`)*
+## Connection Status Endpoint
+*(kind: `connection_status`)*
 
-The URI and parameters for the balance endpoint are communicated by the provider to the client through the [`unlock_balance_initialization`](#init-unlockbalance_initialization)
+The URI and parameters for the balance endpoint are communicated by the provider to the client through the `provider_configuration` datablock.
 
 - The `data` field for this endpoint SHOULD contain the `unlock_balance` datablock, if asset unlocking is used.
 - The `data` field for this endpoint MAY contain the `user` datablock.
@@ -698,7 +698,7 @@ This datablock has the following structure:
 | Field | Format | Required | Description |
 | --- | --- | --- | --- |
 | `headers` | Array of `header` | yes | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request. |
-| `session_status_query` | `fixed_query` | yes | Query to use for checking whether the provided headers are valid und for obtaining session status information. |
+| `connection_status_query` | `fixed_query` | yes | Query to use for checking whether the provided headers are valid und for obtaining connection status information. |
 
 #### `header` structure
 
