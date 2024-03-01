@@ -16,5 +16,5 @@
 		  "type": "string"
 		}
 	},
-	"required": ["meta","version"]
+	"required": ["kind","version"]
 }
