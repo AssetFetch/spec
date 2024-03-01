@@ -1,0 +1,16 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Loose Environment Datablock",
+	"$id": "/datablock/loose_environment.json",
+	"type": "object",
+	"additionalProperties": false,
+	"properties": {
+		"projection":{
+			"type":"string",
+			"enum": ["equirectangular","mirror_ball"]
+		}
+	},
+	"required": [
+		"projection"
+	]
+}
