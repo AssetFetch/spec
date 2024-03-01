@@ -721,6 +721,11 @@ This datablock has the following structure:
 This datablock allows the provider to communicate to the client a new set of headers that it MUST sent along with every request.
 The client MUST fully replace the values defined in the  `provider_configuration` with the values defined in this datablock.
 
+These new headers effectively act like cookies used on web sites.
+Providers SHOULD only use this datablock for purposes that are strictly required for the communication to work and MUST consider the potential legal implications when deciding to use this datablock for other purposes such as tracking or analytics.
+
+Clients MAY require the user to confirm the new header values before starting to send them.
+
 | Field | Format | Required | Description |
 | --- | --- | --- | --- |
 | `headers` | Object | yes | An object whose properties MUST all be strings. The keys indicate the new header names, the property values represent the new header values to be used. |
