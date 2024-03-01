@@ -37,6 +37,10 @@
 					},
 					"title": {
 						"type": "string"
+					},
+					"encoding": {
+						"type":"string",
+						"enum": ["plain","base64"]
 					}
 				},
 				"required": [

@@ -714,6 +714,7 @@ This datablock has the following structure:
 | `prefix` | string | no | Prefix that the client should prepend to the value entered by the user when sending it to the provider |
 | `suffix` | string | no | Suffix that the client should append to the value entered by the user when sending it to the provider |
 | `title` | string | no | Title to display inside the client |
+| `encoding` | string | no, default=`plain` | The encoding that the client MUST apply to the header value. MUST be one of `plain` or `base64`. | 
 
 ### [Status?] `user`
 
