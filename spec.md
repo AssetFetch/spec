@@ -765,7 +765,7 @@ This datablock indicates that this is a file which can be downloaded directly us
 The download destination is defined via the `file_info` datablock.
 
 The structure of this datablock follows the `fixed_query` template.
-#### [Component!] `file_fetch.from_archive`
+#### [Component!*] `file_fetch.from_archive`
 This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
 More about the handling in [Component Handling](#component-handling).
 The destination is defined via the `file_info` datablock.
