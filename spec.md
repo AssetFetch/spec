@@ -526,7 +526,7 @@ Every `component` object MUST have the following structure:
 
 - The `name` field MUST be unique for among all components inside one implementation, but MAY be reused for a component in a different implementation. It MAY be used as an alternative to the `title` field in the `text` datablock, if its not set.
 - The `data` field on every `component` MUST contain one of the `fetch.*` datablocks.
-- The `data` field on every `component` MAY contain any of the following datablocks: `environment_map`, `loose_material.define_map`, `loose_material.apply_material`, `mtlx_apply`,`text`
+- The `data` field on every `component` MAY contain any of the following datablocks: `environment_map`, `loose_material_define`, `loose_material_apply`, `mtlx_apply`,`text`
 - If the file extension defined inside the `fetch.*` field has a datablock defined with the same name (minus the dot-prefix) then the `data` field on that `component` SHOULD have that corresponding datablock to provide more format-specific information about the file.
 - If the provider wants to use [unlocking](#asset-unlocking) on the component-level then the component's `data` field MUST contain the datablock `unlock_state`.
 
