@@ -6,25 +6,10 @@
 	"additionalProperties": false,
 	"properties": {
 		"license_spdx": {
-			"oneOf": [
-				{
-					"type": "string"
-				},
-				{
-					"type": "null"
-				}
-			]
+			"type":["string","null"]
 		},
 		"license_uri": {
-			"oneOf": [
-				{
-					"type": "string",
-					"format": "uri"
-				},
-				{
-					"type": "null"
-				}
-			]
+			"type":["string","null"]
 		}
 	},
 	"required": []
