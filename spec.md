@@ -105,7 +105,7 @@ Datablocks are extremely flexible and sometimes reusable pieces of metadata that
 - The fact that a specific image belongs to a specific material and should be treated as a roughness map is contained in a datablock (See [the material section](#materials)).
 - The fact that a specific EXR file should be treated as an HDRI environment map with equirectangular projection is contained in a datablock (See [the environments section](#environments)).
 - The fact that a provider wants the client to send an HTTP header containing an access token is contained in a datablock (See [Authentication Using Headers](#authentication-using-headers)).
-- The URL to a thumbnail image for an asset is communicated using a datablock (See [`preview_image.thumbnail`](#asset-preview_imagethumbnail))
+- The URL to a thumbnail image for an asset is communicated using a datablock (See [`preview_image_thumbnail`](#asset-preview_image_thumbnail))
 
 ### Variable Query
 > An HTTP(S) request defined by its URI, method and a payload _that has been (partly) configured by the user_ which is sent by the client to the provider in order to receive data in response.
