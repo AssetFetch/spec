@@ -51,7 +51,7 @@
 			}
 		},
 		"connection_status_query": {
-			"$ref": "/template/fixed_query.json"
+			"$ref":"../template/fixed_query.json"
 		}
 	},
 	"required": [

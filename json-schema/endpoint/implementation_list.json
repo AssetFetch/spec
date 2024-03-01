@@ -5,19 +5,19 @@
 	"type": "object",
 	"properties": {
 		"meta": {
-			"$ref": "/template/meta.json"
+			"$ref":"../template/meta.json"
 		},
 		"data": {
 			"type": "object",
 			"properties": {
 				"next_query": {
-					"$ref": "/datablock/next_query.json"
+					"$ref":"../datablock/next_query.json"
 				},
 				"response_statistics": {
-					"$ref": "/datablock/response_statistics.json"
+					"$ref":"../datablock/response_statistics.json"
 				},
 				"text": {
-					"$ref": "/datablock/text.json"
+					"$ref":"../datablock/text.json"
 				}
 			},
 			"required": []
@@ -33,7 +33,7 @@
 					"data": {
 						"type": "object",
 						"text": {
-							"$ref": "/datablock/text.json"
+							"$ref":"../datablock/text.json"
 						}
 					},
 					"components": {
@@ -49,37 +49,37 @@
 									"additionalProperties": false,
 									"properties": {
 										"fetch.archive": {
-											"$ref": "/datablock/fetch.archive.json"
+											"$ref":"../datablock/fetch.archive.json"
 										},
 										"fetch.archive_file": {
-											"$ref": "/datablock/fetch.archive_file.json"
+											"$ref":"../datablock/fetch.archive_file.json"
 										},
 										"fetch.file": {
-											"$ref": "/datablock/fetch.file.json"
+											"$ref":"../datablock/fetch.file.json"
 										},
 										"unlock_state": {
-											"$ref": "/datablock/unlock_state.json"
+											"$ref":"../datablock/unlock_state.json"
 										},
 										"behavior": {
-											"$ref": "/datablock/behavior.json"
+											"$ref":"../datablock/behavior.json"
 										},
 										"loose_environment": {
-											"$ref": "/datablock/loose_environment.json"
+											"$ref":"../datablock/loose_environment.json"
 										},
 										"loose_material.apply_material": {
-											"$ref": "/datablock/loose_material.apply_material.json"
+											"$ref":"../datablock/loose_material.apply_material.json"
 										},
 										"loose_material.define_map": {
-											"$ref": "/datablock/loose_material.define_map.json"
+											"$ref":"../datablock/loose_material.define_map.json"
 										},
 										"mtlx_apply_material": {
-											"$ref": "/datablock/mtlx_apply_material.json"
+											"$ref":"../datablock/mtlx_apply_material.json"
 										},
 										"blend": {
-											"$ref": "/datablock/blender.json"
+											"$ref":"../datablock/blender.json"
 										},
 										"obj": {
-											"$ref": "/datablock/obj.json"
+											"$ref":"../datablock/obj.json"
 										}
 									},
 									"required": [

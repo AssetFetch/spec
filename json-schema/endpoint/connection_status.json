@@ -5,17 +5,17 @@
 	"type": "object",
 	"properties": {
 		"meta": {
-			"$ref": "/template/meta.json"
+			"$ref":"../template/meta.json"
 		},
 		"data": {
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
 				"unlock_status": {
-					"$ref": "/datablock/unlock_status.json"
+					"$ref":"../datablock/unlock_status.json"
 				},
 				"user": {
-					"$ref": "/datablock/user.json"
+					"$ref":"../datablock/user.json"
 				}
 			}
 		}

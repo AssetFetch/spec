@@ -12,7 +12,7 @@
 			"type":"number"
 		},
 		"unlock_query":{
-			"$ref": "/template/fixed_query.json"
+			"$ref":"../template/fixed_query.json"
 		},
 		"unlock_query_fallback_uri":{
 			"type":"string",

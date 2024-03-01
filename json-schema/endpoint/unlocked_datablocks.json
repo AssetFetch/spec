@@ -5,14 +5,14 @@
 	"type": "object",
 	"properties": {
 		"meta": {
-			"$ref": "/template/meta.json"
+			"$ref":"../template/meta.json"
 		},
 		"data": {
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
 				"file_fetch.download": {
-					"$ref": "/datablock/file_fetch.download.json"
+					"$ref":"../datablock/file_fetch.download.json"
 				}
 			}
 		}

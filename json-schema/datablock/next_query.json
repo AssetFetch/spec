@@ -3,5 +3,5 @@
 	"title": "Next Query Datablock",
 	"$id": "/datablock/next_query.json",
 	"$comment": "This datablock is just a variable query with no other fields.",
-	"$ref": "/template/variable_query.json"
+	"$ref":"../template/variable_query.json"
 }

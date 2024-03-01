@@ -5,20 +5,20 @@
 	"type": "object",
 	"properties": {
 		"meta": {
-			"$ref": "/template/meta.json"
+			"$ref":"../template/meta.json"
 		},
 		"data": {
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
 				"next_query": {
-					"$ref": "/datablock/next_query.json"
+					"$ref":"../datablock/next_query.json"
 				},
 				"response_statistics": {
-					"$ref": "/datablock/response_statistics.json"
+					"$ref":"../datablock/response_statistics.json"
 				},
 				"text": {
-					"$ref": "/datablock/text.json"
+					"$ref":"../datablock/text.json"
 				}
 			}
 		},
@@ -35,34 +35,34 @@
 						"type": "object",
 						"properties": {
 							"implementations_query": {
-								"$ref": "/datablock/implementations_query.json"
+								"$ref":"../datablock/implementations_query.json"
 							},
 							"unlock_state": {
-								"$ref": "/datablock/unlock_state.json"
+								"$ref":"../datablock/unlock_state.json"
 							},
 							"text": {
-								"$ref": "/datablock/text.json"
+								"$ref":"../datablock/text.json"
 							},
 							"dimensions.3d": {
-								"$ref": "/datablock/dimensions.3d.json"
+								"$ref":"../datablock/dimensions.3d.json"
 							},
 							"dimensions.2d": {
-								"$ref": "/datablock/dimensions.2d.json"
+								"$ref":"../datablock/dimensions.2d.json"
 							},
 							"preview_image_supplemental": {
-								"$ref": "/datablock/preview_image_supplemental.json"
+								"$ref":"../datablock/preview_image_supplemental.json"
 							},
 							"preview_image_thumbnail": {
-								"$ref": "/datablock/preview_image_thumbnail.json"
+								"$ref":"../datablock/preview_image_thumbnail.json"
 							},
 							"web_references": {
-								"$ref": "/datablock/web_references.json"
+								"$ref":"../datablock/web_references.json"
 							},
 							"license": {
-								"$ref": "/datablock/license.json"
+								"$ref":"../datablock/license.json"
 							},
 							"authors": {
-								"$ref": "/datablock/authors.json"
+								"$ref":"../datablock/authors.json"
 							}
 						},
 						"required": [

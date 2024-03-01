@@ -2,5 +2,5 @@
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Unlockable Data Datablock",
 	"$id": "/datablock/unlockable_data_query.json",
-	"$ref": "/template/fixed_query.json"
+	"$ref":"../template/fixed_query.json"
 }

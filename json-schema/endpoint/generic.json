@@ -3,7 +3,7 @@
 	"type": "object",
 	"properties": {
 		"meta": {
-			"$ref": "/template/meta.json"
+			"$ref":"../template/meta.json"
 		},
 		"data": {
 			"type": "object",
