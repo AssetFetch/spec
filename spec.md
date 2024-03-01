@@ -1,4 +1,4 @@
-# AssetFetch Specification - Draft Version 0.1
+# AssetFetch Specification - Draft Version 0.2
 
 This document specifies **AssetFetch**, an HTTP- and JSON-based system for browsing, retrieving and handling/importing digital assets for media creation.
 The AssetFetch Protocol aims to provide a standardized way for artists to browse libraries of downloadable assets offered by providers *outside* their current production environment/pipeline, such as those of commercial or non-profit 3D asset vendors, marketplaces or other repositories of models, textures or any other kind of digital assets.
@@ -565,7 +565,7 @@ This field is open to extension, but currently the provider MUST NOT include any
 
 The URI and parameters for the balance endpoint are communicated by the provider to the client through the `provider_configuration` datablock.
 
-- The `data` field for this endpoint SHOULD contain the `unlock_balance` datablock, if asset unlocking is used.
+- The `data` field for this endpoint SHOULD contain the `unlock_status` datablock, if asset unlocking is used.
 - The `data` field for this endpoint MAY contain the `user` datablock.
 
 
