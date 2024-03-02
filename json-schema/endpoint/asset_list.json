@@ -28,17 +28,15 @@
 				"type": "object",
 				"additionalProperties": false,
 				"properties": {
-					"name": {
-						"type": "string"
+					"id": {
+						"type": "string",
+						"pattern": "[a-zA-Z0-9\\._]+"
 					},
 					"data": {
 						"type": "object",
 						"properties": {
-							"implementations_query": {
-								"$ref":"../datablock/implementations_query.json"
-							},
-							"unlock_state": {
-								"$ref":"../datablock/unlock_state.json"
+							"implementation_list_query": {
+								"$ref":"../datablock/implementation_list_query.json"
 							},
 							"text": {
 								"$ref":"../datablock/text.json"
@@ -66,7 +64,7 @@
 							}
 						},
 						"required": [
-							"implementations_query"
+							"implementation_list_query"
 						],
 						"$comment": "The 'allOf' section ensures that no two datablocks with the same prefix are used.",
 						"allOf": [
@@ -107,7 +105,7 @@
 		}
 	},
 	"required": [
-		"name",
+		"meta",
 		"data"
 	]
 }

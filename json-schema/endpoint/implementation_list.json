@@ -5,19 +5,22 @@
 	"type": "object",
 	"properties": {
 		"meta": {
-			"$ref":"../template/meta.json"
+			"$ref": "../template/meta.json"
 		},
 		"data": {
 			"type": "object",
 			"properties": {
 				"next_query": {
-					"$ref":"../datablock/next_query.json"
+					"$ref": "../datablock/next_query.json"
 				},
 				"response_statistics": {
-					"$ref":"../datablock/response_statistics.json"
+					"$ref": "../datablock/response_statistics.json"
 				},
 				"text": {
-					"$ref":"../datablock/text.json"
+					"$ref": "../datablock/text.json"
+				},
+				"unlock": {
+					"$ref": "../datablock/unlock.json"
 				}
 			},
 			"required": []
@@ -26,14 +29,20 @@
 			"type": "array",
 			"items": {
 				"type": "object",
+				"additionalProperties": false,
 				"properties": {
-					"name": {
-						"type": "string"
+					"id": {
+						"$comment": "A unique id for this implementation.",
+						"type": "string",
+						"pattern": "[a-zA-Z0-9\\._]+"
 					},
 					"data": {
 						"type": "object",
 						"text": {
-							"$ref":"../datablock/text.json"
+							"$ref": "../datablock/text.json"
+						},
+						"unlock": {
+							"$ref": "../datablock/unlock.json"
 						}
 					},
 					"components": {
@@ -41,66 +50,50 @@
 						"items": {
 							"type": "object",
 							"properties": {
-								"name": {
-									"type": "string"
+								"id": {
+									"type": "string",
+									"pattern": "[a-zA-Z0-9\\._]+"
 								},
 								"data": {
 									"type": "object",
 									"additionalProperties": false,
 									"properties": {
-										"fetch.archive": {
-											"$ref":"../datablock/fetch.archive.json"
+										"file_fetch.from_archive": {
+											"$ref": "../datablock/file_fetch.from_archive.json"
 										},
-										"fetch.archive_file": {
-											"$ref":"../datablock/fetch.archive_file.json"
+										"file_fetch.download": {
+											"$ref": "../datablock/file_fetch.download.json"
 										},
-										"fetch.file": {
-											"$ref":"../datablock/fetch.file.json"
-										},
-										"unlock_state": {
-											"$ref":"../datablock/unlock_state.json"
-										},
-										"behavior": {
-											"$ref":"../datablock/behavior.json"
+										"unlock": {
+											"$ref": "../datablock/unlock.json"
 										},
 										"loose_environment": {
-											"$ref":"../datablock/loose_environment.json"
+											"$ref": "../datablock/loose_environment.json"
 										},
-										"loose_material.apply_material": {
-											"$ref":"../datablock/loose_material.apply_material.json"
+										"loose_material_apply": {
+											"$ref": "../datablock/loose_material_apply.json"
 										},
-										"loose_material.define_map": {
-											"$ref":"../datablock/loose_material.define_map.json"
+										"loose_material_define": {
+											"$ref": "../datablock/loose_material_define.json"
 										},
-										"mtlx_apply_material": {
-											"$ref":"../datablock/mtlx_apply_material.json"
+										"mtlx_apply": {
+											"$ref": "../datablock/mtlx_apply.json"
 										},
-										"blend": {
-											"$ref":"../datablock/blender.json"
+										"format.blend": {
+											"$ref": "../datablock/format.blend.json"
 										},
-										"obj": {
-											"$ref":"../datablock/obj.json"
+										"format.obj": {
+											"$ref": "../datablock/format.obj.json"
+										},
+										"format.usd": {
+											"$ref": "../datablock/format.usd.json"
+										},
+										"unlockable_data_query": {
+											"$ref": "../datablock/unlockable_data_query.json"
 										}
 									},
 									"required": [
 										"behavior"
-									],
-									"oneOf": [
-										{
-											"required": [
-												"fetch.archive"
-											]
-										},
-										{
-											"required": [
-												"fetch.archive_file"
-											]
-										},
-										{
-											"required": [
-												"fetch.file"
-											]
-										}
 									],
 									"$comment": "The 'allOf' section ensures that no two datablocks with the same prefix are used.",
 									"allOf": [
@@ -109,17 +102,17 @@
 												"anyOf": [
 													{
 														"required": [
-															"fetch.file"
+															"format.obj"
 														]
 													},
 													{
 														"required": [
-															"fetch.archive"
+															"format.blend"
 														]
 													},
 													{
 														"required": [
-															"fetch.archive_file"
+															"format.usd"
 														]
 													}
 												]
@@ -128,33 +121,47 @@
 												"oneOf": [
 													{
 														"required": [
-															"fetch.file"
+															"format.obj"
 														]
 													},
 													{
 														"required": [
-															"fetch.archive"
+															"format.blend"
 														]
 													},
 													{
 														"required": [
-															"fetch.archive_file"
+															"format.usd"
 														]
 													}
 												]
 											}
 										},
 										{
+											"oneOf": [
+												{
+													"required": [
+														"file_fetch.from_archive"
+													]
+												},
+												{
+													"required": [
+														"file_fetch.download"
+													]
+												}
+											]
+										},
+										{
 											"if": {
 												"anyOf": [
 													{
 														"required": [
-															"loose_material.define_map"
+															"loose_material.apply_material"
 														]
 													},
 													{
 														"required": [
-															"loose_material.apply_material"
+															"loose_material.define_map"
 														]
 													}
 												]
@@ -163,12 +170,12 @@
 												"oneOf": [
 													{
 														"required": [
-															"loose_material.define_map"
+															"loose_material.apply_material"
 														]
 													},
 													{
 														"required": [
-															"loose_material.apply_material"
+															"loose_material.define_map"
 														]
 													}
 												]
@@ -184,7 +191,8 @@
 		}
 	},
 	"required": [
-		"name",
-		"data"
+		"meta",
+		"data",
+		"implementations"
 	]
 }

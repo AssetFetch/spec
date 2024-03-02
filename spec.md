@@ -406,7 +406,7 @@ The URIs and parameters for all subsequent endpoints are not defined explicitly 
 This gives the provider great flexibility in how to structure its data and backend implementation.
 Providers with simple data formats, small asset collections and no need for authentication or asset unlocking are theoretically even able to pre-generate all API responses and upload them as JSON files to a static web hosting service.
 
-### The `meta` field
+### The `meta` template
 All provider responses on all endpoints MUST carry the `meta` field to communicate key information about the current response.
 ### Structure
 | Field | Format | Required | Description |
@@ -423,9 +423,8 @@ If a request fails, the provider SHOULD use the `message` field to communicate m
 
 Clients SHOULD display the `response_id` and `message` fields to the user if a query was unsuccessful, as indicated by the HTTP status code.
 
-### The `data` field
-Nearly all provider endpoint responses have a `data` field at some place in their structure requirements.
-This data field contains most of the relevant information for any resource and always has the same general structure which is explained in more detail in the [Datablocks section](#datablocks).
+### The `datablock_collection` template
+This object contains most of the relevant information for any resource and always has the same general structure, described in this section.
 
 | Field | Format | Required | Description |
 | --- | --- | --- | --- |
@@ -433,12 +432,32 @@ This data field contains most of the relevant information for any resource and a
 | \<string-key\> | object or array | yes | Exact structure is defined in the [Datablocks section](#datablocks) |
 | ... (arbitrary number of datablocks)
 
+This object is usually named `data` or `*_data`, but the exact name is specified for each endpoint.
+Every key of this data object is the identifier for the datablock stored in that key's field.
+
+The example below illustrates an object called `data` whose structure follows the `datablock_collection` template with two datablocks (`block_type_1` and `block_type_2`) which have a varying structure.
+
+```
+{
+    "data":{
+        "block_type_1":{
+            "example_key": "example_value"
+        },
+        "block_type_2.a":{
+            "example_array": [1,2,4],
+            "example_object": {
+                "a": 7
+            }
+        }
+    }
+}
+```
+
 # Endpoint List
 
 This section describes the required formats for the three core endpoint types which MUST be implemented by any provider.
 
 ## Initialization 
-*(kind: `initialization`)*
 
 This endpoint is the first point of contact between a client and a provider.
 The provider MUST NOT require any kind of authentication for interaction with it.
@@ -448,8 +467,8 @@ The response on this endpoint MUST have the following structure:
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `meta` | meta | yes | Metadata. |
-| `data` | datablocks | yes | Datablocks. |
+| `meta` | `meta` | yes | Metadata, kind: `initialization`. |
+| `data` | `datablock_collection` | yes |  |
 
 - The `data` field MUST always contain the datablock `asset_list_query`.
 - The `data` field SHOULD always contain the datablock `text`.
@@ -458,7 +477,6 @@ The response on this endpoint MUST have the following structure:
 - If the provider wants to use [unlocking](#asset-unlocking) anywhere during later API calls the `data` field MUST contain the datablock `unlock_balance_initialization`.
 
 ## Asset List
-*(kind: `asset_list`)*
 
 The URI and available parameters for this endpoint are communicated by the server to the client using the `asset_list_query` datablock on the initialization endpoint.
 
@@ -466,9 +484,9 @@ The response on this endpoint MUST have the following structure:
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `meta` | meta | yes| Metadata. |
-| `data` | datablocks | yes | Datablocks. |
-| `assets` | array of `asset` | yes |Array of `asset`s, as described below.|
+| `meta` | `meta` | yes| Metadata, kind: `asset_list`. |
+| `data` | `datablock_collection` | yes |  |
+| `assets` | array of `asset` | yes |  |
 
 - The `data` field MAY contain the datablocks `next_query`, `response_statistics` and/or `text`.
 
@@ -478,28 +496,28 @@ Every `asset` object MUST have the following structure:
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `name` | string | yes | Unique name for this asset. |
-| `data` | datablocks | yes | Object containing datablocks. |
+| `id` | string | yes | Unique id for this asset. Must match the regular expression `[a-z0-9\._]+` | 
+| `data` | `datablock_collection` | yes |  |
+<!--TODO Allow spaces in ids?-->
 
-- The `name` field MUST be unique among all assets for this provider. Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the `text` datablock if it is set for this asset.
+- The `id` field MUST be unique among all assets for this provider. Clients MAY use this id when storing and organizing files on disk. Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
 - The `data` field MUST contain the datablock `implementation_list_query`.
 - The `data` field SHOULD contain the datablocks `preview_image_thumbnail` and `text`.
 - The `data` field MAY contain the datablocks `preview_image_supplemental`,`license`,`authors` and/or `web_references`.
 - The `data` field MAY contain one of the datablocks `dimensions.*`.
 
 ## Implementation List
-*(kind: `implementation_list`)*
 
 This endpoint returns one or several implementations for one specific asset.
 The URI and available parameters for this endpoint are communicated by the server to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `meta` | meta | yes | Metadata.|
-| `data` | datablocks | no | Datablocks. |
-| `implementations` | yes | array of `implementation` | |
+| `meta` | `meta` | yes | Metadata, kind: `implementation_list`.|
+| `data` | `datablock_collection` | yes | Datablocks that apply to the entire implementation list.  |
+| `implementations` | yes | Array of `implementation` | |
 
-- The `data` field MAY contain the datablocks `response_statics` and/or `next_query`
+- The `data` field MAY contain the datablocks `response_statics` or `unlock`
 
 ### `implementation` Structure
 
@@ -507,13 +525,13 @@ Every `implementation` object MUST have the following structure:
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `name` | string | yes | A unique name for this implementation. |
-| `data` | datablocks | yes | Datablocks.|
-| `components` | array of `component` | yes | |
+| `id` | string | yes | A unique id for this implementation. Must match the regular expression `[a-z0-9\._]+`.|
+| `data` | `datablock_collection` | yes | Datablocks that apply to this specific implementation.|
+| `components` | Array of `component` | yes |  |
 
-- The `data` field MAY contain the datablock `text`.
-
-- The `name` MUST be unique among all implementations for this asset, but MAY be reused for an implementation of another asset. It SHOULD be used by the client as alternative to the `title` field in the `text` datablock if it is not set for an implementation.
+- The `id` field MUST be unique among all possible implementations the provider offers for this asset, even if not all of them are included in the current implementation list.
+- The `data` field SHOULD contain the datablock `text`.
+- The `data` field MAY contain the datablock `unlock`.
 
 ### `component` Structure
 
@@ -521,10 +539,10 @@ Every `component` object MUST have the following structure:
 
 | Field | Format | Required | Description|
 | --- | --- |--- | --- |
-| `name` | string | yes | A unique name for this component.  |
+| `id` | string | yes | A unique id for this component. Must match the regular expression `[a-z0-9\._]+`. |
 | `data` | datablocks | yes | Datablocks.|
 
-- The `name` field MUST be unique for among all components inside one implementation, but MAY be reused for a component in a different implementation. It MAY be used as an alternative to the `title` field in the `text` datablock, if its not set.
+- The `id` field MUST be unique for among all components inside this component's implementation, but MAY be reused for a component in a different implementation.
 - The `data` field on every `component` MUST contain one of the `fetch.*` datablocks.
 - The `data` field on every `component` MAY contain any of the following datablocks: `environment_map`, `loose_material_define`, `loose_material_apply`, `mtlx_apply`,`text`
 - If the file extension defined inside the `fetch.*` field has a datablock defined with the same name (minus the dot-prefix) then the `data` field on that `component` SHOULD have that corresponding datablock to provide more format-specific information about the file.
@@ -538,8 +556,8 @@ Unless noted otherwise in the specification, these endpoints MUST use the follow
 
 | Field | Format | Required | Description|
 | --- | --- |--- | --- |
-| `meta` | metadata | yes | Metadata. |
-| `data` | datablocks | yes | Datablocks.|
+| `meta` | `meta` | yes | Metadata, the endpoint kind is specified for every endpoint below. |
+| `data` | `datablock_collection` | yes | Datablocks.|
 
 ## Unlocking Endpoint
 *(kind: `unlock`)*
@@ -579,30 +597,7 @@ The URI and parameters for the balance endpoint are communicated by the provider
 
 # Datablocks
 
-## Data field format
-Throughout the entire interaction data is exchanged in pre-defined datablocks which are of a certain type, identified by a string key, and MUST follow the specified structure for that type.
-One datablock never stands on its own, it MUST always be contained within a parent data object.
-Every key of this data object is the identifier for the datablock stored in that key's field.
-
-The example below illustrates a data object with two datablocks (`block_type_1` and `block_type_2`) which have a varying structure.
-
-```
-{
-    "data":{
-        "block_type_1":{
-            "example_key": "example_value"
-        },
-        "block_type_2.a":{
-            "example_array": [1,2,4],
-            "example_object": {
-                "a": 7
-            }
-        }
-    }
-}
-```
-
-### Datablock names
+## Datablock names
 
 The name of a datablock MUST be a string composed of small alphanumerical characters, underscores and dots .
 Datablock names MUST contain either 0 or 1 instance of the dot (`.`) character which indicates that a datablock has multiple variations.
@@ -610,7 +605,7 @@ One resource MUST NOT have two datablocks that share the same string *before* th
 
 The resulting regular expression from these rules is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
 
-## Datablock element templates
+## Datablock value templates
 This section describes additional data types that can be used within other datablocks.
 They exist to eliminate the need to re-specify the same data structure in two different places.
 The templates can not be used directly as datablocks under their template name.
@@ -643,9 +638,6 @@ This template describes a fixed query that can be sent by the client to the prov
 | `uri` | string | yes | The URI to contact for getting more results. |
 | `method` | string | yes | MUST be one of `get` or `post` |
 | `payload` | object with string keys and string values | yes  |  |
-
-### `component_ref`
-A field marked as `component_ref` is just a string, which represents the name of another component in the same implementation.
 
 
 
@@ -777,7 +769,7 @@ The destination is defined via the `file_info` datablock.
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `archive_component_name` | string | yes | The name of the component representing the archive that this component is contained in. |
+| `archive_component_id` | string | yes | The id of the component representing the archive that this component is contained in. |
 | `component_path` | string | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`).  |
 
 ## Display related datablocks
@@ -916,7 +908,7 @@ When applied to a component, it indicates that this component makes use of a mat
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `mtlx_component` | `component_reference` | yes | Reference to the component that represents the mtlx file. | 
+| `mtlx_component_id` | string | yes | Id of the component that represents the mtlx file. | 
 | `mtlx_material` | string | no | Optional reference for which material to use from the mtlx file, if it contains multiple. |
 | `apply_selectively_to` | string | no |  Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
 
