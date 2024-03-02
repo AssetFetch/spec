@@ -9,7 +9,7 @@
 			"type":"string"
 		},
 		"apply_selectively_to":{
-			"type":"string"
+			"type":["string","null"]
 		}
 	},
 	"required": [

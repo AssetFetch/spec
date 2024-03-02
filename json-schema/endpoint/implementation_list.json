@@ -64,6 +64,9 @@
 										"file_fetch.download": {
 											"$ref": "../datablock/file_fetch.download.json"
 										},
+										"file_info":{
+											"$ref": "../datablock/file_info.json"
+										},
 										"unlock": {
 											"$ref": "../datablock/unlock.json"
 										},
@@ -93,7 +96,19 @@
 										}
 									},
 									"required": [
-										"behavior"
+										"file_info"
+									],
+									"oneOf": [
+										{
+											"required": [
+												"file_fetch.from_archive"
+											]
+										},
+										{
+											"required": [
+												"file_fetch.download"
+											]
+										}
 									],
 									"$comment": "The 'allOf' section ensures that no two datablocks with the same prefix are used.",
 									"allOf": [
@@ -136,20 +151,6 @@
 													}
 												]
 											}
-										},
-										{
-											"oneOf": [
-												{
-													"required": [
-														"file_fetch.from_archive"
-													]
-												},
-												{
-													"required": [
-														"file_fetch.download"
-													]
-												}
-											]
 										},
 										{
 											"if": {

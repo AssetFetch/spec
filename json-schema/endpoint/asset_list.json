@@ -27,6 +27,7 @@
 			"items": {
 				"type": "object",
 				"additionalProperties": false,
+				"required": ["id","data"],
 				"properties": {
 					"id": {
 						"type": "string",
@@ -106,6 +107,7 @@
 	},
 	"required": [
 		"meta",
-		"data"
+		"data",
+		"assets"
 	]
 }

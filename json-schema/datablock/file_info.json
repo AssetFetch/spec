@@ -1,7 +1,7 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "File Info Datablock",
-	"$id": "/datablock/next_query.json",
+	"$id": "/datablock/file_into.json",
 	"type":"object",
     "properties": {
         "local_path":{
