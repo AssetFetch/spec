@@ -546,7 +546,7 @@ Every `component` object MUST have the following structure:
 - The `data` field on every `component` MUST contain one of the `fetch.*` datablocks.
 - The `data` field on every `component` MAY contain any of the following datablocks: `environment_map`, `loose_material_define`, `loose_material_apply`, `mtlx_apply`,`text`
 - If the file extension defined inside the `fetch.*` field has a datablock defined with the same name (minus the dot-prefix) then the `data` field on that `component` SHOULD have that corresponding datablock to provide more format-specific information about the file.
-- If the provider wants to use [unlocking](#asset-unlocking) on the component-level then the component's `data` field MUST contain the datablock `unlock_state`.
+- If the provider wants to use [unlocking](#asset-unlocking) on the component-level then the component's `data` field MUST contain the datablock `unlock`.
 
 # Additional Endpoints
 
@@ -564,7 +564,7 @@ Unless noted otherwise in the specification, these endpoints MUST use the follow
 
 This endpoint type is used to "unlock" (usually meaning "purchase") an asset or asset component.
 The client calls this endpoint in order to receive the `fixed_query` for downloading the .
-The URI and parameters for this endpoint are communicated through the `unlock` field in a `unlock_state` datablock.
+The URI and parameters for this endpoint are communicated through the `unlock_query` field in an `unlock` datablock.
 
 This endpoint currently does not use any datablocks specified for it. Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
 
@@ -583,7 +583,7 @@ This field is open to extension, but currently the provider MUST NOT include any
 
 The URI and parameters for the balance endpoint are communicated by the provider to the client through the `provider_configuration` datablock.
 
-- The `data` field for this endpoint SHOULD contain the `unlock_status` datablock, if asset unlocking is used.
+- The `data` field for this endpoint SHOULD contain the `unlock_balance` datablock, if asset unlocking is used.
 - The `data` field for this endpoint MAY contain the `user` datablock.
 
 
@@ -967,8 +967,8 @@ It indicates that this component (or all the components in the implementation or
 This datablock can be applied to resources in multiple hierarchies in an implementation list: Either to the entire list itself, an individual implementation or even an individual implementation component.
 Providers MUST NOT apply the `unlock` block in multiple places in the same hierarchy, meaning that if in implementation list receives an `unlock` datablock, it MUST NOT define additional `unlock` datablocks on any of the implementations or components inside it.
 
-### [Status?] `unlock_status`
-General information about how currency/balance is handled by this provider.
+### [Status?] `unlock_balance`
+Information about the user's current account balance.
 
 | Field | Format | Required | Description | 
 | --- | --- |--- | --- |

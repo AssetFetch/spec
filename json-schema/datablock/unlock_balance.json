@@ -1,7 +1,7 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "Unlocking Initialization  Datablock",
-	"$id": "/datablock/unlock_initialization.json",
+	"title": "Unlocking Balance Datablock",
+	"$id": "/datablock/unlock_balance.json",
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {
