@@ -185,15 +185,15 @@ If more than one implementation is valid for the given client and its host appli
 This whole process is comparable to the rarely used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
 
 ### Unlocking (Optional)
-The provider MAY allow any user to download any asset for free and without authentication, but it MAY also require payment for an asset.
-To accommodate this, providers are able to mark resources as "unlockable", requiring further deliberate action by the client and user to access them.
-Unlocking can happen with varying degrees of granularity, either in one go for all implementations of an asset at once, only for specific implementations or even on a component-by-component basis.
+The provider MAY allow any user to download any asset for free and without authentication or restrictions, but it MAY also require payment for an asset.
+To accommodate this, providers are able to mark resources as "unlockable", requiring further deliberate action by the client and user to access the files associated with their components.
+Unlocking can happen with varying degrees of granularity, either in one go for an entire asset, only for specific implementations or even on a component-by-component basis.
 
-When responding with the implementation list the provider MAY withhold certain datablocks relating to downloading from the implementation's components.
-If it does that, then it MUST instead provide two additional datablocks describing possible "unlocking queries" that the client can perform (along with their prices) and a query for how to obtain the actual download link for any component that does not have one yet.
+When responding with the implementation list the provider MAY withhold certain datablocks related to downloading from the implementation's components.
+If it does that, then it MUST instead provide two additional datablocks describing one or multiple "unlocking queries" that the client can perform (along with their prices) and a query for how to obtain the actual download link after unlocking the resource.
 
 The client SHOULD then present the required unlocking action (along with the accompanying charges to their account) to the user.
-If the user agrees, the client first performs the unlocking query (or queries) and then queries the provider for the previously withheld datablocks which contain the real (possibly temporary) download links.
+If the user agrees, the client first performs the unlocking query (or queries) and then queries the provider for the previously withheld datablocks which contain the real (possibly temporarily generated) download links.
 
 ### Downloading and Handling
 After choosing a suitable implementation and unlocking all of it's datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
@@ -372,7 +372,7 @@ In concrete terms, this means:
 - If a provider receives a query that references a specific resource which does not exist, such as a query for implementations of an asset that the provider does not recognize, it SHOULD respond with code `404 - Not Found`.
 - If the provider can not parse the query data sent by the client properly, it SHOULD respond with code `400 - Bad Request`.
 - If a provider receives a query an any other endpoint than the initialization endpoint without one of the headers it defined as mandatory during the initialization it SHOULD send status code `401 - Unauthorized`. This indicates that the client is unaware of required headers and SHOULD cause the client to contact the initialization endpoint for that provider again in order to receive updated information about required headers.
-- If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to download a component that has not been [unlocked](#asset-unlocking), the provider MAY respond with code `402 - Payment Required` instead.
+- If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to download a component that has not been unlocked, the provider MAY respond with code `402 - Payment Required` instead.
 
 If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
 This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#the-meta-field), if they have content.
@@ -398,7 +398,7 @@ The provider MUST implement:
 The provider MAY implement, based on their needs:
 - A connection status endpoint
 - An endpoint for unlocking resources
-- An endpoint for loading previously withheld datablocks after the unlocking step
+- An endpoint for obtaining previously withheld datablocks after the unlocking step
 
 The URI for the initialization endpoint is communicated by the provider to the user through external means (such as listing it on the provider's website).
 The URIs and parameters for all subsequent endpoints are not defined explicitly by the specification and are communicated from the provider to the client.
@@ -473,7 +473,6 @@ The response on this endpoint MUST have the following structure:
 - The `data` field SHOULD always contain the datablock `text`.
 - The `data` field MAY contain the datablocks `branding`, `authors`, `license`, and/or `web_references`.
 - The `data` field MUST contain the datablock `headers` if other parts of the API require header-based authentication to function. It MAY still be used for other purposes.
-- If the provider wants to use [unlocking](#asset-unlocking) anywhere during later API calls the `data` field MUST contain the datablock `unlock_balance_initialization`.
 
 ## Asset List
 
@@ -495,15 +494,13 @@ Every `asset` object MUST have the following structure:
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `id` | string | yes | Unique id for this asset. Must match the regular expression `[a-z0-9\._]+` | 
+| `id` | string | yes | Unique id for this asset. Must match the regular expression `[a-z0-9_-]+` | 
 | `data` | `datablock_collection` | yes |  |
-<!--TODO Allow spaces in ids?-->
 
 - The `id` field MUST be unique among all assets for this provider. Clients MAY use this id when storing and organizing files on disk. Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
 - The `data` field MUST contain the datablock `implementation_list_query`.
 - The `data` field SHOULD contain the datablocks `preview_image_thumbnail` and `text`.
-- The `data` field MAY contain the datablocks `preview_image_supplemental`,`license`,`authors` and/or `web_references`.
-- The `data` field MAY contain one of the datablocks `dimensions.*`.
+- The `data` field MAY contain the datablocks `preview_image_supplemental`,`license`,`authors`,`dimensions.*`,`unlock` and/or `web_references`.
 
 ## Implementation List
 
@@ -516,7 +513,7 @@ The URI and available parameters for this endpoint are communicated by the serve
 | `data` | `datablock_collection` | yes | Datablocks that apply to the entire implementation list.  |
 | `implementations` | yes | Array of `implementation` | |
 
-- The `data` field MAY contain the datablocks `response_statics` or `unlock`
+- The `data` field MAY contain the datablocks `response_statics`
 
 ### `implementation` Structure
 
@@ -542,10 +539,9 @@ Every `component` object MUST have the following structure:
 | `data` | datablocks | yes | Datablocks.|
 
 - The `id` field MUST be unique for among all components inside this component's implementation, but MAY be reused for a component in a different implementation.
-- The `data` field on every `component` MUST contain one of the `fetch.*` datablocks.
-- The `data` field on every `component` MAY contain any of the following datablocks: `environment_map`, `loose_material_define`, `loose_material_apply`, `mtlx_apply`,`text`
-- If the file extension defined inside the `fetch.*` field has a datablock defined with the same name (minus the dot-prefix) then the `data` field on that `component` SHOULD have that corresponding datablock to provide more format-specific information about the file.
-- If the provider wants to use [unlocking](#asset-unlocking) on the component-level then the component's `data` field MUST contain the datablock `unlock`.
+- The `data` field on every `component` MUST contain the `file_info` datablock.
+- The `data` field on every `component` MUST contain one of the `file_fetch.*` datablocks, unless it contains the `unlock` datablock.
+- The `data` field on every `component` MAY contain any of the following datablocks: `environment_map`, `loose_material_define`, `loose_material_apply`, `mtlx_apply`,`text` and/or `unlock`.
 
 # Additional Endpoints
 
