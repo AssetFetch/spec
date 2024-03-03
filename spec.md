@@ -187,13 +187,15 @@ This whole process is comparable to the rarely used [agent-driven content negoti
 ### Unlocking (Optional)
 The provider MAY allow any user to download any asset for free and without authentication or restrictions, but it MAY also require payment for an asset.
 To accommodate this, providers are able to mark resources as "unlockable", requiring further deliberate action by the client and user to access the files associated with their components.
-Unlocking can happen with varying degrees of granularity, either in one go for an entire asset, only for specific implementations or even on a component-by-component basis.
+Unlocking works by linking individual components to an "unlocking request" (i.e. purchase).
+This mapping can be 1-to-1 where every component has its own unlocking query (for example for a texturing website that charges users individually for every texture map they download) or 1-to-many where one unlocking query is unlocking many different components (for example on a 3D website where purchasing a model usually unlocks all available model files and textures at once).
 
 When responding with the implementation list the provider MAY withhold certain datablocks related to downloading from the implementation's components.
-If it does that, then it MUST instead provide two additional datablocks describing one or multiple "unlocking queries" that the client can perform (along with their prices) and a query for how to obtain the actual download link after unlocking the resource.
+If it does that, then it MUST instead provide a list of possible unlocking queries, the mapping between components and unlocking queries and queries to receive the previously withheld download information for every component after the unlocking has happened.
 
-The client SHOULD then present the required unlocking action (along with the accompanying charges to their account) to the user.
-If the user agrees, the client first performs the unlocking query (or queries) and then queries the provider for the previously withheld datablocks which contain the real (possibly temporarily generated) download links.
+The client SHOULD then present the required unlocking queries (along with the accompanying charges to) to the user.
+If the user agrees, the client first performs the unlocking query (or queries) and then queries the provider for the previously withheld datablocks which contain the real (possibly ephemeral) download links.
+It should be noted that the AssetFetch does not handle the actual payment itself, users still need to perform any required account- and payment setup with the provider through external means, like the provider's website.
 
 ### Downloading and Handling
 After choosing a suitable implementation and unlocking all of it's datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
@@ -372,7 +374,7 @@ In concrete terms, this means:
 - If a provider receives a query that references a specific resource which does not exist, such as a query for implementations of an asset that the provider does not recognize, it SHOULD respond with code `404 - Not Found`.
 - If the provider can not parse the query data sent by the client properly, it SHOULD respond with code `400 - Bad Request`.
 - If a provider receives a query an any other endpoint than the initialization endpoint without one of the headers it defined as mandatory during the initialization it SHOULD send status code `401 - Unauthorized`. This indicates that the client is unaware of required headers and SHOULD cause the client to contact the initialization endpoint for that provider again in order to receive updated information about required headers.
-- If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to download a component that has not been unlocked, the provider MAY respond with code `402 - Payment Required` instead.
+- If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to perform a download that has not been unlocked, the provider MAY respond with code `402 - Payment Required` instead.
 
 If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
 This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#the-meta-field), if they have content.
@@ -946,22 +948,6 @@ Information about files with the extension `.obj`.
 
 These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch.
 
-### [ImplementationList?/Implementation?/Component?] `unlock`
-
-This datablock contains exact pricing information.
-It can be applied to an Asset, Implementation or Component.
-
-It indicates that this component (or all the components in the implementation or implementation list) need to be unlocked using a dedicated query in order to be downloadable.
-
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `locked` | boolean | yes | Indicates whether the subject of this datablock is locked (`True`) or already unlocked (`False`) |
-| `price` | number | only if `locked=True` | The price that the provider will charge the user in the background if they run the `unlock_query`. |
-| `unlock_query` | `fixed_query` | only if `locked=True` | Query to perform to to make the purchase. |
-
-This datablock can be applied to resources in multiple hierarchies in an implementation list: Either to the entire list itself, an individual implementation or even an individual implementation component.
-Providers MUST NOT apply the `unlock` block in multiple places in the same hierarchy, meaning that if in implementation list receives an `unlock` datablock, it MUST NOT define additional `unlock` datablocks on any of the implementations or components inside it.
-
 ### [Status?] `unlock_balance`
 Information about the user's current account balance.
 
@@ -971,9 +957,31 @@ Information about the user's current account balance.
 | `balance_unit` | string | yes | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
 | `balance_refill_uri` | string | yes | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form. |
 
-### [Component?] `unlockable_data_query`
-This datablock contains the query to receive the previously withheld datablocks for one component after it (or its parent implementation/asset) has been unlocked.
-It follows the `fixed_query` template.
+### [Component?] `unlock_link`
+
+This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
+
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `unlock_query_id` | string | yes | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_datablocks_query`. |
+| `unlocked_datablocks_query` | `fixed_query` | yes | The query to fetch the datablocks for this component if the unlocking was successful. |
+
+### [ImplementationList?] `unlock_queries`
+
+This datablock contains the query or queries required to unlock all or some of the components in this implementation list.
+
+This datablock is an `array` consisting of `unlocking_query` objects.
+
+#### `unlocking_query` template
+
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `id` | string | yes | This is the id by which `unlock_link` datablocks will reference this query. |
+| `unlocked` | boolean | yes | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked |
+| `price` | number | only if `locked=True` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
+| `unlock_query` | `fixed_query` | only if `unlocked=False` | Query to perform to to make the purchase. |
+| `unlock_query_fallback_uri` | string | no | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually. |
+
 
 
 

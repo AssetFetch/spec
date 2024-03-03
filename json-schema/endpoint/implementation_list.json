@@ -19,8 +19,8 @@
 				"text": {
 					"$ref": "../datablock/text.json"
 				},
-				"unlock": {
-					"$ref": "../datablock/unlock.json"
+				"unlock_queries": {
+					"$ref": "../datablock/unlock_queries.json"
 				}
 			},
 			"required": []
@@ -40,9 +40,6 @@
 						"type": "object",
 						"text": {
 							"$ref": "../datablock/text.json"
-						},
-						"unlock": {
-							"$ref": "../datablock/unlock.json"
 						}
 					},
 					"components": {
@@ -67,8 +64,8 @@
 										"file_info":{
 											"$ref": "../datablock/file_info.json"
 										},
-										"unlock": {
-											"$ref": "../datablock/unlock.json"
+										"unlock_link": {
+											"$ref": "../datablock/unlock_link.json"
 										},
 										"loose_environment": {
 											"$ref": "../datablock/loose_environment.json"
@@ -90,9 +87,6 @@
 										},
 										"format.usd": {
 											"$ref": "../datablock/format.usd.json"
-										},
-										"unlockable_data_query": {
-											"$ref": "../datablock/unlockable_data_query.json"
 										}
 									},
 									"required": [
