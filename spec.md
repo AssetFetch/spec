@@ -622,13 +622,13 @@ This template describes a variable query. The individual parameter objects conta
 #### `parameter` Structure
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `type` | string | yes| one of text / boolean / hidden / select / multiselect |
-| `name` | string | yes| name of the HTTP parameter |
-| `title` | string | no| Title to display to the user |
-| `default` | string | no | The default value for this parameter |
-| `mandatory` | boolean | no | Whether this parameter is mandatory and must be set to a non-empty string |
-| `choices` | array of string | only if `select` or `multiselect` type is used | Possible choices when type `select` or `multiselect` is used |
-| `delimiter` | string | only if `multiselect` type is used | Delimiter to use for selected choices when type `multiselect` is used. |
+| `type` | string | yes| One of `text` / `boolean` / `fixed` / `select` / `multiselect` |
+| `name` | string | yes| Name of the HTTP parameter. |
+| `title` | string | no| Title to display to the user. |
+| `default` | string | no | The default value for this parameter. It becomes the only possible value of this parameter if type `fixed` is used. |
+| `mandatory` | boolean | no | Whether this parameter is mandatory and must be set to a non-empty string. |
+| `choices` | array of string | only if `select` or `multiselect` type is used | Possible choices when type `select` or `multiselect` is used. |
+| `delimiter` | string | Only if `multiselect` type is used. | Delimiter to use for selected choices when type `multiselect` is used. |
 
 ### `fixed_query`
 This template describes a fixed query that can be sent by the client to the provider without additional user input or configuration.
@@ -637,7 +637,7 @@ This template describes a fixed query that can be sent by the client to the prov
 | --- | --- |--- | --- |
 | `uri` | string | yes | The URI to contact for getting more results. |
 | `method` | string | yes | MUST be one of `get` or `post` |
-| `payload` | object with string keys and string values | yes  |  |
+| `payload` | object with string keys and string properties | yes  | The payload for the request.  |
 
 
 
