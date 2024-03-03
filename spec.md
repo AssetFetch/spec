@@ -187,18 +187,15 @@ This whole process is comparable to the rarely used [agent-driven content negoti
 ### Unlocking (Optional)
 The provider MAY allow any user to download any asset for free and without authentication or restrictions, but it MAY also require payment for an asset.
 To accommodate this, providers are able to mark resources as "unlockable", requiring further deliberate action by the client and user to access the files associated with their components.
-Unlocking works by linking individual components to an "unlocking request" (i.e. purchase).
-This mapping can be 1-to-1 where every component has its own unlocking query (for example for a texturing website that charges users individually for every texture map they download) or 1-to-many where one unlocking query is unlocking many different components (for example on a 3D website where purchasing a model usually unlocks all available model files and textures at once).
+Unlocking works by attaching a special query to an implementation. This query is called by the client (after getting confirmation from the user) and tells the provider to perform the purchase in the background.
 
-When responding with the implementation list the provider MAY withhold certain datablocks related to downloading from the implementation's components.
-If it does that, then it MUST instead provide a list of possible unlocking queries, the mapping between components and unlocking queries and queries to receive the previously withheld download information for every component after the unlocking has happened.
+When initially responding with the implementation list the provider MAY withhold certain datablocks related to downloading from the implementation's components.
+If it does that, then it MUST instead provide a query that allows the client to obtain these datablocks after the unlocking query has been executed.
 
-The client SHOULD then present the required unlocking queries (along with the accompanying charges to) to the user.
-If the user agrees, the client first performs the unlocking query (or queries) and then queries the provider for the previously withheld datablocks which contain the real (possibly ephemeral) download links.
 It should be noted that the AssetFetch does not handle the actual payment itself, users still need to perform any required account- and payment setup with the provider through external means, like the provider's website.
 
 ### Downloading and Handling
-After choosing a suitable implementation and unlocking all of it's datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
+After choosing a suitable implementation and unlocking all it's datablocks (including download links), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
 The choice about where this directory should be created is made between the client and user through configuration and is not part of the specification.
 
 Inside this directory the client SHOULD arrange the files as described by the provider in the implementation metadata to ensure that relative links between files remain intact.
@@ -301,11 +298,9 @@ sequenceDiagram
 	User->>User: Reviews suggested implementation(s)<br>(*price*,files, download size, etc.)
 	User->>Client: Confirms asset import
 
-	loop Possibly multiple times, depending on granularity of <br>provider's unlocking model
-		Client->>Provider: Query: paid.example.com/unlock?asset=<asset id>&component=<component id>
-		Provider->>Client: Confirms the unlocking action.
-	end
-
+	Client->>Provider: Query: paid.example.com/unlock?asset=<asset id>
+	Provider->>Client: Confirms the unlocking action.
+	
 	loop For every component that <br>had its download-related datablocks withheld
 		Client->>Provider: Query: paid.example.com/downloads?asset=<asset id>&component=<component id>
 		Provider->>Client: Responds with actual download information<br>(possibly temporarily generated)
@@ -399,7 +394,7 @@ The provider MUST implement:
 
 The provider MAY implement, based on their needs:
 - A connection status endpoint
-- An endpoint for unlocking resources
+- An endpoint for receiving unlocking queries
 - An endpoint for obtaining previously withheld datablocks after the unlocking step
 
 The URI for the initialization endpoint is communicated by the provider to the user through external means (such as listing it on the provider's website).
@@ -502,7 +497,7 @@ Every `asset` object MUST have the following structure:
 - The `id` field MUST be unique among all assets for this provider. Clients MAY use this id when storing and organizing files on disk. Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
 - The `data` field MUST contain the datablock `implementation_list_query`.
 - The `data` field SHOULD contain the datablocks `preview_image_thumbnail` and `text`.
-- The `data` field MAY contain the datablocks `preview_image_supplemental`,`license`,`authors`,`dimensions.*`,`unlock` and/or `web_references`.
+- The `data` field MAY contain the datablocks `preview_image_supplemental`,`license`,`authors`,`dimensions.*` and/or `web_references`.
 
 ## Implementation List
 
@@ -529,7 +524,7 @@ Every `implementation` object MUST have the following structure:
 
 - The `id` field MUST be unique among all possible implementations the provider offers for this asset, even if not all of them are included in the current implementation list.
 - The `data` field SHOULD contain the datablock `text`.
-- The `data` field MAY contain the datablock `unlock`.
+- The `data` field MAY contain the datablock `unlock_query`.
 
 ### `component` Structure
 
@@ -542,8 +537,8 @@ Every `component` object MUST have the following structure:
 
 - The `id` field MUST be unique for among all components inside this component's implementation, but MAY be reused for a component in a different implementation.
 - The `data` field on every `component` MUST contain the `file_info` datablock.
-- The `data` field on every `component` MUST contain one of the `file_fetch.*` datablocks, unless it contains the `unlock` datablock.
-- The `data` field on every `component` MAY contain any of the following datablocks: `environment_map`, `loose_material_define`, `loose_material_apply`, `mtlx_apply`,`text` and/or `unlock`.
+- The `data` field on every `component` MUST contain one of the `file_fetch.*` datablocks, unless it contains the `unlock_datablocks_query` datablock.
+- The `data` field on every `component` MAY contain any of the following datablocks: `environment_map`, `loose_material_define`, `loose_material_apply`, `mtlx_apply`,`text` and/or `unlock_datablocks_query`.
 
 # Additional Endpoints
 
@@ -559,21 +554,28 @@ Unless noted otherwise in the specification, these endpoints MUST use the follow
 ## Unlocking Endpoint
 *(kind: `unlock`)*
 
-This endpoint type is used to "unlock" (usually meaning "purchase") an asset or asset component.
-The client calls this endpoint in order to receive the `fixed_query` for downloading the .
-The URI and parameters for this endpoint are communicated through the `unlock_query` field in an `unlock` datablock.
+This endpoint type is used to "unlock" (usually meaning "purchase") an implementation.
+The URI and parameters for this endpoint are communicated through the `unlock_query` datablock.
+
+When receiving a request from the client on this endpoint, the provider performs the required charges to the customers account using whatever pay-as-you-go or prepaid solution it has set up for this user's account.
+While doing this the provider MUST take steps to avoid double-charging the customer for the same resource, even if the client (erroneously requests it).
 
 This endpoint currently does not use any datablocks specified for it. Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
 
+After sending a request to an unlocking endpoint, the client MUST do two things:
+- Call the connection status endpoint again (if available) to receive updated user information, most crucially account balance.
+- Discard any other unlocking queries, for example those of another implementation of the same asset that was included in the same implementation list. This is because the last unlocking request might have had a side-effect on the vendor's backend that causes the prices of another unlocking query to be inaccurate, for example because purchasing one implementation unlocks all implementations of the entire asset. Therefore, the client SHOULD re-run the entire implementations query after every complete import.
+
 ## Unlocked Datablocks Endpoint
-*(kind:`unlocked_datablocks`)*
+*(kind:`unlock_datablocks`)*
 
 This endpoint type responds with the previously withheld datablocks for one component, assuming that the client has made all the necessary calls to the unlocking endpoint.
 It gets called by the client for every component that had an `unlockable_data_query` datablock assigned to it.
 
-
 - The `data` field contains all the datablocks that are only available for the component after it has been unlocked. 
 This field is open to extension, but currently the provider MUST NOT include any other datablock than `file_fetch.download` in this list.
+
+The provider MUST NOT treat this endpoint as an extension of the "unlocking endpoint" explained above, meaning that if it receives a request for a resource that is not yet unlocked, it MUST reject this request instead of silently charging the user in the background.
 
 ## Connection Status Endpoint
 *(kind: `connection_status`)*
@@ -957,32 +959,37 @@ Information about the user's current account balance.
 | `balance_unit` | string | yes | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
 | `balance_refill_uri` | string | yes | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form. |
 
-### [Component?] `unlock_link`
+### [Component?] `unlock_withheld_datablocks_query`
 
-This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
+This datablock follows the `fixed_query` that the client can use to obtain the datablocks for this component that weren't sent along with the rest of the datablocks by the provider because they are only available after an asset is unlocked.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `unlock_query_id` | string | yes | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_datablocks_query`. |
-| `unlocked_datablocks_query` | `fixed_query` | yes | The query to fetch the datablocks for this component if the unlocking was successful. |
+This datablock follows the `fixed_query` template.
 
-### [ImplementationList?] `unlock_queries`
+### [Implementation?] `unlock_query`
 
-This datablock contains the query or queries required to unlock all or some of the components in this implementation list.
+This datablock contains the query or queries required to unlock all or some of the components in this implementation.
 
-This datablock is an `array` consisting of `unlocking_query` objects.
-
-#### `unlocking_query` template
+This datablock is an **array** consisting of objects with the following structure:
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `id` | string | yes | This is the id by which `unlock_link` datablocks will reference this query. |
-| `unlocked` | boolean | yes | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked |
-| `price` | number | only if `locked=True` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
-| `unlock_query` | `fixed_query` | only if `unlocked=False` | Query to perform to to make the purchase. |
+| `total_charges` | number | only if `unlock_query` is set | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
+| `unlock_query` | `fixed_query` | no | Query to perform to to make the purchase. If it is not set or `null` then the client MUST assume that that all resources have already been unlocked and can proceed straight to fetching the withheld component datablocks. It MAY still display the `unlock_charges` |
 | `unlock_query_fallback_uri` | string | no | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually. |
+| `composition` | array of `individual_charge` | no | Optional listing of how the value in `total_charges` is calculated. |
 
+#### `individual_charge` structure
 
+This object describes a singular charge that happens in a provider's backend.
+It MAY be be included by the provider purely in order to create clarity for the user in more complex scenarios where one asset implementation is composed of multiple components that can be bought individually, for example a texturing website that charges per material *map* instead of per material.
+
+If the sum of the `price` fields does not match the one in the `total_charges` field, then the client SHOULD treat the `total_charges` value as authoritative and display that to the user.
+
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `title` | string | yes | A title that describes this sub-charge. |
+| `price` | number | yes | The price to display for this sub-charge. |
+| `already_owned` | boolean | yes | Indicates whether the user already owns this resource and will not get charged again. |
 
 
 
