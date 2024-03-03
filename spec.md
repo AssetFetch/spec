@@ -174,15 +174,14 @@ The user chooses one of the assets they wish to receive.
 ### Choosing an implementation
 In order to load an asset a specific implementation of that asset needs to be chosen.
 The first step of this process involves receiving a list of possible implementations from the provider using the information on how to request it sent by the provider along with the other asset metadata.
-The provider MAY decide to request additional parameters for querying implementations, in which case the user MAY (or MUST) provide additional asset-specific query data like texture resolution, level of detail, etc.
+The provider MAY request additional parameters for querying implementations in order to filter for asset-specific data like texture resolution, level of detail, etc.
 The exact parameters are defined by the provider.
-This pre-selection ensures that all the proposed implementations returned by the provider already have the desired qualities and only differ in terms of how the asset is encoded in terms of file structure and formats.
-After getting the choice from the user (if one needed to be made) the client requests the list of available implementations for this asset. 
+After getting the parameters from the user (if applicable) the client requests the list of available implementations for this asset. 
 The provider responds with a list of possible implementations available for this asset and the quality parameters chosen by the user.
 The implementations each consist of a list of components, each of which have metadata attached to them containing information about file formats, relationships and downloads.
 The client analyzes the metadata declarations of each component in every proposed implementation in order to test it for compatibility.
 If at least one implementation turns out to be compatible with the client and its host application, the process can proceed.
-If more than one implementation is valid for the given client and its host application, it MAY ask the user to make the final choice or choose one implementation based on pre-programmed preferences.
+If more than one implementation is valid for the given client and its host application, it SHOULD ask the user to make the final choice.
 This whole process is comparable to the rarely used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
 
 ### Unlocking (Optional)
