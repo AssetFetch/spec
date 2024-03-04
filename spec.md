@@ -99,13 +99,7 @@ When a client instructs its host to load a component and this component causes m
 ### Datablock
 > A piece of metadata of a certain type and structure that can be attached to most other datastructures defined by AssetFetch.
 
-Datablocks are extremely flexible and sometimes reusable pieces of metadata that enable the communication of specific attributes, relationships, or even higher-level information like how to properly interact with a provider.
-
-- Which axis in an OBJ file should be used as the up-axis in contained in a datablock (See [`obj`](#component-obj)).
-- The fact that a specific image belongs to a specific material and should be treated as a roughness map is contained in a datablock (See [the material section](#materials)).
-- The fact that a specific EXR file should be treated as an HDRI environment map with equirectangular projection is contained in a datablock (See [the environments section](#environments)).
-- The fact that a provider wants the client to send an HTTP header containing an access token is contained in a datablock (See [Authentication Using Headers](#authentication-using-headers)).
-- The URL to a thumbnail image for an asset is communicated using a datablock (See [`preview_image_thumbnail`](#asset-preview_image_thumbnail))
+Datablocks are extremely flexible and sometimes reusable pieces of metadata that enable the communication of specific attributes, instructions how to parse other data elsewhere, relationships, or how to properly interact with a provider's API in the first place.
 
 ### Variable Query
 > An HTTP(S) request defined by its URI, method and a payload _that has been (partly) configured by the user_ which is sent by the client to the provider in order to receive data in response.
@@ -348,7 +342,7 @@ This encoding for query data is already extremely widespread and can therefore u
 ### Response payloads
 
 The payload of all responses from a provider MUST be valid JSON and SHOULD use the Content-Type header `application/json`.
-The exact structure of the data for individual endpoints is specified in the [Data model](#data-model) section.
+The exact structure of the data for individual endpoints is specified in the [Endpoint section](#endpoint-list).
 
 ## User-Agent
 
@@ -377,7 +371,7 @@ In concrete terms, this means:
 - If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to perform a download that has not been unlocked, the provider MAY respond with code `402 - Payment Required` instead.
 
 If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
-This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#the-meta-field), if they have content.
+This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#the-meta-template), if they have content.
 
 
 
@@ -749,9 +743,26 @@ The `behavior` describes whether this file should be treated as an [active or pa
 
 If `behavior=archive` and the `local_path` is not `null`, the entire archive MUST be unpacked into the local path.
 
-If `behavior=file_active` or `behavior=file_passive` then the `local_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash" and MUST NOT contain relative path references (`example.txt` or `sub/dir/example.txt` would be correct, `/example.txt`, `./example.txt` or `/sub/dir/example.txt` would be incorrect).
+If `behavior=archive` and the `local_path` *is* `null`, the archive MUST NOT be unpacked in full automatically. Instead, other components can reference data from this archive using the `file_fetch.from_archive` datablock.
+The client MAY unpack the entire archive into a temporary directory if it helps with processing the `file_fetch.from_archive` datablocks of other components.
 
-If `behavior=archive` the local path MUST end with a slash ("trailing slash") and MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`) and MUST NOT contain relative path references (`./` or `../`) anywhere within it (`contents/` or `my/contents/` would be correct, `contents`,`./contents/`,`./contents`,`my/../../contents` or `../contents` would all be incorrect).
+#### `local_path` rules
+
+##### `behavior=file_*`
+
+If `behavior=file_active` or `behavior=file_passive` then the `local_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash".
+
+The `local_path` MUST NOT contain relative path references (`./` or `../`) anywhere within it.
+
+`example.txt` or `sub/dir/example.txt` would be correct, `/example.txt`, `./example.txt` or `/sub/dir/example.txt` would be incorrect.
+
+##### `behavior=archive`
+
+In that case the local path MUST end with a slash ("trailing slash") and MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`).
+
+The `local_path` MUST NOT contain relative path references (`./` or `../`) anywhere within it.
+
+`contents/` or `my/contents/` would be correct, `contents`,`./contents/`,`./contents`,`my/../../contents` or `../contents` would all be incorrect.
 
 ### [Component!*] `file_fetch.download`
 
@@ -1055,5 +1066,5 @@ They SHOULD consider storing secret headers through native operation system APIs
 
 ## Avoiding Relative Paths in `local_path`
 Datablocks of the `fetch.*` family specify a local sub-path for every component that needs to be appended to a local path chosen by the client in order to assemble the correct file structure for this asset.
-As specified in the [datablock requirements](#requirements-for-all-fetch-datablocks) the `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
-Clients MUST ensure that components with `./` or `../` in their local path are rejected or that their "spread" through the system is sufficiently limited.
+As specified in the [datablock requirements](#local_path-rules) the `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
+Clients MUST take cate to ensure that components with references like `./` or `../` in their local path are rejected.
