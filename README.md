@@ -5,10 +5,23 @@ The AssetFetch Protocol aims to provide a standardized way for artists to browse
 
 It aims to help in creating an artist experience similar to existing native integrations, such as proprietary import plugins like, with less development overhead in order to increase interoperability between vendors and applications and allow more vendors - especially smaller ones - to offer their assets to artists right in the applications where they need them.
 
-# Project Status: "I just uploaded this."
-Currently, the very first draft version (0.1) is available and can be read in [spec.md](./spec.md).
-The idea was born out of frustration about the prospect of having to develop a Blender addon JUST for my asset site [ambientCG.com](https://ambientCG.com) when a lot of its actions and behaviors would be very similar to those of the addons for Poliigon or PolyHaven.
-Everything here at the moment should really only be regarded as a starting-off point for future testing and discussion about how the transfer of 3D assets from vendors to clients can be made made more open and interoperable.
+# Features
+
+- Header-based Authentication using numerous methods and a login-system to show account balance
+- Browsing assets with thumbnails, server-side searching and filtering, license data, author data and more
+- Support for multiple resolutions, quality levels or any other kind of variation of assets
+- Support for zipped downloads: Providers can still send metadata for individual asset files, even if the actual download arrives in just one zip file.
+- Ways for checking compatibility with different open or vendor-native formats: The provider offers metadata for multiple versions of the same asset which the client can use to judge whether it will be able to actually import the file BEFORE downloading it, as best as possible (100% certainty will be impossible).
+- Support for dynamically generated asset downloads (think ticking boxes about which PBR maps you want and then getting a Zip file with exactly those maps)
+- Purchasing assets (even composite assets that require multiple purchases like the individually purchasable PBR maps on textures.com) through an "asset unlocking" system. (The actual payment isn't handled by AF, users still need to sign up on the provider's website)
+- Support for temporarily generated download links (used by commercial providers like Poliigon to prevent people from sharing direct download links of paid assets)
+- Ways of linking loose files together to cover "loose materials" (i.e. materials that arrive as just a bunch of material maps without any further files like .MTLX)
+- Theming and branding options for providers with banner images, if the client chooses to display those.
+- Custom metadata for common file formats, like which axis represents "up" in an .obj file.
+
+# This is a Work-In-Progress
+Currently, an early draft version (0.2) is available and can be read in [spec.md](./spec.md).
+Everything here at the moment should be regarded as a starting-off point for future testing and discussion about how the transfer of 3D assets from vendors to clients can be made made more open and interoperable.
 
 There are still numerous milestones to hit before a version 1.0 can be released. Among other things...
 
