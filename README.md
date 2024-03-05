@@ -5,6 +5,8 @@ The AssetFetch Protocol aims to provide a standardized way for artists to browse
 
 It aims to help in creating an artist experience similar to existing native integrations, such as proprietary import plugins like, with less development overhead in order to increase interoperability between vendors and applications and allow more vendors - especially smaller ones - to offer their assets to artists right in the applications where they need them.
 
+Currently, an early draft version (0.2) is available and can be read in [spec.md](./spec.md).
+
 # Features
 
 - Header-based Authentication using numerous methods and a login-system to show account balance
@@ -20,7 +22,6 @@ It aims to help in creating an artist experience similar to existing native inte
 - Custom metadata for common file formats, like which axis represents "up" in an .obj file.
 
 # This is a Work-In-Progress
-Currently, an early draft version (0.2) is available and can be read in [spec.md](./spec.md).
 Everything here at the moment should be regarded as a starting-off point for future testing and discussion about how the transfer of 3D assets from vendors to clients can be made made more open and interoperable.
 
 There are still numerous milestones to hit before a version 1.0 can be released. Among other things...
