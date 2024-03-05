@@ -13,8 +13,8 @@ It aims to help in creating an artist experience similar to existing native inte
 - Support for zipped downloads: Providers can still send metadata for individual asset files, even if the actual download arrives in just one zip file.
 - Ways for checking compatibility with different open or vendor-native formats: The provider offers metadata for multiple versions of the same asset which the client can use to judge whether it will be able to actually import the file BEFORE downloading it, as best as possible (100% certainty will be impossible).
 - Support for dynamically generated asset downloads (think ticking boxes about which PBR maps you want and then getting a Zip file with exactly those maps)
-- Purchasing assets (even composite assets that require multiple purchases like the individually purchasable PBR maps on textures.com) through an "asset unlocking" system. (The actual payment isn't handled by AF, users still need to sign up on the provider's website)
-- Support for temporarily generated download links (used by commercial providers like Poliigon to prevent people from sharing direct download links of paid assets)
+- Purchasing assets (even composite assets that require multiple purchases) through an "asset unlocking" system. (The actual payment isn't handled by AF, users still need to sign up on the provider's website)
+- Support for temporarily generated download links
 - Ways of linking loose files together to cover "loose materials" (i.e. materials that arrive as just a bunch of material maps without any further files like .MTLX)
 - Theming and branding options for providers with banner images, if the client chooses to display those.
 - Custom metadata for common file formats, like which axis represents "up" in an .obj file.
