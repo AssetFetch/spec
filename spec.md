@@ -75,7 +75,7 @@ The emphasis is put on the term "logical" to indicate that one asset does not ne
 
 When describing the transfer of assets from a provider to a client it is common for the provider to have the same asset available in many different quality levels (resolutions or LODs) and file formats for different applications.
 Some vendors allow their users to control these parameters with great precision so that they only need to download the asset in exactly the format and quality that is desired.
-This exact choice - or rather the collection of files that is a result of it - is considered the "implementation of an asset".
+This exact choice - or rather the collection of files with metadata that is a result of it - is considered the "implementation of an asset".
 
 - An OBJ file containing the LOD1 mesh of a chair along with a set of TIFF texture maps measuring 512x512 pixels each is considered one implementation of the chair asset. Using the LOD0 version instead yields a new implementation of the same asset.
 - An EXR image with a resolution of 8192x4096 pixels in an equirectangular projection is considered one implementation.
@@ -327,7 +327,7 @@ sequenceDiagram
 
 # Communication
 
-### Query payloads
+## Query payloads
 
 The payload of both the `fixed_query` and the `variable_query` from a client to a provider MUST be encoded as [`application/x-www-form-urlencoded`](https://url.spec.whatwg.org/#application/x-www-form-urlencoded), the same format that is used by standard HTML forms.
 When using variable queries, lists of items are implemented using a delimiter of the provider's choice. This choice is communicated by the provider to the client along with the other query parameters.
@@ -339,14 +339,14 @@ tags=wood,old&min_resolution=512
 
 This encoding for query data is already extremely widespread and can therefore usually be handled by using standard libraries, both on the provider- and on the client-side.
 
-### Response payloads
+## Response payloads
 
 The payload of all responses from a provider MUST be valid JSON and SHOULD use the Content-Type header `application/json`.
 The exact structure of the data for individual endpoints is specified in the [Endpoint section](#endpoint-list).
 
 ## User-Agent
 
-The client SHOULD send an appropriate user-agent header as defined in the [specification](https://www.rfc-editor.org/rfc/rfc9110#field.user-agent).
+The client SHOULD send an appropriate user-agent header as defined in the [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#field.user-agent).
 
 If the client is embedded in a host application, for example as an addon inside a 3D suite, it SHOULD set its first `product` and `product-version` identifier based on the "parent" application and then describe the product and version of the client plugin itself afterwards.
 
@@ -384,22 +384,19 @@ This message SHOULD contain the contents of the `message` and `id` field in the 
 
 # About Endpoints
 
-The interaction model described in the [General Operation](#general-operation) section principally implies that there are three kinds of HTTP(s)-based endpoints that a provider MUST implement and  to be implemented by the provider:
+The interaction model described in the [General Operation](#general-operation) section principally implies that there are three kinds of HTTP(s)-based endpoints that a provider MUST implement:
 
-The provider MUST implement:
 - An initialization endpoint
 - An endpoint for querying assets
 - An endpoint for querying implementations of one specific asset
 
-The provider MAY implement, based on their needs:
-- A connection status endpoint
-- An endpoint for unlocking resources
-- An endpoint for obtaining previously withheld datablocks after the unlocking step
+Depending on which features it wants to use, the provider MUST implement:
+- A connection status endpoint if it wants to use custom headers for authentication
+- An endpoint for unlocking resources and an endpoint for obtaining previously withheld datablocks if it wants to support asset unlocking (i.e. purchases).
 
 The URI for the initialization endpoint is communicated by the provider to the user through external means (such as listing it on the provider's website).
 The URIs and parameters for all subsequent endpoints are not defined explicitly by the specification and are communicated from the provider to the client.
 This gives the provider great flexibility in how to structure its data and backend implementation.
-Providers with simple data formats, small asset collections and no need for authentication or asset unlocking are theoretically even able to pre-generate all API responses and upload them as JSON files to a static web hosting service.
 
 ### The `meta` template
 All provider responses on all endpoints MUST carry the `meta` field to communicate key information about the current response.
@@ -427,7 +424,6 @@ This object contains most of the relevant information for any resource and alway
 | \<string-key\> | object or array | yes | Exact structure is defined in the [Datablocks section](#datablocks) |
 | ... (arbitrary number of datablocks)
 
-This object is usually named `data` or `*_data`, but the exact name is specified for each endpoint.
 Every key of this data object is the identifier for the datablock stored in that key's field.
 
 The example below illustrates an object called `data` whose structure follows the `datablock_collection` template with two datablocks (`block_type_1` and `block_type_2`) which have a varying structure.
