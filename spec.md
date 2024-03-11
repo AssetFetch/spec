@@ -678,8 +678,8 @@ This datablock has the following structure:
 | --- | --- | --- | --- |
 | `headers` | Array of `header` | yes | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request. |
 | `connection_status_query` | `fixed_query` | yes | Query to use for checking whether the provided headers are valid und for obtaining connection status information. |
-| `acquisition_uri` | string | no | A URI that the client MAY offer to open in the user's web browser to help them obtain the header values. |
-| `acquisition_uri_title` | string | no | Title for the `acquisition_uri`. |
+| `header_acquisition_uri` | string | no | A URI that the client MAY offer to open in the user's web browser to help them obtain the header values. |
+| `header_acquisition_uri_title` | string | no | Title for the `acquisition_uri`. |
 
 
 #### `header` structure
@@ -690,15 +690,15 @@ This datablock has the following structure:
 | `default` | string | no | Default value as a suggestion to the client |
 | `is_required` | boolean | yes | Indicates if this header is required.|
 | `is_sensitive` | boolean | yes | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#storing-sensitive-headers) |
-| `prefix` | string | no | Prefix that the client should prepend to the value entered by the user when sending it to the provider |
-| `suffix` | string | no | Suffix that the client should append to the value entered by the user when sending it to the provider |
+| `prefix` | string | no | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`. |
+| `suffix` | string | no | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`. |
 | `title` | string | no | Title to display inside the client |
 | `encoding` | string | no, default=`plain` | The encoding that the client MUST apply to the header value. MUST be one of `plain` or `base64`. | 
 
 ### [Status?] `provider_reconfiguration`
 
-This datablock allows the provider to communicate to the client a new set of headers that it MUST sent along with every request.
-The client MUST fully replace the values defined in the  `provider_configuration` with the values defined in this datablock.
+This datablock allows the provider to communicate to the client a new set of headers that it MUST sent along with every request instead of those entered by the user until a new initialization is performed (possibly,though not necessarily,using new header values entered by the user).
+The client MUST fully replace the values defined using the requirements from the `provider_configuration` datablock with the new values defined in this datablock.
 
 These new headers effectively act like cookies used on web sites.
 Providers SHOULD only use this datablock for purposes that are strictly required for the communication to work and MUST consider the potential legal implications when deciding to use this datablock for other purposes such as tracking or analytics.
