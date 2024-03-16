@@ -459,6 +459,7 @@ The response on this endpoint MUST have the following structure:
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `meta` | `meta` | yes | Metadata, kind: `initialization`. |
+| `id` | `string` | yes | An id that identifies this provider. It MUST match the regular expression `[a-z0-9-\.]`. Providers SHOULD use a domain name (e.g. `example.com` or `sub.example.com`) as the ID, if applicable in their use-case. |
 | `data` | `datablock_collection` | yes |  |
 
 - The `data` field MUST always contain the datablock `asset_list_query`.
