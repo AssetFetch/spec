@@ -5,6 +5,10 @@
 		"meta": {
 			"$ref": "../template/meta.json"
 		},
+		"id":{
+			"type":"string",
+			"pattern": "[a-z0-9-\\.]"
+		},
 		"data": {
 			"type": "object",
 			"additionalProperties": false,
@@ -35,6 +39,7 @@
 	},
 	"required": [
 		"meta",
-		"data"
+		"data",
+		"id"
 	]
 }
