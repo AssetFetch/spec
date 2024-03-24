@@ -11,7 +11,8 @@
 			"properties": {},
 			"patternProperties": {
 				"[0-9]+":{
-					"type":"string"
+					"type":"string",
+					"format": "uri"
 				}
 			},
 			"additionalProperties": false,
