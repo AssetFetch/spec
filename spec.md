@@ -866,7 +866,7 @@ An object that MUST conform to this format:
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `alt` | string | no | An "alt" String for the image. |
-| `uris` | object | yes | See table below. |
+| `uris` | object | yes | See structure described below. |
 
 #### `uris` Structure
 
