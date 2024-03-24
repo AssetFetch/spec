@@ -38,8 +38,6 @@ There are still numerous milestones to hit before a version 1.0 can be released.
 
 - Create JSON schema documents for every endpoint and datablock to help with validation.
 
-- Create a logo for the standard.
-
 - ...
 
 # JSON Schema
