@@ -1,4 +1,6 @@
-<img src="./brand/logo_wide_dark.png" alt="AssetFetch Logo" width="400"/>
+<p align="center">
+	<img src="./brand/logo_wide_dark.png" alt="AssetFetch Logo" width="400"/>
+</p>
 
 # The AssetFetch Specification
 
