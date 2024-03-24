@@ -1,3 +1,5 @@
+<img src="./brand/logo_wide_dark.png" alt="AssetFetch Logo" width="400"/>
+
 # The AssetFetch Specification
 
 **AssetFetch** is an HTTP- and JSON-based system for browsing, retrieving and handling/importing digital assets for media creation.
