@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Text Datablock",
-	"$id": "/datablock/text.json",
+	"$id": "af.datablock.text",
+	"description": "This datablock contains basic text information.",
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {

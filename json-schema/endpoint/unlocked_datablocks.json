@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Unlocked Datablocks Endpoint",
-	"$id": "/endpoint/unlocked_datablocks.json",
+	"$id": "af.endpoint.unlocked_datablocks",
+	"description": "This endpoint returns the previously withheld file_fetch.download datablock for a component.",
 	"type": "object",
 	"properties": {
 		"meta": {

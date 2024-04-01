@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Loose Material Definition Datablock",
-	"$id": "/datablock/loose_material_apply.json",
+	"$id": "af.datablock.loose_material_apply",
+	"description": "This datablock indicates that this component is part of a loose material (usually this means that the datablock is a PBR map).",
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {

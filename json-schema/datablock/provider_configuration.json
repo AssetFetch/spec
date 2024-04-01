@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Provider Configuration Datablock",
-	"$id": "/datablock/provider_configuration.json",
+	"$id": "af.datablock.provider_configuration",
+	"description": "This datablock contains provider configuration data, like which headers the provider expects to receive from the client.",
 	"type": "object",
 	"properties": {
 		"acquisition_uri": {

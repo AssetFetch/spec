@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Fixed Query Template",
-	"$id":"/template/fixed_query.json",
+	"$id":"af.template.fixed_query",
+	"description": "This template represents a fixed query.",
 	"type": "object",
 	"properties": {
 		"uri": {

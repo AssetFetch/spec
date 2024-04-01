@@ -1,7 +1,7 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Implementation List Query Datablock",
-	"$id": "/datablock/implementation_list_query.json",
-	"$comment": "This datablock is just a variable query with no other fields.",
+	"$id": "af.datablock.implementation_list_query.json",
+	"description": "This datablock is contains the query to list the implementations for an asset.",
 	"$ref":"../template/variable_query.json"
 }

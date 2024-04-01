@@ -1,8 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Dimensions (3D) Datablock",
-	"$id": "/datablock/dimensions.3d.json",
-	"$comment": "This datablock describes physical dimensions for 3D assets.",
+	"$id": "af.datablock.dimensions.3d",
+	"description": "This datablock describes physical dimensions for 3D assets.",
 	"type": "object",
 	"properties": {
 		"width_m": {

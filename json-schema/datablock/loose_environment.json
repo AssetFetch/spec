@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Loose Environment Datablock",
-	"$id": "/datablock/loose_environment.json",
+	"$id": "af.datablock.loose_environment",
+	"description": "This datablock describes a loose environment.",
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {

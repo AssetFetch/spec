@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "File Info Datablock",
-	"$id": "/datablock/file_into.json",
+	"$id": "af.datablock.file_info",
+	"description": "Datablock for general information about a component file.",
 	"type":"object",
     "properties": {
         "local_path":{

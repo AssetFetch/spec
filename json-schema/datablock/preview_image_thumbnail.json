@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Preview Image (Thumbnail) Datablock",
-	"$id": "/datablock/preview_image_thumbnail.json",
+	"$id": "af.datablock.preview_image_thumbnail",
+	"description": "This datablock describes the main thumbnail image (and its possible resolutions).",
 	"type": "object",
 	"properties": {
 		"alt":{
