@@ -608,24 +608,33 @@ This template describes a variable query. The individual parameter objects conta
 | `parameters` | array of `parameter` | yes| The configurable parameters for this query. |
 
 #### `parameter` Structure
+A parameter describes the attributes of one parameter for the query and how the client can present this to its user.
+
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `type` | string | yes| One of `text` / `boolean` / `fixed` / `select` / `multiselect` |
-| `name` | string | yes| Name of the HTTP parameter. |
-| `title` | string | no| Title to display to the user. |
-| `default` | string | no | The default value for this parameter. It becomes the only possible value of this parameter if type `fixed` is used. |
-| `mandatory` | boolean | no | Whether this parameter is mandatory and must be set to a non-empty string. |
-| `choices` | array of string | only if `select` or `multiselect` type is used | Possible choices when type `select` or `multiselect` is used. |
-| `delimiter` | string | Only if `multiselect` type is used. | Delimiter to use for selected choices when type `multiselect` is used. |
+| `type` | string | yes | One of `text` / `boolean`  / `select` / `multiselect` / `fixed` |
+| `id` | string | yes | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key if it is sending a response using this parameter. |
+| `title` | string | no | Title to display to the user. |
+| `default` | string | no | The default value for this parameter. It becomes the only possible value for this parameter if type `fixed` is used. |
+| `mandatory` | boolean | no, default=`false` | `True`: This parameter is mandatory and must be set to a non-empty string. Otherwise it is optional. |
+| `choices` | array of `choice` | only if `select` or `multiselect` type is used | This field contains the possible choices when the `select` or `multiselect` type is used. |
+
+#### `choice` Structure
+| Field | Format | Required | Description |
+| --- | --- |--- | --- |
+| `value` | string | yes | The value that the client MUST use in its HTTP response if the user has selected this choice. |
+| `title` | string | yes | The title that the client SHOULD display to the user to represent this choice. |
+
 
 ### `fixed_query`
 This template describes a fixed query that can be sent by the client to the provider without additional user input or configuration.
+See [Variable and Fixed Queries](#variable-and-fixed-queries) for more details.
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `uri` | string | yes | The URI to contact for getting more results. |
 | `method` | string | yes | MUST be one of `get` or `post` |
-| `payload` | object with string keys and string properties | yes  | The payload for the request.  |
+| `payload` | object with string properties | yes  | The keys and values for the payload of the request.  |
 
 
 
