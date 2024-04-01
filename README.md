@@ -1,3 +1,7 @@
+<p align="center">
+	<img src="./brand/logo_wide_dark.png" alt="AssetFetch Logo" width="400"/>
+</p>
+
 # The AssetFetch Specification
 
 **AssetFetch** is an HTTP- and JSON-based system for browsing, retrieving and handling/importing digital assets for media creation.
@@ -33,8 +37,6 @@ There are still numerous milestones to hit before a version 1.0 can be released.
 - Create more extension-specific datablock definitions for many more formats, both open and application-specific ones (`max`(3DSMax),`ma/mb`(Maya),`uasset`(Unreal Engine),`usda/c/z` (OpenUSD), `gltf/b`(GLTF),...) 
 
 - Create JSON schema documents for every endpoint and datablock to help with validation.
-
-- Create a logo for the standard.
 
 - ...
 
