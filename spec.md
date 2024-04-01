@@ -101,18 +101,6 @@ When a client instructs its host to load a component and this component causes m
 
 Datablocks are extremely flexible and sometimes reusable pieces of metadata that enable the communication of specific attributes, instructions how to parse other data elsewhere, relationships, or how to properly interact with a provider's API in the first place.
 
-### Variable Query
-> An HTTP(S) request defined by its URI, method and a payload _that has been (partly) configured by the user_ which is sent by the client to the provider in order to receive data in response.
-
-- A user searching for all assets with the keyword "apple" requires the use of a variable query.
-- A user requesting to download the 2048px-jpg-version of the PBR material "paving_0042" necessitates a variable query to fetch the implementation(s) available for these parameters.
-
-### Fixed Query
-> An HTTP(S) request defined by its URI, method and payload _that is not configurable by the user (and might not even be explicitly requested by them)_ which is sent by the client to the provider in order to receive data in response.
-
-- A client automatically reloading the user's account balance from the provider after purchasing an asset is an implicit query. The user's input such as authentication headers entered earlier may technically have an impact on the query but its request payload is generated without specific user-input for this query.
-- The file download of a specific model requires the use of a fixed query. It may be initiated by the user but its exact parameters are determined by data returned by the provider in the response to an earlier *variable query* for said model's files.
-
 
 
 
@@ -141,7 +129,7 @@ This initialization endpoint is freely accessible via HTTP GET and communicates 
 
 
 ### Authentication (optional)
-The provider MAY require custom authentication headers, in which case the client MUST send these headers along with every `variable_query` or `fixed_query` it performs for that provider, except for initialization.
+The provider MAY require custom authentication headers, in which case the client MUST send these headers along with every request it performs to that provider, except for initialization.
 The names of these headers, if any, MUST be declared by the provider during the initialization.
 The client obtains the required header values, such as passwords or randomly generated access tokens, from the user through a GUI or from a cache or other storage location.
 The implementation of this possible storage is not part of the specification and left up to the client implementor.
@@ -325,19 +313,58 @@ sequenceDiagram
 
 
 
-# Communication
+# HTTP Communication
 
-## Query payloads
+This section describes general instructions for all HTTP communication described in this specification.
 
-The payload of both the `fixed_query` and the `variable_query` from a client to a provider MUST be encoded as [`application/x-www-form-urlencoded`](https://url.spec.whatwg.org/#application/x-www-form-urlencoded), the same format that is used by standard HTML forms.
-When using variable queries, lists of items are implemented using a delimiter of the provider's choice. This choice is communicated by the provider to the client along with the other query parameters.
+## Variable and Fixed Queries
 
-An example for a valid query payload is shown below. 
+In AssetFetch, there are numerous instances where the provider needs to describe a possible HTTP(s) request that a client can make to perform a certain action or obtain data, such as browsing for assets, unlocking components or downloading files.
+In this context, the specification differentiates between "variable" and "fixed" queries.
+
+### Variable Query
+
+A **variable query** is an HTTP(S) request defined by its URI, method and a payload _that has been (partly) configured by the user_ which is sent by the client to the provider in order to receive data in response.
+For this purpose, the provider sends the client a list of parameters that it MAY (or MUST, depending on the configuration sent by the provider) use to construct the actual HTTP query to the provider.
+For the client, handling a variable query usually involves drawing a GUI and asking the user to provide the values to be sent to the provider.
+
+A typical example for a variable query is a query for listing assets that allows the user to specify a list of keywords before the request is sent to the provider.
+
+#### Variable Query parameters
+
+A variable query is composed of its URI, HTTP method and one or multiple parameters, each of which the provider MAY mark as mandatory.
+For describing the kinds of adjustable parameters a provider may offer for a request, it MUST choose one of the following parameter types:
+
+- `text`: A plain text field, allowing for one line of arbitrary text.
+- `boolean`: A binary choice with no further labels for either state (apart from the title property), for example a tick-box. When sending the request, the client MUST encode a `true` (ticked) choice with the parameter value `1`, and a `false` (unticked) choice with the value `0`.
+- `select`: A list of possible options, each represented by a string. If the parameter is marked as mandatory, the client MUST ensure that the user has chosen exactly one option. Otherwise the client MUST allow the user to pick one or none of the choices. A possible way of visualizing this parameter would be a drop-down menu or similar GUI element.
+- `multiselect`: A list of possible options, each represented by a string. If the parameter is marked as mandatory, the client MUST ensure that the user has picked 1 or multiple options. If the parameter is marked as non-mandatory, the client MUST allow the user to pick any number of options, including none. A possible way of visualizing this parameter would be a list of tick-boxes which the user can arbitrarily tick. If multiple values are selected for a parameter by the user, the client MUST concatenate them with a comma (`,`) when sending the HTTP request.
+- `fixed`: A fixed value that the client MUST include in its request verbatim. The client MAY show this value to the user, but MUST NOT allow any changes to this value.
+
+The full formal description of a variable query object can be found in the [`variable_query` datablock template](#variable_query).
+
+### Fixed Query
+
+A **fixed query** is an HTTP(S) request defined by its URI, method and a payload _that is not configurable by the user_  which is sent by the client to the provider in order to receive data in response.
+
+In this case the provider only transmits the description of the query to the client whose only decision is whether or not to actually send the query with the given parameters to the provider.
+
+A typical example for a fixed query is a download option for a file where the client only has the choice to invoke or not invoke the download.
+
+The full formal description of a variable query object can be found in the [`fixed_query` datablock template](#fixed_query).
+
+## Request payloads
+
+The payload of all queries from a client to a provider MUST be encoded as [`application/x-www-form-urlencoded`](https://url.spec.whatwg.org/#application/x-www-form-urlencoded), the same format that is used by standard HTML forms.
+
+Examples for a valid query payload are shown below. 
 ```
 tags=wood,old&min_resolution=512
+lod=0
+query=&categories=marble,granite
 ```
 
-This encoding for query data is already extremely widespread and can therefore usually be handled by using standard libraries, both on the provider- and on the client-side.
+This encoding for request data is already extremely widespread and can therefore usually be handled by using standard libraries, both on the provider- and on the client-side.
 
 ## Response payloads
 
@@ -599,7 +626,8 @@ They exist to eliminate the need to re-specify the same data structure in two di
 The templates can not be used directly as datablocks under their template name.
 
 ### `variable_query`
-This template describes a variable query. The individual parameter objects contain information on how to get the right values for making the query from the user through a GUI or other means of input.
+This template describes an HTTP query whose parameters are controllable by the user.
+See [Variable and Fixed Queries](#variable-and-fixed-queries) for more details.
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
