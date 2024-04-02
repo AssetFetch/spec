@@ -44,18 +44,25 @@
 						"type": "boolean"
 					},
 					"choices": {
-						"type": "array",
-						"items": {
-							"type": "object",
-							"properties": {
-								"value": {
-									"type": "string"
-								},
-								"title": {
-									"type": "string"
+						"anyOf": [
+							{
+								"type": "null"
+							},
+							{
+								"type": "array",
+								"items": {
+									"type": "object",
+									"properties": {
+										"value": {
+											"type": "string"
+										},
+										"title": {
+											"type": "string"
+										}
+									}
 								}
 							}
-						}
+						]
 					}
 				},
 				"if": {
@@ -69,6 +76,11 @@
 					}
 				},
 				"then": {
+					"properties": {
+						"choices": {
+							"minItems": 1
+						}
+					},
 					"required": [
 						"choices"
 					]
