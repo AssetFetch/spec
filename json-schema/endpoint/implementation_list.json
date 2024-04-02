@@ -103,6 +103,11 @@
 											"required": [
 												"file_fetch.download"
 											]
+										},
+										{
+											"required": [
+												"unlock_link"
+											]
 										}
 									],
 									"$comment": "The 'allOf' section ensures that no two datablocks with the same prefix are used.",
