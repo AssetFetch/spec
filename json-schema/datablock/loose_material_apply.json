@@ -3,14 +3,21 @@
 	"title": "Loose Material Application Datablock",
 	"$id": "af.datablock.loose_material_apply",
 	"description": "This datablock describes how to apply a loose material to the current component.",
-	"type": "object",
-	"additionalProperties": false,
-	"properties": {
-		"material_name":{
-			"type":"string"
-		},
-		"apply_selectively_to":{
-			"type":["string","null"]
+	"type": "array",
+	"additionalItems": false,
+	"items": {
+		"type": "object",
+		"additionalProperties": false,
+		"properties": {
+			"material_name": {
+				"type": "string"
+			},
+			"apply_selectively_to": {
+				"type": [
+					"string",
+					"null"
+				]
+			}
 		}
 	},
 	"required": [
