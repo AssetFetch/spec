@@ -10,14 +10,12 @@
 			"type": "string"
 		},
 		"display_tier": {
-			"type":"string"
+			"type": "string"
 		},
-        "display_icon_uri":{
-            "type":"string",
-            "format": "uri"
-        }
+		"display_icon_uri": {
+			"type": "string",
+			"format": "uri"
+		}
 	},
-	"required": [
-		"title"
-	]
+	"required": []
 }
