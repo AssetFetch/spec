@@ -35,7 +35,7 @@
 			}
 		},
 		"then":{
-			"required": ["price","query"]
+			"required": ["price","unlock_query"]
 		}
 	}
 }
