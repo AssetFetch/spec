@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Web References Datablock",
-	"$id": "/datablock/web_references.json",
+	"$id": "af.datablock.web_references",
+	"description": "This datablock describes web references that can be attached to other resources.",
 	"type": "array",
 	"additionalItems": false,
 	"items": {

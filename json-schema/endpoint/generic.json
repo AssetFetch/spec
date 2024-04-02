@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id":"generic.json",
+	"$id":"af.endpoint.generic",
 	"type": "object",
 	"properties": {
 		"meta": {

@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Unlocking Balance Datablock",
-	"$id": "/datablock/unlock_balance.json",
+	"$id": "af.datablock.unlock_balance",
+	"description": "This datablock contains information about the user's account balance.",
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {

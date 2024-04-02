@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Unlock Link Datablock",
-	"$id": "/datablock/unlock_link.json",
+	"$id": "af.datablock.unlock_link",
+	"description": "This datablock describes which unlocking query must be triggered for this component to become accessible and how to then get the proper download link for a component.",
 	"type":"object",
 	"properties": {
 		"unlock_query_id":{

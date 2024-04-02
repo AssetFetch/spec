@@ -1,6 +1,7 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id":"/template/meta.json",
+	"$id":"af.template.meta",
+	"description": "This template contains metadata for every endpoint.",
 	"type": "object",
 	"properties": {
 		"response_id": {

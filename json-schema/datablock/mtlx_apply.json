@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "MTLX Apply Material Datablock",
-	"$id": "/datablock/mtlx_apply_material.json",
+	"$id": "af.datablock.mtlx_apply_material",
+	"description": "This datablock contains information about how to apply a referenced mtlx material from another component to the current component.",
 	"type": "object",
 	"properties": {
 		"mtlx_component": {

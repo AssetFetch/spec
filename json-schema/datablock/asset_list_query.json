@@ -1,7 +1,7 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Asset List Query Datablock",
-	"$id": "/datablock/asset_list_query.json",
-	"$comment": "This datablock is just a variable query with no other fields.",
+	"$id": "af.datablock.asset_list_query",
+	"description": "Datablock containing the variable query for listing assets.",
 	"$ref":"../template/variable_query.json"
 }

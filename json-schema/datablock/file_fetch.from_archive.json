@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "File Fetch Datablock",
-	"$id": "/datablock/file_fetch.from_archive.json",
+	"$id": "af.datablock.file_fetch.from_archive",
+	"description": "This datablock contains information about how to load a component file from an archive (represented as another component).",
 	"type":"object",
 	"properties": {
 		"archive_component_name":{

@@ -1,7 +1,8 @@
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "License Datablock",
-	"$id": "/datablock/license.json",
+	"$id": "af.datablock.license",
+	"description": "This datablock contains licensing information for an asset or an entire provider",
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {
