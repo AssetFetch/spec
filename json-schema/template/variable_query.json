@@ -25,12 +25,12 @@
 						"enum": [
 							"text",
 							"boolean",
-							"hidden",
+							"fixed",
 							"select",
 							"multiselect"
 						]
 					},
-					"name": {
+					"id": {
 						"type": "string"
 					},
 					"title": {
@@ -45,44 +45,33 @@
 					"choices": {
 						"type": "array",
 						"items": {
-							"type": "string"
+							"type": "object",
+							"properties": {
+								"value": {
+									"type": "string"
+								},
+								"title": {
+									"type": "string"
+								}
+							}
 						}
-					},
-					"delimiter": {
-						"type": "string"
 					}
 				},
-				"allOf": [
-					{
-						"if": {
-							"properties": {
-								"type": {
-									"const": "select"
-								}
-							}
-						},
-						"then": {
-							"required": [
-								"choices"
-							]
-						}
-					},
-					{
-						"if": {
-							"properties": {
-								"type": {
-									"const": "multiselect"
-								}
-							}
-						},
-						"then": {
-							"required": [
-								"choices",
-								"delimiter"
+				"if": {
+					"properties": {
+						"type": {
+							"enum": [
+								"select",
+								"multiselect"
 							]
 						}
 					}
-				],
+				},
+				"then": {
+					"required": [
+						"choices"
+					]
+				},
 				"required": [
 					"type",
 					"name"
