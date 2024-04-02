@@ -21,21 +21,34 @@
 			"unlock_query": {
 				"$ref": "../template/fixed_query.json"
 			},
-			"unlock_query_fallback_uri":{
-				"type":"string",
-				"format": "uri"
+			"unlock_query_fallback_uri": {
+				"oneOf": [
+					{
+						"type": "string",
+						"format": "uri"
+					},
+					{
+						"type": "null"
+					}
+				]
 			}
 		},
-		"required": ["id","unlocked"],
+		"required": [
+			"id",
+			"unlocked"
+		],
 		"if": {
 			"properties": {
-				"unlocked":{
-					"const":false
+				"unlocked": {
+					"const": false
 				}
 			}
 		},
-		"then":{
-			"required": ["price","unlock_query"]
+		"then": {
+			"required": [
+				"price",
+				"unlock_query"
+			]
 		}
 	}
 }
