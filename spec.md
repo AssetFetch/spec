@@ -394,7 +394,7 @@ In this case the provider only transmits the description of the query to the cli
 
 A typical example for a fixed query is a download option for a file where the client only has the choice to invoke or not invoke the download.
 
-The full formal description of a variable query object can be found in the [`fixed_query` datablock template](#fixed_query).
+The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#fixed_query).
 
 
 
