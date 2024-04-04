@@ -317,63 +317,27 @@ sequenceDiagram
 
 This section describes general instructions for all HTTP communication described in this specification.
 
-## Variable and Fixed Queries
-
-In AssetFetch, there are numerous instances where the provider needs to describe a possible HTTP(s) request that a client can make to perform a certain action or obtain data, such as browsing for assets, unlocking components or downloading files.
-In this context, the specification differentiates between "variable" and "fixed" queries.
-
-### Variable Query
-
-A **variable query** is an HTTP(S) request defined by its URI, method and a payload _that has been (partly) configured by the user_ which is sent by the client to the provider in order to receive data in response.
-For this purpose, the provider sends the client a list of parameters that it MAY (or MUST, depending on the configuration sent by the provider) use to construct the actual HTTP query to the provider.
-For the client, handling a variable query usually involves drawing a GUI and asking the user to provide the values to be sent to the provider.
-
-A typical example for a variable query is a query for listing assets that allows the user to specify a list of keywords before the request is sent to the provider.
-
-#### Variable Query parameters
-
-A variable query is composed of its URI, HTTP method and one or multiple parameters, each of which the provider MAY mark as mandatory.
-For describing the kinds of adjustable parameters a provider may offer for a request, it MUST choose one of the following parameter types:
-
-- `text`: A plain text field, allowing for one line of arbitrary text.
-- `boolean`: A binary choice with no further labels for either state (apart from the title property), for example a tick-box. When sending the request, the client MUST encode a `true` (ticked) choice with the parameter value `1`, and a `false` (unticked) choice with the value `0`.
-- `select`: A list of possible options, each represented by a string. If the parameter is marked as mandatory, the client MUST ensure that the user has chosen exactly one option. Otherwise the client MUST allow the user to pick one or none of the choices. A possible way of visualizing this parameter would be a drop-down menu or similar GUI element.
-- `multiselect`: A list of possible options, each represented by a string. If the parameter is marked as mandatory, the client MUST ensure that the user has picked 1 or multiple options. If the parameter is marked as non-mandatory, the client MUST allow the user to pick any number of options, including none. A possible way of visualizing this parameter would be a list of tick-boxes which the user can arbitrarily tick. If multiple values are selected for a parameter by the user, the client MUST concatenate them with a comma (`,`) when sending the HTTP request.
-- `fixed`: A fixed value that the client MUST include in its request verbatim. The client MAY show this value to the user, but MUST NOT allow any changes to this value.
-
-The full formal description of a variable query object can be found in the [`variable_query` datablock template](#variable_query).
-
-### Fixed Query
-
-A **fixed query** is an HTTP(S) request defined by its URI, method and a payload _that is not configurable by the user_  which is sent by the client to the provider in order to receive data in response.
-
-In this case the provider only transmits the description of the query to the client whose only decision is whether or not to actually send the query with the given parameters to the provider.
-
-A typical example for a fixed query is a download option for a file where the client only has the choice to invoke or not invoke the download.
-
-The full formal description of a variable query object can be found in the [`fixed_query` datablock template](#fixed_query).
-
 ## Request payloads
 
-The payload of all queries from a client to a provider MUST be encoded as [`application/x-www-form-urlencoded`](https://url.spec.whatwg.org/#application/x-www-form-urlencoded), the same format that is used by standard HTML forms.
+The payload of all HTTP requests from a client to a provider MUST be encoded as [`application/x-www-form-urlencoded`](https://url.spec.whatwg.org/#application/x-www-form-urlencoded), the same format that is used by standard HTML forms.
 
 Examples for a valid query payload are shown below. 
 ```
-tags=wood,old&min_resolution=512
+q=wood,old&min_resolution=512
 lod=0
-query=&categories=marble,granite
+query=&category=marble
 ```
 
-This encoding for request data is already extremely widespread and can therefore usually be handled by using standard libraries, both on the provider- and on the client-side.
+This encoding for request data is already extremely widespread and can therefore usually be handled using standard libraries, both on the provider- and on the client-side.
 
 ## Response payloads
 
-The payload of all responses from a provider MUST be valid JSON and SHOULD use the Content-Type header `application/json`.
-The exact structure of the data for individual endpoints is specified in the [Endpoint section](#endpoint-list).
+The payload of all HTTP responses from a provider MUST be valid [JSON](https://www.json.org/) and SHOULD use the `Content-Type` header `application/json`.
+The exact structure of the data for individual endpoints and other API resources is specified in the [Endpoint section](#endpoint-list).
 
 ## User-Agent
 
-The client SHOULD send an appropriate user-agent header as defined in the [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#field.user-agent).
+The client SHOULD send an appropriate user-agent header as defined in [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#field.user-agent).
 
 If the client is embedded in a host application, for example as an addon inside a 3D suite, it SHOULD set its first `product` and `product-version` identifier based on the "parent" application and then describe the product and version of the client plugin itself afterwards.
 
@@ -384,6 +348,55 @@ cinema4d/2024.2 MyAssetFetchPlugin/1.2.3
 3dsmax/2023u1 AssetFetchFor3dsMax/0.5.7
 blender/4.0.3 BlenderAssetFetch/v17
 ```
+
+## Variable and Fixed Queries
+
+In AssetFetch, there are several instances where the provider needs to describe a possible HTTP request that a client can make to perform a certain action or obtain data, such as browsing for assets, unlocking components or downloading files.
+In this context, the specification differentiates between "variable" and "fixed" queries.
+
+### Variable Query
+
+A **variable query** is an HTTP(S) request defined by its URI, method and a payload _that has been (partly) configured by the user_ which is sent by the client to the provider in order to receive data in response.
+For this purpose, the provider sends the client a list of parameters that it MAY (or MUST, depending on the configuration sent by the provider) use to construct the actual HTTP query to the provider.
+For the client, handling a variable query usually involves drawing a GUI and asking the user to provide the values to be sent to the provider.
+
+A simple example for a variable query is a query for listing assets that allows the user to specify a list of keywords before the request is sent to the provider.
+
+#### Variable Query Parameters
+
+A variable query is composed of its URI, HTTP method and one or multiple parameters.
+The full field list of a variable query object can be found in the [`variable_query` datablock template](#variable_query).
+
+If the provider decides to offer one or multiple adjustable parameters, it MUST choose one of the following parameter types for each parameter:
+
+`text`: A plain text field, allowing for one line of arbitrary text. If the parameter is marked as mandatory, the client MUST respond with a non-empty string value for this parameter.
+Otherwise, it MAY also respond with an empty string or omit this parameter from the query entirely.
+
+`boolean`: A binary choice with no further labels for either state (apart from the title property), for example a tick-box.
+When sending the request, the client MUST encode a `true` (ticked) choice with the parameter value `1`, and a `false` (unticked) choice with the value `0`.
+If the parameter is marked as mandatory, the client MUST respond with one of these two choices.
+Otherwise, it MAY omit this parameter from the query entirely.
+
+`select`: A list of possible options, each represented by a string.
+If the parameter is marked as mandatory, the client MUST ensure that the user has chosen exactly one option.
+Otherwise the client MUST allow the user to pick one or none of the choices, in which case the client MAY omit the parameter from the query entirely.
+
+`fixed`: A fixed value that the client MUST include in its request verbatim.
+The client MAY show this value to the user, but MUST NOT allow any changes to this value.
+Declaring this parameter mandatory or non-mandatory has no defined meaning.
+Clients SHOULD ignore any such declarations by the provider.
+
+### Fixed Query
+
+A **fixed query** is an HTTP(S) request defined by its URI, method and a payload _that is not configurable by the user_  which is sent by the client to the provider in order to receive data in response.
+
+In this case the provider only transmits the description of the query to the client whose only decision is whether or not to actually send the query with the given parameters to the provider.
+
+A typical example for a fixed query is a download option for a file where the client only has the choice to invoke or not invoke the download.
+
+The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#fixed_query).
+
+
 
 ## HTTP Codes and Error Handling
 
@@ -640,12 +653,12 @@ A parameter describes the attributes of one parameter for the query and how the 
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `type` | string | yes | One of `text` / `boolean`  / `select` / `multiselect` / `fixed` |
+| `type` | string | yes | One of `text` / `boolean`  / `select` / `fixed` |
 | `id` | string | yes | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key if it is sending a response using this parameter. |
 | `title` | string | no | Title to display to the user. |
 | `default` | string | no | The default value for this parameter. It becomes the only possible value for this parameter if type `fixed` is used. |
-| `mandatory` | boolean | no, default=`false` | `True`: This parameter is mandatory and must be set to a non-empty string. Otherwise it is optional. |
-| `choices` | array of `choice` | only if `select` or `multiselect` type is used | This field contains the possible choices when the `select` or `multiselect` type is used. |
+| `mandatory` | boolean | no, default=`false` | This field describes whether a parameter is mandatory (see below). |
+| `choices` | array of `choice` | only if `select` type is used | This field contains the possible choices when the `select` type is used. |
 
 #### `choice` Structure
 | Field | Format | Required | Description |
