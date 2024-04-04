@@ -27,8 +27,7 @@
 							"text",
 							"boolean",
 							"fixed",
-							"select",
-							"multiselect"
+							"select"
 						]
 					},
 					"id": {
@@ -68,10 +67,7 @@
 				"if": {
 					"properties": {
 						"type": {
-							"enum": [
-								"select",
-								"multiselect"
-							]
+							"const":"select"
 						}
 					}
 				},

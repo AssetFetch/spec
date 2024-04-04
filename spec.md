@@ -323,9 +323,9 @@ The payload of all HTTP requests from a client to a provider MUST be encoded as 
 
 Examples for a valid query payload are shown below. 
 ```
-tags=wood&tags=old&min_resolution=512
+q=wood,old&min_resolution=512
 lod=0
-query=&categories=marble&categories=granite
+query=&category=marble
 ```
 
 This encoding for request data is already extremely widespread and can therefore usually be handled using standard libraries, both on the provider- and on the client-side.
@@ -381,23 +381,10 @@ Otherwise, it MAY omit this parameter from the query entirely.
 If the parameter is marked as mandatory, the client MUST ensure that the user has chosen exactly one option.
 Otherwise the client MUST allow the user to pick one or none of the choices, in which case the client MAY omit the parameter from the query entirely.
 
-`multiselect`: A list of possible options, each represented by a string.
-If the parameter is marked as mandatory, the client MUST ensure that the user has picked 1 or multiple options.
-Otherwise, it MUST also allow the user to pick none of the options, in which case the parameter MAY be omitted from the query entirely.
-If the user has selected multiple values, the client MUST encode each value as a new tuple when constructing the query payload.
-
 `fixed`: A fixed value that the client MUST include in its request verbatim.
 The client MAY show this value to the user, but MUST NOT allow any changes to this value.
 Declaring this parameter mandatory or non-mandatory has no defined meaning.
 Clients SHOULD ignore any such declarations by the provider.
-
-#### Constructing an HTTP Request From Variable Query Parameters
-
-
-
-https://url.spec.whatwg.org/#urlencoded-serializing
-
-
 
 ### Fixed Query
 
@@ -666,14 +653,12 @@ A parameter describes the attributes of one parameter for the query and how the 
 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
-| `type` | string | yes | One of `text` / `boolean`  / `select` / `multiselect` / `fixed` |
+| `type` | string | yes | One of `text` / `boolean`  / `select` / `fixed` |
 | `id` | string | yes | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key if it is sending a response using this parameter. |
 | `title` | string | no | Title to display to the user. |
 | `default` | string | no | The default value for this parameter. It becomes the only possible value for this parameter if type `fixed` is used. |
 | `mandatory` | boolean | no, default=`false` | This field describes whether a parameter is mandatory (see below). |
-| `choices` | array of `choice` | only if `select` or `multiselect` type is used | This field contains the possible choices when the `select` or `multiselect` type is used. |
-
-If a parameter is marked as `mandatory`, this implies the following 
+| `choices` | array of `choice` | only if `select` type is used | This field contains the possible choices when the `select` type is used. |
 
 #### `choice` Structure
 | Field | Format | Required | Description |
