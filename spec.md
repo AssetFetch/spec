@@ -520,6 +520,7 @@ The response on this endpoint MUST have the following structure:
 | `assets` | array of `asset` | yes |  |
 
 - The `data` field MAY contain the datablocks `next_query`, `response_statistics` and/or `text`.
+- The `assets` field MUST NOT contain more than 100 entries for one response. If more assets than this are contained in the response, the `next_query` datablock SHOULD be used to define a new query that the client can use to fetch more results.
 
 ### `asset` Structure
 
