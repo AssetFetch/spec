@@ -20,5 +20,10 @@
             "type":"string",
             "enum": ["file_active","file_passive","archive"]
         }
-    }
+    },
+	"required": [
+		"local_path",
+		"extension",
+		"behavior"
+	]
 }
