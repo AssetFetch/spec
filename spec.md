@@ -676,7 +676,7 @@ See [Variable and Fixed Queries](#variable-and-fixed-queries) for more details.
 | --- | --- |--- | --- |
 | `uri` | string | yes | The URI to contact for getting more results. |
 | `method` | string | yes | MUST be one of `get` or `post` |
-| `payload` | object with string properties | yes  | The keys and values for the payload of the request.  |
+| `payload` | object with string properties | no  | The keys and values for the payload of the request.  |
 
 
 
