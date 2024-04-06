@@ -1,4 +1,4 @@
-# AssetFetch Specification - Draft Version 0.2
+# AssetFetch Specification - Version 0.2
 
 This document specifies **AssetFetch**, an HTTP- and JSON-based system for browsing, retrieving and handling/importing digital assets for media creation.
 The AssetFetch Protocol aims to provide a standardized way for artists to browse libraries of downloadable assets offered by providers *outside* their current production environment/pipeline, such as those of commercial or non-profit 3D asset vendors, marketplaces or other repositories of models, textures or any other kind of digital assets.
@@ -347,6 +347,7 @@ Examples for proper user-agents are:
 cinema4d/2024.2 MyAssetFetchPlugin/1.2.3
 3dsmax/2023u1 AssetFetchFor3dsMax/0.5.7
 blender/4.0.3 BlenderAssetFetch/v17
+standaloneAssetFetchClient/1.4.2.7
 ```
 
 ## Variable and Fixed Queries
@@ -395,8 +396,6 @@ In this case the provider only transmits the description of the query to the cli
 A typical example for a fixed query is a download option for a file where the client only has the choice to invoke or not invoke the download.
 
 The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#fixed_query).
-
-
 
 ## HTTP Codes and Error Handling
 
@@ -505,7 +504,7 @@ The response on this endpoint MUST have the following structure:
 - The `data` field MUST always contain the datablock `asset_list_query`.
 - The `data` field SHOULD always contain the datablock `text`.
 - The `data` field MAY contain the datablocks `branding`, `authors`, `license`, and/or `web_references`.
-- The `data` field MUST contain the datablock `headers` if other parts of the API require header-based authentication to function. It MAY still be used for other purposes.
+- The `data` field MUST contain the datablock `headers` if other parts of the API require header-based authentication to function.
 
 ## Asset List
 
@@ -519,7 +518,7 @@ The response on this endpoint MUST have the following structure:
 | `data` | `datablock_collection` | yes |  |
 | `assets` | array of `asset` | yes |  |
 
-- The `data` field MAY contain the datablocks `next_query`, `response_statistics` and/or `text`.
+- The `data` field MAY contain the datablocks `next_query` and/or `response_statistics`.
 - The `assets` field MUST NOT contain more than 100 entries for one response. If more assets than this are contained in the response, the `next_query` datablock SHOULD be used to define a new query that the client can use to fetch more results.
 
 ### `asset` Structure
@@ -832,7 +831,7 @@ The destination is defined via the `file_info` datablock.
 
 These datablocks relate to how assets and their details are displayed to the user.
 
-### [Init?/Asset?/AssetList?/ImplementationList?/Implementation?/Component?] `text`
+### [Init?/Asset?/Implementation?/Component?] `text`
 General text information to be displayed to the user.
 
 | Field | Format | Required | Description |
@@ -1085,8 +1084,7 @@ This allows the use of `.mtlx` files with mesh file formats that do not have the
 ### Using loose material declarations
 The workflow outlined in the previous section is not always easily achievable since not all file 3D file formats offer up-to-date (or any) support for defining materials.
 In those cases it is common practice to simply distribute the necessary material maps along with the mesh files without any concrete machine-readable description for how the maps should be applied
-The `loose_material_*` datablocks exist to limit the negative impacts of this limitation.
-The `loose_material_define` and `loose_material_apply` make it possible to define basic PBR materials through datablocks on the individual map components and reference them on the mesh component.
+The `loose_material_*` datablocks exist to limit the negative impacts of this limitation. They make it possible to define basic PBR materials through datablocks on the individual map components and reference them on the mesh component.
 
 Providers SHOULD make use of this notation if, and only if, other more native representations of the material are unavailable of severely insufficient.
 

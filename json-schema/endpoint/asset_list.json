@@ -17,9 +17,6 @@
 				},
 				"response_statistics": {
 					"$ref":"../datablock/response_statistics.json"
-				},
-				"text": {
-					"$ref":"../datablock/text.json"
 				}
 			}
 		},
