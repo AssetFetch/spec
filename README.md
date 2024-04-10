@@ -36,8 +36,6 @@ There are still numerous milestones to hit before a version 1.0 can be released.
 
 - Create more extension-specific datablock definitions for many more formats, both open and application-specific ones (`max`(3DSMax),`ma/mb`(Maya),`uasset`(Unreal Engine),`usda/c/z` (OpenUSD), `gltf/b`(GLTF),...) 
 
-- Create JSON schema documents for every endpoint and datablock to help with validation.
-
 - ...
 
 # JSON Schema
