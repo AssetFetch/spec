@@ -1,0 +1,24 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "File Handling Datablock",
+	"$id": "af.datablock.file_handle",
+	"description": "Datablock for file handling imformation.",
+	"type": "object",
+	"properties": {
+		"local_path": {
+			"type": "string"
+		},
+		"behavior": {
+			"type": "string",
+			"enum": [
+				"file_active",
+				"file_passive",
+				"archive"
+			]
+		}
+	},
+	"required": [
+		"local_path",
+		"behavior"
+	]
+}

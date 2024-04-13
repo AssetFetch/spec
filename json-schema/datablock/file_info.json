@@ -3,27 +3,18 @@
 	"title": "File Info Datablock",
 	"$id": "af.datablock.file_info",
 	"description": "Datablock for general information about a component file.",
-	"type":"object",
-    "properties": {
-        "local_path":{
-            "type":"string"
-        },
-        "length":{
-            "type":"integer",
-            "minimum": 0
-        },
-        "extension":{
-            "type":"string",
-            "pattern": "(\\.[a-z0-9]+)+"
-        },
-        "behavior":{
-            "type":"string",
-            "enum": ["file_active","file_passive","archive"]
-        }
-    },
+	"type": "object",
+	"properties": {
+		"length": {
+			"type": "integer",
+			"minimum": 0
+		},
+		"extension": {
+			"type": "string",
+			"pattern": "(\\.[a-z0-9]+)+"
+		}
+	},
 	"required": [
-		"local_path",
-		"extension",
-		"behavior"
+		"extension"
 	]
 }

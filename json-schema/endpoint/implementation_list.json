@@ -59,11 +59,14 @@
 										"file_fetch.download": {
 											"$ref": "../datablock/file_fetch.download.json"
 										},
-										"file_info":{
+										"file_fetch.download_post_unlock": {
+											"$ref": "../datablock/file_fetch.download_post_unlock.json"
+										},
+										"file_info": {
 											"$ref": "../datablock/file_info.json"
 										},
-										"unlock_link": {
-											"$ref": "../datablock/unlock_link.json"
+										"file_handle": {
+											"$ref": "../datablock/file_handle.json"
 										},
 										"loose_environment": {
 											"$ref": "../datablock/loose_environment.json"
@@ -88,7 +91,8 @@
 										}
 									},
 									"required": [
-										"file_info"
+										"file_info",
+										"file_handle"
 									],
 									"oneOf": [
 										{
@@ -103,7 +107,7 @@
 										},
 										{
 											"required": [
-												"unlock_link"
+												"file_fetch.download_post_unlock"
 											]
 										}
 									],
