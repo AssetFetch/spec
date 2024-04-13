@@ -365,30 +365,29 @@ A simple example for a variable query is a query for listing assets that allows 
 
 #### Variable Query Parameters
 
-A variable query is composed of its URI, HTTP method and optionally one or multiple parameter definitions that are used to determine the body of the HTTP request.
 The full field list of a variable query object can be found in the [`variable_query` datablock template](#variable_query).
+A variable query is composed of its URI, HTTP method and optionally one or multiple parameter definitions that are used to determine the body of the HTTP request.
 
 Every parameter has a `title` property which the client SHOULD use to communicate the functionality of the given parameter to the user.
-The `id` property on the parameter dictates the actual key value that that the client MUST use when composing the HTTP request.
+The `id` property on the parameter dictates the actual key value that the client MUST use when composing the HTTP request.
 
 The nature of the final value of the parameter is dictated by its `type`.
 If the provider offers one or multiple adjustable parameters, it MUST choose one of the following parameter types for each parameter:
 
-- `text`: A string of text with no line breaks (`\r` and/or `\n`). When utilizing a GUI the client SHOULD use a one-line text input field to represent this parameter.
-- `boolean`: A binary choice with `true` being represented by the value `1` and `false` with the value `0`. When utilizing a GUI the client SHOULD use a tick-box or similar kind of menu item to represent this parameter.
+- `text`: A string of text with no line breaks (`\r` and/or `\n`). When utilizing a GUI the client SHOULD use a one-line text input field to represent this parameter. The client MUST allow the use of an empty string.
+- `boolean`: A binary choice with `true` being represented by the value `1` and `false` with the value `0`. The client MUST NOT send any other response value for this parameter. When utilizing a GUI the client SHOULD use a tick-box or similar kind of menu item to represent this parameter.
 - `select`: A list of possible choices, each represented by a `value` which is the actual parameter value that the client MUST include in its HTTP request if the user chooses the choice in question and a `title` which the client SHOULD use to represent the choice to the user. When utilizing a GUI the client SHOULD use a drop-down or similar kind of menu item to represent this parameter.
-- `fixed`: A fixed value that the client MUST include in its request verbatim.
-The client MAY reveal this value to the user, but MUST NOT allow any changes to this value.
+- `fixed`: A fixed value that the client MUST include in its request verbatim. The client MAY reveal this value to the user, but MUST NOT allow any changes to this value.
 
 ### Fixed Query
+
+The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#fixed_query).
 
 A **fixed query** is an HTTP(S) request defined by its URI, method and a payload _that is not configurable by the user_  which is sent by the client to the provider in order to receive data in response.
 
 In this case the provider only transmits the description of the query to the client whose only decision is whether or not to actually send the query with the given parameters to the provider.
 
 A typical example for a fixed query is a download option for a file where the client only has the choice to invoke or not invoke the download.
-
-The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#fixed_query).
 
 ## HTTP Codes and Error Handling
 
