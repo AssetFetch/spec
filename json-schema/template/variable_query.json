@@ -39,9 +39,6 @@
 					"default": {
 						"type": "string"
 					},
-					"mandatory": {
-						"type": "boolean"
-					},
 					"choices": {
 						"anyOf": [
 							{
@@ -58,7 +55,8 @@
 										"title": {
 											"type": "string"
 										}
-									}
+									},
+									"required": ["value","title"]
 								}
 							}
 						]

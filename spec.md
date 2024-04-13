@@ -365,37 +365,29 @@ A simple example for a variable query is a query for listing assets that allows 
 
 #### Variable Query Parameters
 
-A variable query is composed of its URI, HTTP method and one or multiple parameters.
 The full field list of a variable query object can be found in the [`variable_query` datablock template](#variable_query).
+A variable query is composed of its URI, HTTP method and optionally one or multiple parameter definitions that are used to determine the body of the HTTP request.
 
-If the provider decides to offer one or multiple adjustable parameters, it MUST choose one of the following parameter types for each parameter:
+Every parameter has a `title` property which the client SHOULD use to communicate the functionality of the given parameter to the user.
+The `id` property on the parameter dictates the actual key value that the client MUST use when composing the HTTP request.
 
-`text`: A plain text field, allowing for one line of arbitrary text. If the parameter is marked as mandatory, the client MUST respond with a non-empty string value for this parameter.
-Otherwise, it MAY also respond with an empty string or omit this parameter from the query entirely.
+The nature of the final value of the parameter is dictated by its `type`.
+If the provider offers one or multiple adjustable parameters, it MUST choose one of the following parameter types for each parameter:
 
-`boolean`: A binary choice with no further labels for either state (apart from the title property), for example a tick-box.
-When sending the request, the client MUST encode a `true` (ticked) choice with the parameter value `1`, and a `false` (unticked) choice with the value `0`.
-If the parameter is marked as mandatory, the client MUST respond with one of these two choices.
-Otherwise, it MAY omit this parameter from the query entirely.
-
-`select`: A list of possible options, each represented by a string.
-If the parameter is marked as mandatory, the client MUST ensure that the user has chosen exactly one option.
-Otherwise the client MUST allow the user to pick one or none of the choices, in which case the client MAY omit the parameter from the query entirely.
-
-`fixed`: A fixed value that the client MUST include in its request verbatim.
-The client MAY show this value to the user, but MUST NOT allow any changes to this value.
-Declaring this parameter mandatory or non-mandatory has no defined meaning.
-Clients SHOULD ignore any such declarations by the provider.
+- `text`: A string of text with no line breaks (`\r` and/or `\n`). When utilizing a GUI the client SHOULD use a one-line text input field to represent this parameter. The client MUST allow the use of an empty string.
+- `boolean`: A binary choice with `true` being represented by the value `1` and `false` with the value `0`. The client MUST NOT send any other response value for this parameter. When utilizing a GUI the client SHOULD use a tick-box or similar kind of menu item to represent this parameter.
+- `select`: A list of possible choices, each represented by a `value` which is the actual parameter value that the client MUST include in its HTTP request if the user chooses the choice in question and a `title` which the client SHOULD use to represent the choice to the user. When utilizing a GUI the client SHOULD use a drop-down or similar kind of menu item to represent this parameter.
+- `fixed`: A fixed value that the client MUST include in its request verbatim. The client MAY reveal this value to the user, but MUST NOT allow any changes to this value.
 
 ### Fixed Query
+
+The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#fixed_query).
 
 A **fixed query** is an HTTP(S) request defined by its URI, method and a payload _that is not configurable by the user_  which is sent by the client to the provider in order to receive data in response.
 
 In this case the provider only transmits the description of the query to the client whose only decision is whether or not to actually send the query with the given parameters to the provider.
 
 A typical example for a fixed query is a download option for a file where the client only has the choice to invoke or not invoke the download.
-
-The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#fixed_query).
 
 ## HTTP Codes and Error Handling
 
@@ -406,7 +398,7 @@ In concrete terms, this means:
 - If a provider managed to successfully process the query then the response code SHOULD be `200 - OK`. Even if the query sent by the client leads to zero results in the context of a search with potentially zero to infinitely many results, the response code SHOULD still be `200 - OK`.
 - If a provider receives a query that references a specific resource which does not exist, such as a query for implementations of an asset that the provider does not recognize, it SHOULD respond with code `404 - Not Found`.
 - If the provider can not parse the query data sent by the client properly, it SHOULD respond with code `400 - Bad Request`.
-- If a provider receives a query an any other endpoint than the initialization endpoint without one of the headers it defined as mandatory during the initialization it SHOULD send status code `401 - Unauthorized`. This indicates that the client is unaware of required headers and SHOULD cause the client to contact the initialization endpoint for that provider again in order to receive updated information about required headers.
+- If a provider receives a query an any other endpoint than the initialization endpoint without one of the headers it defined as required during the initialization it SHOULD send status code `401 - Unauthorized`. This indicates that the client is unaware of required headers and SHOULD cause the client to contact the initialization endpoint for that provider again in order to receive updated information about required headers.
 - If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to perform a download that has not been unlocked, the provider MAY respond with code `402 - Payment Required` instead.
 
 If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
@@ -654,18 +646,18 @@ A parameter describes the attributes of one parameter for the query and how the 
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `type` | string | yes | One of `text` / `boolean`  / `select` / `fixed` |
-| `id` | string | yes | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key if it is sending a response using this parameter. |
-| `title` | string | no | Title to display to the user. |
-| `default` | string | no | The default value for this parameter. It becomes the only possible value for this parameter if type `fixed` is used. |
-| `mandatory` | boolean | no, default=`false` | This field describes whether a parameter is mandatory (see below). |
-| `choices` | array of `choice` | only if `select` type is used | This field contains the possible choices when the `select` type is used. |
+| `id` | string | yes | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key when sending a response using this parameter. |
+| `title` | string | no | The title that the client SHOULD display to the user to represent this parameter. |
+| `default` | string | no | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
+| `choices` | array of `choice` | only if `select` type is used | This field contains the possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below. |
 
 #### `choice` Structure
+A single choice for a `select` type parameter.
+
 | Field | Format | Required | Description |
 | --- | --- |--- | --- |
 | `value` | string | yes | The value that the client MUST use in its HTTP response if the user has selected this choice. |
 | `title` | string | yes | The title that the client SHOULD display to the user to represent this choice. |
-
 
 ### `fixed_query`
 This template describes a fixed query that can be sent by the client to the provider without additional user input or configuration.
@@ -675,7 +667,7 @@ See [Variable and Fixed Queries](#variable-and-fixed-queries) for more details.
 | --- | --- |--- | --- |
 | `uri` | string | yes | The URI to contact for getting more results. |
 | `method` | string | yes | MUST be one of `get` or `post` |
-| `payload` | object with string properties | no  | The keys and values for the payload of the request.  |
+| `payload` | object with string properties | no | The keys and values for the payload of the request. |
 
 
 
