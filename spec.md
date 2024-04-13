@@ -604,7 +604,7 @@ The following datablocks are to be included in the `data` field:
 | Requirement Level | Datablocks                                                                                        |
 | ----------------- | ------------------------------------------------------------------------------------------------- |
 | MUST              | `file_info` and exactly one of `file_fetch.*` or `unlock_link`                                    |
-| MAY               | `environment_map`, `loose_material_define`, `loose_material_apply`, `mtlx_apply`,`text`, `unlock` |
+| MAY               | `environment_map`, `loose_material.*`, `mtlx_apply`,`text`, `unlock` |
 
 # 6. Additional Endpoints
 
@@ -996,7 +996,10 @@ An object that MUST conform to this format:
 | ------------ | ------ | -------- | --------------------------------------- |
 | `projection` | string | yes      | One of `equirectangular`, `mirror_ball` |
 
-### 8.5.2. `loose_material_define`
+### 8.5.2. `loose_material.define`
+
+This datablock is applied to a component that is part of a loose material, most likely a material map.
+It indicates which role the component should play in this material.
 
 | Field           | Format | Required | Description                                                                                                                               |
 | --------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1004,9 +1007,11 @@ An object that MUST conform to this format:
 | `map`           | string | yes      | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
 | `colorspace`    | string | no       | One of `srgb`, `linear`                                                                                                                   |
 
-### 8.5.3. `loose_material_apply`
-When applied to a component, it indicates that this component uses one or multiple materials defined using `loose_material_define` datablocks.
-Array of objects with this structure:
+### 8.5.3. `loose_material.apply`
+
+When applied to a component, it indicates that this component uses one or multiple materials defined using `loose_material.define` datablocks.
+
+The datablock is an **array of objects** with this structure:
 
 | Field                  | Format | Required | Description                                                                                                                           |
 | ---------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1115,7 +1120,7 @@ When processing the components of an implementation, the `behavior` datablock de
 
 If the behavior is `active`, then the client SHOULD make an attempt to load this file directly, for example through the host application's native import functionality.
 
-If the behavior is `passive`, then the client SHOULD NOT make a direct attempt to load this file and only load it if it is referenced by another (active) component, either through a native reference in the component file itself or through a reference in the AssetFetch data (like `loose_material_apply`).
+If the behavior is `passive`, then the client SHOULD NOT make a direct attempt to load this file and only load it if it is referenced by another (active) component, either through a native reference in the component file itself or through a reference in the AssetFetch data (like `loose_material.apply`).
 
 ## 9.2. Local Storage of Asset Files
 As described in the previous section, individual asset components/files may have implicit relationships to each other that are not directly visible from any of the datablocks such as relative file paths within project files.
@@ -1140,13 +1145,13 @@ This allows the use of `.mtlx` files with mesh file formats that do not have the
 ### 9.3.2. Using loose material declarations
 The workflow outlined in the previous section is not always easily achievable since not all file 3D file formats offer up-to-date (or any) support for defining materials.
 In those cases it is common practice to simply distribute the necessary material maps along with the mesh files without any concrete machine-readable description for how the maps should be applied
-The `loose_material_*` datablocks exist to limit the negative impacts of this limitation. They make it possible to define basic PBR materials through datablocks on the individual map components and reference them on the mesh component.
+The `loose_material.*` datablocks exist to limit the negative impacts of this limitation. They make it possible to define basic PBR materials through datablocks on the individual map components and reference them on the mesh component.
 
 Providers SHOULD make use of this notation if, and only if, other more native representations of the material are unavailable of severely insufficient.
 
 ## 9.4. Environments
 HDRI environments or skyboxes face a similar situation as materials: They can be represented using native formats, but a common practice is to provide them as a singular image file whose projection must be manually set by the artist.
-The `loose_environment` datablock works similar to the `loose_material` block and allows the provider to communicate that a component should be treated as an environment and what projection should be used.
+The `loose_environment` datablock works similar to the `loose_material.*` blocks and allows the provider to communicate that a component should be treated as an environment and what projection should be used.
 
 
 

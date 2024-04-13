@@ -68,11 +68,11 @@
 										"loose_environment": {
 											"$ref": "../datablock/loose_environment.json"
 										},
-										"loose_material_apply": {
-											"$ref": "../datablock/loose_material_apply.json"
+										"loose_material.apply": {
+											"$ref": "../datablock/loose_material.apply.json"
 										},
-										"loose_material_define": {
-											"$ref": "../datablock/loose_material_define.json"
+										"loose_material.define": {
+											"$ref": "../datablock/loose_material.define.json"
 										},
 										"mtlx_apply": {
 											"$ref": "../datablock/mtlx_apply.json"
@@ -154,12 +154,12 @@
 												"anyOf": [
 													{
 														"required": [
-															"loose_material.apply_material"
+															"loose_material.apply"
 														]
 													},
 													{
 														"required": [
-															"loose_material.define_map"
+															"loose_material.define"
 														]
 													}
 												]
@@ -168,12 +168,12 @@
 												"oneOf": [
 													{
 														"required": [
-															"loose_material.apply_material"
+															"loose_material.apply"
 														]
 													},
 													{
 														"required": [
-															"loose_material.define_map"
+															"loose_material.define"
 														]
 													}
 												]
