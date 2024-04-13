@@ -339,7 +339,7 @@ The exact structure of the data for individual endpoints and other API resources
 
 The client SHOULD send an appropriate user-agent header as defined in [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#field.user-agent).
 
-If the client is embedded in a host application, for example as an addon inside a 3D suite, it SHOULD set its first `product` and `product-version` identifier based on the "parent" application and then describe the product and version of the client plugin itself afterwards.
+If the client is embedded in a host application, for example as an addon inside a 3D suite, it SHOULD set its first `product` and `product-version` identifier based on the host application and then describe the product and version of the client plugin itself afterwards.
 
 Examples for proper user-agents are:
 
