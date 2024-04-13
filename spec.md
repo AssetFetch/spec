@@ -1093,7 +1093,7 @@ This datablock is an `array` consisting of `unlock_query` objects.
 | `id`                        | string        | yes                      | This is the id by which `unlock_link` datablocks will reference this query.                                                                                                                    |
 | `unlocked`                  | boolean       | yes                      | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
 | `price`                     | number        | only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
-| `unlock_query`              | `fixed_query` | only if `unlocked=False` | Query to perform to to make the purchase.                                                                                                                                                      |
+| `unlock_query`              | `fixed_query` | only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                      |
 | `unlock_query_fallback_uri` | string        | no                       | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
 
 
