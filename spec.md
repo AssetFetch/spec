@@ -643,7 +643,6 @@ The following datablocks are to be included in the `data` field:
 
 
 ## 6.3. Connection Status Endpoint
-*(kind: `connection_status`)*
 
 | Field  | Format                 | Required | Description                         |
 | ------ | ---------------------- | -------- | ----------------------------------- |
