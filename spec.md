@@ -454,8 +454,8 @@ Clients SHOULD display the `response_id` and `message` fields to the user if a q
 ### 5.1.2. The `datablock_collection` template
 This object contains most of the relevant information for any resource and always has the same general structure, described in this section.
 
-| Field                                | Format          | Required | Description                                                         |
-| ------------------------------------ | --------------- | -------- | ------------------------------------------------------------------- |
+| Field                                | Format          | Required | Description                                                                |
+| ------------------------------------ | --------------- | -------- | -------------------------------------------------------------------------- |
 | \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
 | \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
 | ... (arbitrary number of datablocks) |
@@ -601,9 +601,9 @@ Clients MAY use this field as a display title, but SHOULD prefer the `title` fie
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level | Datablocks                                                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------- |
-| MUST              | `file_info` and exactly one of `file_fetch.*` or `unlock_link`                                    |
+| Requirement Level | Datablocks                                                           |
+| ----------------- | -------------------------------------------------------------------- |
+| MUST              | `file_info` and exactly one of `file_fetch.*` or `unlock_link`       |
 | MAY               | `environment_map`, `loose_material.*`, `mtlx_apply`,`text`, `unlock` |
 
 # 6. Additional Endpoints
@@ -756,16 +756,16 @@ This datablock has the following structure:
 
 #### 8.1.1.1. `header` structure
 
-| Field          | Format  | Required            | Description                                                                                                                                                               |
-| -------------- | ------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | string  | yes                 | Name of the header                                                                                                                                                        |
-| `default`      | string  | no                  | Default value as a suggestion to the client.                                                                                                                              |
-| `is_required`  | boolean | yes                 | Indicates if this header is required.                                                                                                                                     |
-| `is_sensitive` | boolean | yes                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#101-storing-sensitive-headers)    |
-| `prefix`       | string  | no                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`. |
-| `suffix`       | string  | no                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.   |
-| `title`        | string  | no                  | Title that the client SHOULD display to the user.                                                                                                                         |
-| `encoding`     | string  | no, default=`plain` | The encoding that the client MUST apply to the header value. MUST be one of `plain` or `base64`.                                                                          |
+| Field          | Format  | Required            | Description                                                                                                                                                                |
+| -------------- | ------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | string  | yes                 | Name of the header                                                                                                                                                         |
+| `default`      | string  | no                  | Default value as a suggestion to the client.                                                                                                                               |
+| `is_required`  | boolean | yes                 | Indicates if this header is required.                                                                                                                                      |
+| `is_sensitive` | boolean | yes                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#101-storing-sensitive-headers) |
+| `prefix`       | string  | no                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.  |
+| `suffix`       | string  | no                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.    |
+| `title`        | string  | no                  | Title that the client SHOULD display to the user.                                                                                                                          |
+| `encoding`     | string  | no, default=`plain` | The encoding that the client MUST apply to the header value. MUST be one of `plain` or `base64`.                                                                           |
 
 ### 8.1.2. `provider_reconfiguration`
 
