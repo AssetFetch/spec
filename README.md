@@ -44,3 +44,12 @@ JSON-Schemas for AssetFetch are provided in the `/json-schema` subdirectory of t
 
 # Contributing
 Currently the best way to contribute is by opening issues with questions, contradictions in the specifications, suggestions for datablocks or any other thoughts about the specification.
+
+The specification document is written in markdown and therefore easily editable with any text editor.
+
+The recommended environment for editing `spec.md` is Visual Studio Code with the following extensions:
+
+- Markdown Preview Mermaid Support (`bierner.markdown-mermaid`)
+- Markdown All-In-One (`yzhang.markdown-all-in-one`)
+
+To maintain proper document structure, the commands "Format Document" and "Markdown-All-In-One: Add/Update section Numbers" should be used.
