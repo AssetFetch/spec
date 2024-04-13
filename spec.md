@@ -1,7 +1,7 @@
+# 1. Introduction
+
 This document specifies **AssetFetch v0.3**, an HTTP- and JSON-based system for browsing, retrieving and handling/importing digital assets for media creation.
 The AssetFetch Protocol aims to provide a standardized way for artists to browse libraries of downloadable assets offered by providers *outside* their current production environment/pipeline, such as those of commercial or non-profit 3D asset vendors, marketplaces or other repositories of models, textures or any other kind of digital assets.
-
-# 1. Introduction
 
 ## 1.1. Motivation
 
