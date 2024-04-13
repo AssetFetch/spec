@@ -43,7 +43,8 @@ There are still numerous milestones to hit before a version 1.0 can be released.
 JSON-Schemas for AssetFetch are provided in the `/json-schema` subdirectory of this repository.
 
 # Contributing
-Currently the best way to contribute is by opening issues with questions, contradictions in the specifications, suggestions for datablocks or any other thoughts about the specification.
+
+The best way to contribute at this stage is by opening issues with questions, contradictions in the specifications, suggestions for datablocks or any other thoughts about the specification.
 
 The specification document is written in markdown and therefore easily editable with any text editor.
 
@@ -53,3 +54,8 @@ The recommended environment for editing `spec.md` is Visual Studio Code with the
 - Markdown All-In-One (`yzhang.markdown-all-in-one`)
 
 To maintain proper document structure, the commands "Format Document" and "Markdown-All-In-One: Add/Update section Numbers" should be used.
+
+For checking the integrity of document links, [tcort/markdown-link-check](https://github.com/tcort/markdown-link-check) is recommended, invoked like this:
+```
+docker run -v ${PWD}:/tmp:ro --rm -i ghcr.io/tcort/markdown-link-check:stable /tmp/spec.md
+```

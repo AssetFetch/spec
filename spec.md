@@ -192,7 +192,7 @@ This processing is aided by the metadata in the datablocks of every component se
 At this point the interaction is complete and the user MAY start a new query for assets.
 
 ## 3.2. Sequence Diagram
-The following diagrams illustrate the general flow of information between the user,[their client software](#client) and the provider as well as the most important actions taken by each party.
+The following diagrams illustrate the general flow of information between the user, the client software and the provider as well as the most important actions taken by each party.
 
 ### 3.2.1. Simple Version
 This diagram shows a simple implementation without any ability for dynamic filtering or dynamically generated implementations and without requiring authentication or unlocking.
@@ -333,7 +333,7 @@ This encoding for request data is already extremely widespread and can therefore
 ## 4.2. Response payloads
 
 The payload of all HTTP responses from a provider MUST be valid [JSON](https://www.json.org/) and SHOULD use the `Content-Type` header `application/json`.
-The exact structure of the data for individual endpoints and other API resources is specified in the [Endpoint section](#endpoint-list).
+The exact structure of the data for individual endpoints and other API resources is specified in the [Endpoint section](#5-endpoints).
 
 ## 4.3. User-Agent
 
@@ -365,7 +365,7 @@ A simple example for a variable query is a query for listing assets that allows 
 
 #### 4.4.1.1. Variable Query Parameters
 
-The full field list of a variable query object can be found in the [`variable_query` datablock template](#variable_query).
+The full field list of a variable query object can be found in the [`variable_query` datablock template](#721-variable_query).
 A variable query is composed of its URI, HTTP method and optionally one or multiple parameter definitions that are used to determine the body of the HTTP request.
 
 Every parameter has a `title` property which the client SHOULD use to communicate the functionality of the given parameter to the user.
@@ -381,7 +381,7 @@ If the provider offers one or multiple adjustable parameters, it MUST choose one
 
 ### 4.4.2. Fixed Query
 
-The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#fixed_query).
+The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#722-fixed_query).
 
 A **fixed query** is an HTTP(S) request defined by its URI, method and a payload _that is not configurable by the user_  which is sent by the client to the provider in order to receive data in response.
 
@@ -402,7 +402,7 @@ In concrete terms, this means:
 - If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to perform a download that has not been unlocked, the provider MAY respond with code `402 - Payment Required` instead.
 
 If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
-This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#the-meta-template), if they have content.
+This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#511-the-meta-template), if they have content.
 
 
 
@@ -419,7 +419,7 @@ This section outlines general information about AssetFetch endpoints along with 
 
 ## 5.1. About Endpoints
 
-The interaction model described in the [General Operation](#general-operation) section principally implies that there are three kinds of HTTP(s)-based endpoints that a provider MUST implement:
+The interaction model described in the [General Operation](#3-general-operation) section principally implies that there are three kinds of HTTP(s)-based endpoints that a provider MUST implement:
 
 - An initialization endpoint
 - An endpoint for querying assets
@@ -456,8 +456,8 @@ This object contains most of the relevant information for any resource and alway
 
 | Field                                | Format          | Required | Description                                                         |
 | ------------------------------------ | --------------- | -------- | ------------------------------------------------------------------- |
-| \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#datablocks) |
-| \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#datablocks) |
+| \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
+| \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
 | ... (arbitrary number of datablocks) |
 
 Every key of this data object is the identifier for the datablock stored in that key's field.
@@ -684,7 +684,7 @@ They exist to eliminate the need to re-specify the same data structure in two di
 
 ### 7.2.1. `variable_query`
 This template describes an HTTP query whose parameters are controllable by the user.
-See [Variable and Fixed Queries](#variable-and-fixed-queries) for more details.
+See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more details.
 
 | Field        | Format               | Required | Description                                 |
 | ------------ | -------------------- | -------- | ------------------------------------------- |
@@ -713,7 +713,7 @@ A single choice for a `select` type parameter.
 
 ### 7.2.2. `fixed_query`
 This template describes a fixed query that can be sent by the client to the provider without additional user input or configuration.
-See [Variable and Fixed Queries](#variable-and-fixed-queries) for more details.
+See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more details.
 
 | Field     | Format                        | Required | Description                                         |
 | --------- | ----------------------------- | -------- | --------------------------------------------------- |
@@ -761,7 +761,7 @@ This datablock has the following structure:
 | `name`         | string  | yes                 | Name of the header                                                                                                                                                        |
 | `default`      | string  | no                  | Default value as a suggestion to the client.                                                                                                                              |
 | `is_required`  | boolean | yes                 | Indicates if this header is required.                                                                                                                                     |
-| `is_sensitive` | boolean | yes                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#storing-sensitive-headers)    |
+| `is_sensitive` | boolean | yes                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#101-storing-sensitive-headers)    |
 | `prefix`       | string  | no                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`. |
 | `suffix`       | string  | no                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.   |
 | `title`        | string  | no                  | Title that the client SHOULD display to the user.                                                                                                                         |
@@ -831,7 +831,7 @@ These datablocks are related to files.
 
 This datablock contains information about the file represented by a component.
 
-| Filed        | Format  | Required                       | Description                                                                      |
+| Field        | Format  | Required                       | Description                                                                      |
 | ------------ | ------- | ------------------------------ | -------------------------------------------------------------------------------- |
 | `local_path` | string  | yes, unless `behavior=archive` | The sub-path that this file should take in the directory of this implementation. |
 | `length`     | integer | no                             | The length of the file in bytes.                                                 |
@@ -840,7 +840,7 @@ This datablock contains information about the file represented by a component.
 
 The `extension` MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if required, MUST include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
 
-The `behavior` describes whether this file should be treated as an [active or passive file component](#active-vs-passive-components) or as an archive.
+The `behavior` describes whether this file should be treated as an [active or passive file component](#271-active-vs-passive-components) or as an archive.
 
 If `behavior=archive` and the `local_path` is not `null`, the entire archive MUST be unpacked into the local path.
 
@@ -874,7 +874,7 @@ The structure of this datablock follows the `fixed_query` template.
 
 ### 8.3.3. `file_fetch.from_archive`
 This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
-More about the handling in [Component Handling](#component-handling).
+More about the handling in the [Component Handling section](#9-component-handling).
 The destination is defined via the `file_info` datablock.
 
 | Field                  | Format | Required                                                                                                                                                                                                                                                                                           | Description                                                                           |
@@ -1168,5 +1168,5 @@ They SHOULD consider storing secret headers through native operation system APIs
 
 ## 10.2. Avoiding Relative Paths in `local_path`
 Datablocks of the `fetch.*` family specify a local sub-path for every component that needs to be appended to a local path chosen by the client in order to assemble the correct file structure for this asset.
-As specified in the [datablock requirements](#local_path-rules) the `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
+As specified in the [datablock requirements](#8311-local_path-rules) the `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
 Clients MUST take cate to ensure that components with references like `./` or `../` in their local path are rejected.
