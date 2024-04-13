@@ -432,12 +432,12 @@ This gives the provider great flexibility in how to structure its data and backe
 ### The `meta` template
 All provider responses on all endpoints MUST carry the `meta` field to communicate key information about the current response.
 ### Structure
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `response_id` | string | no | An ID for this specific response from the provider. |
-| `version` | string | yes | The version of AssetFetch that this response is intended for. |
-| `kind` | string | yes | The kind of data that is being transmitted with this response. The exact value of this field is specified individually for each endpoint. |
-| `message` | string | no | An arbitrary message to attach to this response. |
+| Field         | Format | Required | Description                                                                                                                               |
+| ------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `response_id` | string | no       | An ID for this specific response from the provider.                                                                                       |
+| `version`     | string | yes      | The version of AssetFetch that this response is intended for.                                                                             |
+| `kind`        | string | yes      | The kind of data that is being transmitted with this response. The exact value of this field is specified individually for each endpoint. |
+| `message`     | string | no       | An arbitrary message to attach to this response.                                                                                          |
 
 The `response_id` field is designed to aid with logging and troubleshooting, should the need arise.
 The provider MAY set this field, in which case they SHOULD keep a log of the responses and their ids, especially in the case of an error.
@@ -449,11 +449,11 @@ Clients SHOULD display the `response_id` and `message` fields to the user if a q
 ### The `datablock_collection` template
 This object contains most of the relevant information for any resource and always has the same general structure, described in this section.
 
-| Field | Format | Required | Description |
-| --- | --- | --- | --- |
-| \<string-key\> | object or array | yes | Exact structure is defined in the [Datablocks section](#datablocks) |
-| \<string-key\> | object or array | yes | Exact structure is defined in the [Datablocks section](#datablocks) |
-| ... (arbitrary number of datablocks)
+| Field                                | Format          | Required | Description                                                         |
+| ------------------------------------ | --------------- | -------- | ------------------------------------------------------------------- |
+| \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#datablocks) |
+| \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#datablocks) |
+| ... (arbitrary number of datablocks) |
 
 Every key of this data object is the identifier for the datablock stored in that key's field.
 
@@ -487,11 +487,11 @@ It's URI is initially typed or copy-pasted by the user into a client and is used
 
 The response on this endpoint MUST have the following structure:
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `meta` | `meta` | yes | Metadata, kind: `initialization`. |
-| `id` | `string` | yes | An id that identifies this provider. It MUST match the regular expression `[a-z0-9-\.]`. Providers SHOULD use a domain name (e.g. `example.com` or `sub.example.com`) as the ID, if applicable in their use-case. |
-| `data` | `datablock_collection` | yes |  |
+| Field  | Format                 | Required | Description                                                                                                                                                                                                       |
+| ------ | ---------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `meta` | `meta`                 | yes      | Metadata, kind: `initialization`.                                                                                                                                                                                 |
+| `id`   | `string`               | yes      | An id that identifies this provider. It MUST match the regular expression `[a-z0-9-\.]`. Providers SHOULD use a domain name (e.g. `example.com` or `sub.example.com`) as the ID, if applicable in their use-case. |
+| `data` | `datablock_collection` | yes      |                                                                                                                                                                                                                   |
 
 - The `data` field MUST always contain the datablock `asset_list_query`.
 - The `data` field SHOULD always contain the datablock `text`.
@@ -504,11 +504,11 @@ The URI and available parameters for this endpoint are communicated by the serve
 
 The response on this endpoint MUST have the following structure:
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `meta` | `meta` | yes| Metadata, kind: `asset_list`. |
-| `data` | `datablock_collection` | yes |  |
-| `assets` | array of `asset` | yes |  |
+| Field    | Format                 | Required | Description                   |
+| -------- | ---------------------- | -------- | ----------------------------- |
+| `meta`   | `meta`                 | yes      | Metadata, kind: `asset_list`. |
+| `data`   | `datablock_collection` | yes      |                               |
+| `assets` | array of `asset`       | yes      |                               |
 
 - The `data` field MAY contain the datablocks `next_query` and/or `response_statistics`.
 - The `assets` field MUST NOT contain more than 100 entries for one response. If more assets than this are contained in the response, the `next_query` datablock SHOULD be used to define a new query that the client can use to fetch more results.
@@ -517,10 +517,10 @@ The response on this endpoint MUST have the following structure:
 
 Every `asset` object MUST have the following structure:
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `id` | string | yes | Unique id for this asset. Must match the regular expression `[a-z0-9_-]+` | 
-| `data` | `datablock_collection` | yes |  |
+| Field  | Format                 | Required | Description                                                               |
+| ------ | ---------------------- | -------- | ------------------------------------------------------------------------- |
+| `id`   | string                 | yes      | Unique id for this asset. Must match the regular expression `[a-z0-9_-]+` |
+| `data` | `datablock_collection` | yes      |                                                                           |
 
 - The `id` field MUST be unique among all assets for this provider. Clients MAY use this id when storing and organizing files on disk. Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
 - The `data` field MUST contain the datablock `implementation_list_query`.
@@ -532,11 +532,11 @@ Every `asset` object MUST have the following structure:
 This endpoint returns one or several implementations for one specific asset.
 The URI and available parameters for this endpoint are communicated by the server to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `meta` | `meta` | yes | Metadata, kind: `implementation_list`.|
-| `data` | `datablock_collection` | yes | Datablocks that apply to the entire implementation list.  |
-| `implementations` | yes | Array of `implementation` | |
+| Field             | Format                 | Required                  | Description                                              |
+| ----------------- | ---------------------- | ------------------------- | -------------------------------------------------------- |
+| `meta`            | `meta`                 | yes                       | Metadata, kind: `implementation_list`.                   |
+| `data`            | `datablock_collection` | yes                       | Datablocks that apply to the entire implementation list. |
+| `implementations` | yes                    | Array of `implementation` |                                                          |
 
 - The `data` field MAY contain the datablocks `response_statics`
 
@@ -544,11 +544,11 @@ The URI and available parameters for this endpoint are communicated by the serve
 
 Every `implementation` object MUST have the following structure:
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `id` | string | yes | A unique id for this implementation. Must match the regular expression `[a-z0-9\._]+`.|
-| `data` | `datablock_collection` | yes | Datablocks that apply to this specific implementation.|
-| `components` | Array of `component` | yes |  |
+| Field        | Format                 | Required | Description                                                                            |
+| ------------ | ---------------------- | -------- | -------------------------------------------------------------------------------------- |
+| `id`         | string                 | yes      | A unique id for this implementation. Must match the regular expression `[a-z0-9\._]+`. |
+| `data`       | `datablock_collection` | yes      | Datablocks that apply to this specific implementation.                                 |
+| `components` | Array of `component`   | yes      |                                                                                        |
 
 - The `id` field MUST be unique among all possible implementations the provider offers for this asset, even if not all of them are included in the current implementation list.
 - The `data` field SHOULD contain the datablock `text`.
@@ -558,10 +558,10 @@ Every `implementation` object MUST have the following structure:
 
 Every `component` object MUST have the following structure:
 
-| Field | Format | Required | Description|
-| --- | --- |--- | --- |
-| `id` | string | yes | A unique id for this component. Must match the regular expression `[a-z0-9\._]+`. |
-| `data` | datablocks | yes | Datablocks.|
+| Field  | Format     | Required | Description                                                                       |
+| ------ | ---------- | -------- | --------------------------------------------------------------------------------- |
+| `id`   | string     | yes      | A unique id for this component. Must match the regular expression `[a-z0-9\._]+`. |
+| `data` | datablocks | yes      | Datablocks.                                                                       |
 
 - The `id` field MUST be unique for among all components inside this component's implementation, but MAY be reused for a component in a different implementation.
 - The `data` field on every `component` MUST contain the `file_info` datablock.
@@ -574,10 +574,10 @@ Additional endpoint types can be used to perform certain actions or retrieve add
 
 Unless noted otherwise in the specification, these endpoints MUST use the following format:
 
-| Field | Format | Required | Description|
-| --- | --- |--- | --- |
-| `meta` | `meta` | yes | Metadata, the endpoint kind is specified for every endpoint below. |
-| `data` | `datablock_collection` | yes | Datablocks.|
+| Field  | Format                 | Required | Description                                                        |
+| ------ | ---------------------- | -------- | ------------------------------------------------------------------ |
+| `meta` | `meta`                 | yes      | Metadata, the endpoint kind is specified for every endpoint below. |
+| `data` | `datablock_collection` | yes      | Datablocks.                                                        |
 
 ## Unlocking Endpoint
 *(kind: `unlock`)*
@@ -634,40 +634,40 @@ The templates can not be used directly as datablocks under their template name.
 This template describes an HTTP query whose parameters are controllable by the user.
 See [Variable and Fixed Queries](#variable-and-fixed-queries) for more details.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `uri` | string | yes| The URI to send the request to. |
-| `method` | string | yes| One of `get`, `post` |
-| `parameters` | array of `parameter` | yes| The configurable parameters for this query. |
+| Field        | Format               | Required | Description                                 |
+| ------------ | -------------------- | -------- | ------------------------------------------- |
+| `uri`        | string               | yes      | The URI to send the request to.             |
+| `method`     | string               | yes      | One of `get`, `post`                        |
+| `parameters` | array of `parameter` | yes      | The configurable parameters for this query. |
 
 #### `parameter` Structure
 A parameter describes the attributes of one parameter for the query and how the client can present this to its user.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `type` | string | yes | One of `text` / `boolean`  / `select` / `fixed` |
-| `id` | string | yes | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key when sending a response using this parameter. |
-| `title` | string | no | The title that the client SHOULD display to the user to represent this parameter. |
-| `default` | string | no | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
-| `choices` | array of `choice` | only if `select` type is used | This field contains the possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below. |
+| Field     | Format            | Required                      | Description                                                                                                                                                                                                          |
+| --------- | ----------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`    | string            | yes                           | One of `text` / `boolean`  / `select` / `fixed`                                                                                                                                                                      |
+| `id`      | string            | yes                           | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key when sending a response using this parameter.                                |
+| `title`   | string            | no                            | The title that the client SHOULD display to the user to represent this parameter.                                                                                                                                    |
+| `default` | string            | no                            | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
+| `choices` | array of `choice` | only if `select` type is used | This field contains the possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
 
 #### `choice` Structure
 A single choice for a `select` type parameter.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `value` | string | yes | The value that the client MUST use in its HTTP response if the user has selected this choice. |
-| `title` | string | yes | The title that the client SHOULD display to the user to represent this choice. |
+| Field   | Format | Required | Description                                                                                   |
+| ------- | ------ | -------- | --------------------------------------------------------------------------------------------- |
+| `value` | string | yes      | The value that the client MUST use in its HTTP response if the user has selected this choice. |
+| `title` | string | yes      | The title that the client SHOULD display to the user to represent this choice.                |
 
 ### `fixed_query`
 This template describes a fixed query that can be sent by the client to the provider without additional user input or configuration.
 See [Variable and Fixed Queries](#variable-and-fixed-queries) for more details.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `uri` | string | yes | The URI to contact for getting more results. |
-| `method` | string | yes | MUST be one of `get` or `post` |
-| `payload` | object with string properties | no | The keys and values for the payload of the request. |
+| Field     | Format                        | Required | Description                                         |
+| --------- | ----------------------------- | -------- | --------------------------------------------------- |
+| `uri`     | string                        | yes      | The URI to contact for getting more results.        |
+| `method`  | string                        | yes      | MUST be one of `get` or `post`                      |
+| `payload` | object with string properties | no       | The keys and values for the payload of the request. |
 
 
 
@@ -705,9 +705,9 @@ Follows the `fixed_query` template.
 
 ### [AssetList?/ImplementationList?] `response_statistics`
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `result_count_total` | int | yes | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. | 
+| Field                | Format | Required | Description                                                                                                                                                                                            |
+| -------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `result_count_total` | int    | yes      | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
 
 
 ## Configuration and authentication-related datablocks
@@ -717,26 +717,26 @@ Headers that the provider expects to receive from the client on every subsequent
 
 This datablock has the following structure:
 
-| Field | Format | Required | Description |
-| --- | --- | --- | --- |
-| `headers` | Array of `header` | yes | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request. |
-| `connection_status_query` | `fixed_query` | yes | Query to use for checking whether the provided headers are valid und for obtaining connection status information. |
-| `header_acquisition_uri` | string | no | A URI that the client MAY offer to open in the user's web browser to help them obtain the header values. |
-| `header_acquisition_uri_title` | string | no | Title for the `acquisition_uri`. |
+| Field                          | Format            | Required | Description                                                                                                       |
+| ------------------------------ | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `headers`                      | Array of `header` | yes      | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request.     |
+| `connection_status_query`      | `fixed_query`     | yes      | Query to use for checking whether the provided headers are valid und for obtaining connection status information. |
+| `header_acquisition_uri`       | string            | no       | A URI that the client MAY offer to open in the user's web browser to help them obtain the header values.          |
+| `header_acquisition_uri_title` | string            | no       | Title for the `acquisition_uri`.                                                                                  |
 
 
 #### `header` structure
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `name` | string | yes | Name of the header |
-| `default` | string | no | Default value as a suggestion to the client |
-| `is_required` | boolean | yes | Indicates if this header is required.|
-| `is_sensitive` | boolean | yes | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#storing-sensitive-headers) |
-| `prefix` | string | no | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`. |
-| `suffix` | string | no | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`. |
-| `title` | string | no | Title to display inside the client |
-| `encoding` | string | no, default=`plain` | The encoding that the client MUST apply to the header value. MUST be one of `plain` or `base64`. | 
+| Field          | Format  | Required            | Description                                                                                                                                                               |
+| -------------- | ------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | string  | yes                 | Name of the header                                                                                                                                                        |
+| `default`      | string  | no                  | Default value as a suggestion to the client                                                                                                                               |
+| `is_required`  | boolean | yes                 | Indicates if this header is required.                                                                                                                                     |
+| `is_sensitive` | boolean | yes                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#storing-sensitive-headers)    |
+| `prefix`       | string  | no                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`. |
+| `suffix`       | string  | no                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.   |
+| `title`        | string  | no                  | Title to display inside the client                                                                                                                                        |
+| `encoding`     | string  | no, default=`plain` | The encoding that the client MUST apply to the header value. MUST be one of `plain` or `base64`.                                                                          |
 
 ### [Status?] `provider_reconfiguration`
 
@@ -748,20 +748,20 @@ Providers SHOULD only use this datablock for purposes that are strictly required
 
 Clients MAY require the user to confirm the new header values before starting to send them.
 
-| Field | Format | Required | Description |
-| --- | --- | --- | --- |
-| `headers` | Object | yes | An object whose properties MUST all be strings. The keys indicate the new header names, the property values represent the new header values to be used. |
+| Field     | Format | Required | Description                                                                                                                                             |
+| --------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `headers` | Object | yes      | An object whose properties MUST all be strings. The keys indicate the new header names, the property values represent the new header values to be used. |
 
 
 ### [Status?] `user`
 
 This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
 
-| Field | Format | Required | Description |
-| --- | --- | --- | --- |
-| `display_name` | string | no | The name of the user to display. |
-| `display_tier` | string | no | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.|
-| `display_icon_uri` | string | no | URI to an image with an aspect ratio of 1:1, for example a profile picture. |
+| Field              | Format | Required | Description                                                                                            |
+| ------------------ | ------ | -------- | ------------------------------------------------------------------------------------------------------ |
+| `display_name`     | string | no       | The name of the user to display.                                                                       |
+| `display_tier`     | string | no       | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider. |
+| `display_icon_uri` | string | no       | URI to an image with an aspect ratio of 1:1, for example a profile picture.                            |
 
 ## File-related datablocks
 
@@ -769,12 +769,12 @@ This datablock allows the provider to transmit information about the user to the
 
 This datablock contains information about a file.
 
-| Filed | Format | Required | Description |
-| --- | --- | --- | --- |
-| `local_path` | string | yes, unless `behavior=archive` | The sub-path that this file should take in the directory of this implementation. |
-| `length` | integer | no | The length of the file in bytes. |
-| `extension` | string | yes | The file extension indicating the format of this file. |
-| `behavior` | string | yes | One of `file_active`,`file_passive`,`archive` |
+| Filed        | Format  | Required                       | Description                                                                      |
+| ------------ | ------- | ------------------------------ | -------------------------------------------------------------------------------- |
+| `local_path` | string  | yes, unless `behavior=archive` | The sub-path that this file should take in the directory of this implementation. |
+| `length`     | integer | no                             | The length of the file in bytes.                                                 |
+| `extension`  | string  | yes                            | The file extension indicating the format of this file.                           |
+| `behavior`   | string  | yes                            | One of `file_active`,`file_passive`,`archive`                                    |
 
 The `extension` MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and can include multiple dots required for properly expressing the format (eg. `.tar.gz` for a gzipped tar-archive).
 
@@ -814,10 +814,10 @@ This datablock indicates that this component represents a file from within an ar
 More about the handling in [Component Handling](#component-handling).
 The destination is defined via the `file_info` datablock.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `archive_component_id` | string | yes | The id of the component representing the archive that this component is contained in. |
-| `component_path` | string | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`).  |
+| Field                  | Format | Required                                                                                                                                                                                                                                                                                           | Description                                                                           |
+| ---------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `archive_component_id` | string | yes                                                                                                                                                                                                                                                                                                | The id of the component representing the archive that this component is contained in. |
+| `component_path`       | string | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`). |
 
 ## Display related datablocks
 
@@ -826,40 +826,40 @@ These datablocks relate to how assets and their details are displayed to the use
 ### [Init?/Asset?/Implementation?/Component?] `text`
 General text information to be displayed to the user.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `title` | string | yes | A title for the datablock's subject. |
-| `description` | string | no | A description text for the datablocks subject. |
+| Field         | Format | Required | Description                                    |
+| ------------- | ------ | -------- | ---------------------------------------------- |
+| `title`       | string | yes      | A title for the datablock's subject.           |
+| `description` | string | no       | A description text for the datablocks subject. |
 
 
 ### [Init?/Asset?] `web_references`
 References to external websites for documentation or support.
 
 An array of objects each of which MUST follow this format:
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `title` | string | yes | The title to display for this web reference. |
-| `uri` | string | yes | The URL to be opened in the users browser. |
-| `icon_uri` | string | yes | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
+| Field      | Format | Required | Description                                                                                                   |
+| ---------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `title`    | string | yes      | The title to display for this web reference.                                                                  |
+| `uri`      | string | yes      | The URL to be opened in the users browser.                                                                    |
+| `icon_uri` | string | yes      | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
 ### [Init?] `branding`
 Brand information about the provider.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `color_accent` | string | no | Color for the provider, hex string in the format 'abcdef' (no #)
-| `logo_square_uri` | string | no | URI to a square logo. It SHOULD be of the mediatype `image/png` and SHOULD be transparent.|
-| `logo_wide_uri` | string | no | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD be transparent.
-| `banner_uri` | string | no | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent.|
+| Field             | Format | Required | Description                                                                                                                   |
+| ----------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `color_accent`    | string | no       | Color for the provider, hex string in the format 'abcdef' (no #)                                                              |
+| `logo_square_uri` | string | no       | URI to a square logo. It SHOULD be of the mediatype `image/png` and SHOULD be transparent.                                    |
+| `logo_wide_uri`   | string | no       | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD be transparent.                    |
+| `banner_uri`      | string | no       | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent. |
 
 ### [Init?/Asset?] `license`
 Contains license information.
 When attached to an asset, it means that the license information only applies to that asset, when applied to a provider, it means that the license information applies to all assets offered through that provider.
 
-| Field | Format | Required | Description |
-| --- | --- | --- | --- |
-| `license_spdx` | string | no | MUST be an [SPDX license identifier](https://spdx.org/licenses/) or be left unset/null if not applicable. |
-| `license_uri` | string | no | URI which the client SHOULD offer to open in the user's web browser to learn more about the license. |
+| Field          | Format | Required | Description                                                                                               |
+| -------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------- |
+| `license_spdx` | string | no       | MUST be an [SPDX license identifier](https://spdx.org/licenses/) or be left unset/null if not applicable. |
+| `license_uri`  | string | no       | URI which the client SHOULD offer to open in the user's web browser to learn more about the license.      |
 
 ### [Asset?] `authors`
 
@@ -867,48 +867,48 @@ This datablock can be used to communicate the author(s) of a particular asset.
 
 Array of objects that MUST have this structure:
 
-| Field | Format | Required | Description
-| --- | --- |--- | --- |
-| `name` | string | yes | Name of the author. |
-| `uri` | string | no | A URI for this author, for example a profile link. |
-| `role` | string | no | The role that the author has had in the creation of this asset. |
+| Field  | Format | Required | Description                                                     |
+| ------ | ------ | -------- | --------------------------------------------------------------- |
+| `name` | string | yes      | Name of the author.                                             |
+| `uri`  | string | no       | A URI for this author, for example a profile link.              |
+| `role` | string | no       | The role that the author has had in the creation of this asset. |
 
 ### [Asset?] `dimensions.3d`
 Contains general information about the physical dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh data.
 
 An object that MUST conform to this format:
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `width_m` | float | yes | Width of the referenced asset |
-| `height_m` | float | yes | Height of the referenced asset |
-| `depth_m` | float | yes | Depth of the referenced asset |
+| Field      | Format | Required | Description                    |
+| ---------- | ------ | -------- | ------------------------------ |
+| `width_m`  | float  | yes      | Width of the referenced asset  |
+| `height_m` | float  | yes      | Height of the referenced asset |
+| `depth_m`  | float  | yes      | Depth of the referenced asset  |
 
 ### [Asset?] `dimensions.2d`
 Contains general information about the physical dimensions of a two-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh-,texture-, or uv data.
 
 An object that MUST conform to this format:
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `width_m` | float | yes | Width of the referenced asset |
-| `height_m` | float | yes | Height of the referenced asset |
+| Field      | Format | Required | Description                    |
+| ---------- | ------ | -------- | ------------------------------ |
+| `width_m`  | float  | yes      | Width of the referenced asset  |
+| `height_m` | float  | yes      | Height of the referenced asset |
 
 ### [Asset?] `preview_image_supplemental`
 Contains a list of preview images with `uri`s and `alt`-Strings associated to the asset.
 
 An array where every field must conform to the following structure:
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `alt` | string | no | An "alt" String for the image. |
-| `uri` | string | yes | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`.
+| Field | Format | Required | Description                                                                                                   |
+| ----- | ------ | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `alt` | string | no       | An "alt" String for the image.                                                                                |
+| `uri` | string | yes      | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
 ### [Asset?] `preview_image_thumbnail`
 Contains information about a thumbnail for an asset. The thumbnail can be provided in multiple resolutions.
 
 An object that MUST conform to this format:
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `alt` | string | no | An "alt" String for the image. |
-| `uris` | object | yes | See structure described below. |
+| Field  | Format | Required | Description                    |
+| ------ | ------ | -------- | ------------------------------ |
+| `alt`  | string | no       | An "alt" String for the image. |
+| `uris` | object | yes      | See structure described below. |
 
 #### `uris` Structure
 
@@ -929,35 +929,35 @@ In many cases the relationships can be represented purely by placing component f
 The presence of this datablock on a component indicates that it is an environment map.
 This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR), not if the environment is already wrapped in another format with native support.
 An object that MUST conform to this format:
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `projection` | string | yes | One of `equirectangular`, `mirror_ball` |
+| Field        | Format | Required | Description                             |
+| ------------ | ------ | -------- | --------------------------------------- |
+| `projection` | string | yes      | One of `equirectangular`, `mirror_ball` |
 
 ### [Component?] `loose_material_define`
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `material_name` | string | yes | |
-| `map` | string | yes | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission`|
-| `colorspace` | string | no | One of `srgb`, `linear` |
+| Field           | Format | Required | Description                                                                                                                               |
+| --------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `material_name` | string | yes      |                                                                                                                                           |
+| `map`           | string | yes      | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
+| `colorspace`    | string | no       | One of `srgb`, `linear`                                                                                                                   |
 
 ### [Component?] `loose_material_apply`
 When applied to a component, it indicates that this component uses one or multiple materials defined using `loose_material_define` datablocks.
 Array of objects with this structure:
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `material_name` | string | yes | Name of the material used in the definition datablocks |
-| `apply_selectively_to` | string | no | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
+| Field                  | Format | Required | Description                                                                                                                           |
+| ---------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `material_name`        | string | yes      | Name of the material used in the definition datablocks                                                                                |
+| `apply_selectively_to` | string | no       | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
 
 ### [Component?] `mtlx_apply`
 When applied to a component, it indicates that this component makes use of a material defined in mtlx document represented by another component.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `mtlx_component_id` | string | yes | Id of the component that represents the mtlx file. | 
-| `mtlx_material` | string | no | Optional reference for which material to use from the mtlx file, if it contains multiple. |
-| `apply_selectively_to` | string | no |  Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
+| Field                  | Format | Required | Description                                                                                                                           |
+| ---------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `mtlx_component_id`    | string | yes      | Id of the component that represents the mtlx file.                                                                                    |
+| `mtlx_material`        | string | no       | Optional reference for which material to use from the mtlx file, if it contains multiple.                                             |
+| `apply_selectively_to` | string | no       | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
 
 ## File-format specific datablocks
 
@@ -965,33 +965,33 @@ When applied to a component, it indicates that this component makes use of a mat
 Information about files with the extension `.blend`.
 This information is intended to help the client understand the file.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `version` | string | no | Blender Version in the format `Major.Minor.Patch` or `Major.Minor` or `Major` |
-| `is_asset` | boolean | no | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
-| `targets` | array of `target` | no | Array containing the blender structures inside the file that are relevant to the asset. |
+| Field      | Format            | Required | Description                                                                                                       |
+| ---------- | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `version`  | string            | no       | Blender Version in the format `Major.Minor.Patch` or `Major.Minor` or `Major`                                     |
+| `is_asset` | boolean           | no       | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
+| `targets`  | array of `target` | no       | Array containing the blender structures inside the file that are relevant to the asset.                           |
 
 #### `target` Structure
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `kind` | `string` | yes | One of `actions`, `armatures`, `brushes`, `cache_files`, `cameras`, `collections`, `curves`, `fonts`, `grease_pencils`, `hair_curves`, `images`, `lattices`, `lightprobes`, `lights`, `linestyles`, `masks`, `materials`, `meshes`, `metaballs`, `movieclips`, `node_groups`, `objects`, `paint_curves`, `palettes`, `particles`, `pointclouds`, `scenes`, `screens`, `simulations`, `sounds`, `speakers`, `texts`, `textures`, `volumes`, `workspaces`, `worlds` |
-| `names` | Array of `string` | yes | List of the names of the resources to import. |
+| Field   | Format            | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------- | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kind`  | `string`          | yes      | One of `actions`, `armatures`, `brushes`, `cache_files`, `cameras`, `collections`, `curves`, `fonts`, `grease_pencils`, `hair_curves`, `images`, `lattices`, `lightprobes`, `lights`, `linestyles`, `masks`, `materials`, `meshes`, `metaballs`, `movieclips`, `node_groups`, `objects`, `paint_curves`, `palettes`, `particles`, `pointclouds`, `scenes`, `screens`, `simulations`, `sounds`, `speakers`, `texts`, `textures`, `volumes`, `workspaces`, `worlds` |
+| `names` | Array of `string` | yes      | List of the names of the resources to import.                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 ### [Component?] `format.usd`
 Information about files with the extension `.usd`.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `is_crate` | boolean | no | Indicates whether this file is a "crate" (like .usdc) or not (like .usda).|
+| Field      | Format  | Required | Description                                                                |
+| ---------- | ------- | -------- | -------------------------------------------------------------------------- |
+| `is_crate` | boolean | no       | Indicates whether this file is a "crate" (like .usdc) or not (like .usda). |
 
 ### [Component?] `format.obj`
 Information about files with the extension `.obj`.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `up_axis` | string | yes | Indicates which axis should be treated as up. MUST be `+y` or `+z` |
-| `use_mtl` | boolean | yes | Indicates whether the client should attempt to read material data from the MTL files referenced inside the obj-file. |
+| Field     | Format  | Required | Description                                                                                                          |
+| --------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `up_axis` | string  | yes      | Indicates which axis should be treated as up. MUST be `+y` or `+z`                                                   |
+| `use_mtl` | boolean | yes      | Indicates whether the client should attempt to read material data from the MTL files referenced inside the obj-file. |
 
 
 ## Unlocking-related datablocks
@@ -1001,20 +1001,20 @@ These datablocks are used if the provider is utilizing the asset unlocking syste
 ### [Status?] `unlock_balance`
 Information about the user's current account balance.
 
-| Field | Format | Required | Description | 
-| --- | --- |--- | --- |
-| `balance` | number | yes | Balance.|
-| `balance_unit` | string | yes | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
-| `balance_refill_uri` | string | yes | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form. |
+| Field                | Format | Required | Description                                                                                                 |
+| -------------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------- |
+| `balance`            | number | yes      | Balance.                                                                                                    |
+| `balance_unit`       | string | yes      | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
+| `balance_refill_uri` | string | yes      | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form.    |
 
 ### [Component?] `unlock_link`
 
 This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `unlock_query_id` | string | yes | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_datablocks_query`. |
-| `unlocked_datablocks_query` | `fixed_query` | yes | The query to fetch the datablocks for this component if the unlocking was successful. |
+| Field                       | Format        | Required | Description                                                                                                                                                                                                                                          |
+| --------------------------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `unlock_query_id`           | string        | yes      | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_datablocks_query`. |
+| `unlocked_datablocks_query` | `fixed_query` | yes      | The query to fetch the datablocks for this component if the unlocking was successful.                                                                                                                                                                |
 
 ### [ImplementationList?] `unlock_queries`
 
@@ -1024,13 +1024,13 @@ This datablock is an `array` consisting of `unlock_query` objects.
 
 #### `unlock_query` structure
 
-| Field | Format | Required | Description |
-| --- | --- |--- | --- |
-| `id` | string | yes | This is the id by which `unlock_link` datablocks will reference this query. |
-| `unlocked` | boolean | yes | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked. |
-| `price` | number | only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
-| `unlock_query` | `fixed_query` | only if `unlocked=False` | Query to perform to to make the purchase. |
-| `unlock_query_fallback_uri` | string | no | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually. |
+| Field                       | Format        | Required                 | Description                                                                                                                                                                                    |
+| --------------------------- | ------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                        | string        | yes                      | This is the id by which `unlock_link` datablocks will reference this query.                                                                                                                    |
+| `unlocked`                  | boolean       | yes                      | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
+| `price`                     | number        | only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
+| `unlock_query`              | `fixed_query` | only if `unlocked=False` | Query to perform to to make the purchase.                                                                                                                                                      |
+| `unlock_query_fallback_uri` | string        | no                       | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
 
 
 
