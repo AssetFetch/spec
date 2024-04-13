@@ -868,11 +868,21 @@ The `local_path` MUST NOT contain relative path references (`./` or `../`) anywh
 ### 8.3.2. `file_fetch.download`
 
 This datablock indicates that this is a file which can be downloaded directly using the provided query.
-The download destination is defined via the `file_info` datablock.
+The download destination is defined via the `local_path` in the `file_info` datablock.
 
 The structure of this datablock follows the `fixed_query` template.
 
-### 8.3.3. `file_fetch.from_archive`
+### 8.3.3. `file_fetch.download_unlocked`
+
+This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
+
+| Field                       | Format        | Required | Description                                                                                                                                                                                                                                          |
+| --------------------------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `unlock_query_id`           | string        | yes      | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_datablocks_query`. |
+| `unlocked_datablocks_query` | `fixed_query` | yes      | The query to fetch the datablocks for this component if the unlocking was successful.                                                                                                                                                                |
+
+
+### 8.3.4. `file_fetch.from_archive`
 This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
 More about the handling in the [Component Handling section](#9-component-handling).
 The destination is defined via the `file_info` datablock.
@@ -1067,6 +1077,8 @@ Information about files with the extension `.obj`.
 
 These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch.
 
+*Note that the `file_fetch.download_unlocked` datablock is also related to the unlocking system but is [grouped with the other `file_fetch.*` datablocks](#83-file-related-datablocks).* 
+
 ### 8.7.1. `unlock_balance`
 Information about the user's current account balance.
 
@@ -1076,29 +1088,20 @@ Information about the user's current account balance.
 | `balance_unit`       | string | yes      | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
 | `balance_refill_uri` | string | yes      | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form.    |
 
-### 8.7.2. `unlock_link`
-
-This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
-
-| Field                       | Format        | Required | Description                                                                                                                                                                                                                                          |
-| --------------------------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `unlock_query_id`           | string        | yes      | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_datablocks_query`. |
-| `unlocked_datablocks_query` | `fixed_query` | yes      | The query to fetch the datablocks for this component if the unlocking was successful.                                                                                                                                                                |
-
-### 8.7.3. `unlock_queries`
+### 8.7.2. `unlock_queries`
 
 This datablock contains the query or queries required to unlock all or some of the components in this implementation list.
 
 This datablock is an `array` consisting of `unlock_query` objects.
 
-#### 8.7.3.1. `unlock_query` structure
+#### 8.7.2.1. `unlock_query` structure
 
 | Field                       | Format        | Required                 | Description                                                                                                                                                                                    |
 | --------------------------- | ------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `id`                        | string        | yes                      | This is the id by which `unlock_link` datablocks will reference this query.                                                                                                                    |
 | `unlocked`                  | boolean       | yes                      | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
 | `price`                     | number        | only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
-| `unlock_query`              | `fixed_query` | only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                      |
+| `unlock_query`              | `fixed_query` | only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
 | `unlock_query_fallback_uri` | string        | no                       | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
 
 
