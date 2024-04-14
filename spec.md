@@ -1,105 +1,129 @@
 # 1. Introduction
 
-This document specifies **AssetFetch v0.3**, an HTTP- and JSON-based system for browsing, retrieving and handling/importing digital assets for media creation.
-The AssetFetch Protocol aims to provide a standardized way for artists to browse libraries of downloadable assets offered by providers *outside* their current production environment/pipeline, such as those of commercial or non-profit 3D asset vendors, marketplaces or other repositories of models, textures or any other kind of digital assets.
+This document specifies **AssetFetch v0.3**, an HTTP- and JSON-based system for 3D asset discovery, retrieval and handling/import inside of Digital Content Creation (DCC) apps.
+The AssetFetch Protocol aims to provide a standardized way for artists to browse libraries of downloadable assets offered by providers *outside* their current production environment or pipeline, such as those of commercial or non-profit 3D asset vendors, marketplaces or other repositories of models, textures or other kinds of assets for digital media production.
 
 ## 1.1. Motivation
 
-Acquiring pre-made assets for use in a project usually involves visiting the website of a vendor offering 3D models, materials, and other resources and downloading one or multiple files to local storage.
-These asset files are then manually imported into the desired application, a process which often involves additional manual steps for unpacking, file organization and adjustments after the initial import such as setting up a material from texture maps that came with a model file.
+Acquiring pre-made assets for use in a project usually involves visiting the website of a vendor offering 3D models, material or other resources and downloading one or multiple files to local storage.
+These asset files are then manually imported into the desired DCC application, a process which often involves additional steps for unpacking, file organization and adjustments after the initial import such as manually setting up a material from texture maps that came with a model file.
 
 When trying to work with a large volume of third-party assets this workflow can become rather laborious, even more so when trying to experiment with multiple assets to see which works best in a scene.
-Recognizing this issue, multiple vendors have started creating bespoke solutions that allow artists to browse an individual vendor's asset library in a much more integrated fashion, for example through an additional window or panel right in a 3D suite.
-This vastly improves the user experience of browsing, downloading and importing assets and help artists to focus on their core creative objective.
+Recognizing this issue, multiple vendors have started creating bespoke solutions that allow artists to browse an individual vendor's asset library in a much more integrated fashion, for example through an additional window or panel integrated into the graphical user interface in a 3D suite.
+This vastly improves the user experience of browsing, downloading and importing assets and helps artists to focus on their core creative objective.
 
-However, these solutions, which are usually implemented using addons/plugins and are hard-coded to work with one 3D suite and one vendor, come with their own set of issues:
+However, these solutions are usually implemented using addons/plugins and are hard-coded to work with one 3D suite and one vendor, which creates a new set of issues:
 
 Vendors wanting to offer this improved user experience for their customers find themselves needing to build and maintain multiple pieces of software with limited opportunities for code reuse as every new plugin must be built within the language, framework and constraints presented by the target host application.
 
-In light of this, many vendors to only offer a native integration for one or two applications or no native integrations at all because they don't have the resources and skills required or because development is not justifiable from a business perspective.
+In light of this, many vendors choose to only offer a native integration for one or two applications or no native integrations at all.
+This may be because they don't have the resources and skills required or because development of such systems is not justifiable from a business perspective.
 
-Conversely, large vendors who can afford to develop and continuously maintain native integrations for many different applications can benefit from a lock-in effect as only they can provide the convenience and speed that artists are accustomed to - limiting their choices.
+Conversely, large vendors who can afford to develop and continuously maintain native integrations for many different DCC applications can benefit from a lock-in effect as only they can provide the convenience and speed that artists are accustomed to - limiting artist's choices.
 
-**The AssetFetch system aims to help in creating an artist experience similar to the existing native integrations with less development overhead in order to increase interoperability between vendors and applications and allow more vendors - especially smaller ones - to offer their assets to artists right in the applications where they need them.**
+## 1.2. Vision
 
-## 1.2. Goals
+The AssetFetch system aims to create an artist experience similar to the existing native integrations with less development overhead in order to increase interoperability between vendors and DCC applications to allow more vendors - especially smaller ones - to offer their assets to artists right in the DCC applications where they need them.
 
-These are the goals of the AssetFetch specification:
+## 1.3. Goals of this specification
 
-- Describe a provider-independent way of enumerating, filtering and previewing assets.
+These are the goals of the AssetFetch specification, outlined in this document:
+
+- Describe a flexible, extensible way of discovering, filtering and previewing assets.
 - Facilitate the *one-time and one-directional transfer* of an asset with all its files from a provider to a client.
-- Allow providers to describe the structure of their assets (i.e. how the files they provide should work together) in a way that allows for semi- or fully-automated handling on the client-side with the smallest amount of "fix-up" work that is achievable. 
+- Allow providers to describe the structure of their assets (i.e. how the files they provide should work together) in a machine-readable way that allows for semi- or fully-automated handling of assets on the client-side with the smallest amount of manual adjustments that is achievable. 
 <br><br>
-- Work without additional coordination or custom code between the two parties.
+- Work without custom code that is specific for one vendor-application combination.
 - Make offering assets a low-threshold process for implementors on the provider side.
-- Allow implementors on the client side (for whom the implementation is somewhat harder) to easily get to an MVP-stage and gradually build out their implementations from there.
+- Allow implementors on the client side (for whom the implementation is likely harder) to easily get to an MVP-stage and gradually build out their implementations from there.
 
-## 1.3. Non-Goals
+## 1.4. Non-Goals
 
-In order to maintain focus and make the implementation achievable AssetFetch does not want to:
+In order to maintain focus and make the implementation achievable with a reasonable amount of effort AssetFetch does not want to:
 
 - Act as a full asset management system for project- or studio-internal use, i.e. one that permanently tracks potentially evolving assets within an ongoing production. AssetFetch shares some ideas and data structures from [OpenAssetIO](https://openassetio.org/) but is not meant as a competitor or replacement for it, rather as a supplementary system. It might even be possible to run AssetFetch on top of OpenAssetIO in future versions.
-- Act as a new file format for describing complex 3D scenes in great detail. This is left to [OpenUSD](https://openusd.org) or [MaterialX](https://materialx.org/).
+- Act as a new file format for describing complex 3D scenes in great detail. This is left to [OpenUSD](https://openusd.org) or [MaterialX](https://materialx.org/). Instead, the focus lies on describing the interactions and relationships between files with existing, well-known file formats.
 
 # 2. Terminology
 
+This section describes several key terms that will be used throughout this document.
+
 ## 2.1. User
->The human who uses AssetFetch client.
+>The human who uses an AssetFetch client.
 
 ## 2.2. Client
->A piece of software built to interact with the AssetFetch-API of a provider in order to download resources from a provider.
+>A piece of software built to interact with the AssetFetch-API of a provider in order to receive resources from it.
 
 ## 2.3. Host application
 >An application into which the client is integrated.
 
-A client can be a standalone application but it more likely is integrated into another host application, like a 3D suite, in the form of a plugin/addon.
+A client can be a standalone application but in most implementation scenarios it will likely be integrated into another host application, like a 3D suite or other DCC application, in the form of a plugin/addon.
 The crucial difference to existing provider-specific plugins/addons is that only one implementation needs to be developed and maintained per application, instead of one per provider-application pairing.
 In reality there may of course still be multiple client plugins developed for the same application, but the choice for one of them should have less of an impact.
 
 ## 2.4. Provider
->The place that offers assets by hosting an AssetFetch-compliant HTTP(S)-Endpoint.
+>The actor that offers assets by hosting an AssetFetch-compliant HTTP(S)-Endpoint.
 
 This provider can be a commercial platform that is offering 3D assets for sale or an open repository providing content for free.
+The provider hosts the AssetFetch API as an HTTP(s)-based service.
 
 ## 2.5. Asset
 >A reusable *logical* media element in the context of a digital project.
 
-The emphasis is put on the term "logical" to indicate that one asset does not necessarily represent a single file as it might be composed of one or multiple meshes, textures, bones, particle systems, simulation data, etc. that are kept in multiple files.
+The emphasis is put on the term "logical" to indicate that one asset does not necessarily represent a single file.
+It might be composed of one or multiple meshes, textures, bones, particle systems, simulation data, etc. that are kept in multiple files.
 
 - A model of a chair with its mesh and textures is considered one asset.
 - An HDRI environment map is considered one asset.
-- A character with textures and a rig is considered one asset.
+- A character model with textures and a rig is considered one asset.
 
 ## 2.6. (Asset-)Implementation
-> A concrete collection of components, almost always files, that represent the asset in exactly one way for a specific use case, potentially even just for one specific application.
+> A concrete collection of components (files) that represents an asset in exactly one way for one specific use case, potentially even just for one specific application.
 
-When describing the transfer of assets from a provider to a client it is common for the provider to have the same asset available in many different quality levels (resolutions or LODs) and file formats for different applications.
+When describing the transfer of assets from a provider to a client it is common for the provider to have the same asset available in many different variations.
+
+These variations may be:
+- Small semantic variations, like different colors or design alterations that do not change the nature of the asset so much that it becomes a new asset.
+- Quality variations, like multiple texture resolutions or LODs (Levels of Detail) for a mesh.
+- Purely technical variations, like offering the same asset with the same general level of technical fidelity in multiple file formats and file-arrangements for different applications.
+
 Some vendors allow their users to control these parameters with great precision so that they only need to download the asset in exactly the format and quality that is desired.
-This exact choice - or rather the collection of files with metadata that is a result of it - is considered the "implementation of an asset".
+This exact choice - or rather the collection of files with metadata that is a result of it - is considered an  "**implementation** of an asset".
 
-- An OBJ file containing the LOD1 mesh of a chair along with a set of TIFF texture maps measuring 512x512 pixels each is considered one implementation of the chair asset. Using the LOD0 version instead yields a new implementation of the same asset.
+- An OBJ file containing the LOD1 mesh of a chair along with a set of TIFF texture maps measuring 512x512 pixels each is considered one implementation of the chair asset. Using the LOD0 version instead yields a new implementation of the same chair asset.
 - An EXR image with a resolution of 8192x4096 pixels in an equirectangular projection is considered one implementation.
 Tonemapping the EXR image into a JPG image yields a new implementation of the same asset.
-- A BLEND file containing a character model, its rig and all its textures (again with a specific resolution) packed into it is considered one implementation.
-A UASSET file containing the same character and the same texture resolution set up for Unreal Engine instead of Blender is considered a different implementation (of the same asset, since the logical element is still the same character).
+- A BLEND file containing a character model, its rig and all its textures (again with a specific resolution) all packed into it is considered one implementation.
+- A UASSET file containing the same character set up for Unreal Engine instead of Blender is considered a different implementation (of the same asset, since the logical element is still the same character).
 
 ## 2.7. (Implementation-)Component
-> A piece of digital information, almost always a file, that is part of an asset implementation.
+> A piece of digital information, generally a file, that is part of an asset implementation.
 
-- The roughness map of the aforementioned chair implementation is one component.
-- The EXR file containing the panoramic environment is a component - The only component in the implementation of that environment.
+- The 512px .TIFF roughness map of the aforementioned chair implementation is one component.
+- The EXR file containing the panoramic environment is a component. It happens to be the only component in the implementation of that environment.
 - The BLEND file with the character model and textures packed into it is also considered one component since the BLEND file is a black box for any program except Blender.
 - When working with archives, the archive itself as well as its contents are considered components.
-A ZIP archive with the chair model as an FBX file and its textures as PNG files is represented as one component for the ZIP archive and one component for every file in it (with some exceptions when using specific unpacking configurations).
+A ZIP archive with the chair model as an FBX file and its textures as PNG files is represented as one component for the ZIP archive and then one component for each file in it (with some exceptions when using specific archive unpacking configurations).
 
-### 2.7.1. Active vs. Passive Components
+### 2.7.1. Component "activeness"
 Not all components of an implementation must be actively processed by the client in order to use them and are instead handled implicitly by the host application.
-When a client instructs its host to load a component and this component causes multiple other components to be loaded (for example a mesh file referencing two textures) then the first component would be called "active" (because from the client's perspective it needed active handling) whereas the components referenced by it are called "passive" (because the AssetFetch client didn't need to handle them directly).
+
+- When trying to import an implementation consisting of an OBJ-file, an MTL-file and several material maps into a DCC application, then it is generally sufficient to invoke the application's native OBJ import functionality with the OBJ-file as the target.
+The references made inside OBJ-file will prompt the application to handle the MTL-file which then loads the supplemental texture maps without any further explicit invocation.
+- Some formats like [OpenUSD](https://openusd.org/) allow for more complex references between files. This way an entire scene can be represented by one "root" file which contains references to other files which in turn reference even more files.
+
+In both of the given examples, only one file would need to be "actively" handled by the user (or by a client trying to automate the user's work) with the remaining work getting delegated to the host application.
+
+When a client instructs its host to load a component and this component causes multiple other components to be loaded (for example a mesh file referencing two textures) then the first component would be called "active" (because from the client's perspective it needed active handling) whereas the components referenced by it are called "passive" (because the AssetFetch client did not need to handle them directly).
 
 ## 2.8. Datablock
 > A piece of metadata of a certain type and structure that can be attached to most other datastructures defined by AssetFetch.
 
-Datablocks are extremely flexible and sometimes reusable pieces of metadata that enable the communication of specific attributes, instructions how to parse other data elsewhere, relationships, or how to properly interact with a provider's API in the first place.
+Datablocks are extremely flexible and sometimes reusable pieces of metadata that enable the communication a broad range of metadata:
+
+- Attributes of providers, assets, implementations or other resources
+- Instructions for parsing or otherwise handling specific data
+- Relationships between resources
 
 
 
