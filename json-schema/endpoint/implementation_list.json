@@ -59,20 +59,23 @@
 										"file_fetch.download": {
 											"$ref": "../datablock/file_fetch.download.json"
 										},
-										"file_info":{
+										"file_fetch.download_post_unlock": {
+											"$ref": "../datablock/file_fetch.download_post_unlock.json"
+										},
+										"file_info": {
 											"$ref": "../datablock/file_info.json"
 										},
-										"unlock_link": {
-											"$ref": "../datablock/unlock_link.json"
+										"file_handle": {
+											"$ref": "../datablock/file_handle.json"
 										},
 										"loose_environment": {
 											"$ref": "../datablock/loose_environment.json"
 										},
-										"loose_material_apply": {
-											"$ref": "../datablock/loose_material_apply.json"
+										"loose_material.apply": {
+											"$ref": "../datablock/loose_material.apply.json"
 										},
-										"loose_material_define": {
-											"$ref": "../datablock/loose_material_define.json"
+										"loose_material.define": {
+											"$ref": "../datablock/loose_material.define.json"
 										},
 										"mtlx_apply": {
 											"$ref": "../datablock/mtlx_apply.json"
@@ -88,7 +91,8 @@
 										}
 									},
 									"required": [
-										"file_info"
+										"file_info",
+										"file_handle"
 									],
 									"oneOf": [
 										{
@@ -103,7 +107,7 @@
 										},
 										{
 											"required": [
-												"unlock_link"
+												"file_fetch.download_post_unlock"
 											]
 										}
 									],
@@ -154,12 +158,12 @@
 												"anyOf": [
 													{
 														"required": [
-															"loose_material.apply_material"
+															"loose_material.apply"
 														]
 													},
 													{
 														"required": [
-															"loose_material.define_map"
+															"loose_material.define"
 														]
 													}
 												]
@@ -168,12 +172,12 @@
 												"oneOf": [
 													{
 														"required": [
-															"loose_material.apply_material"
+															"loose_material.apply"
 														]
 													},
 													{
 														"required": [
-															"loose_material.define_map"
+															"loose_material.define"
 														]
 													}
 												]

@@ -454,8 +454,8 @@ Clients SHOULD display the `response_id` and `message` fields to the user if a q
 ### 5.1.2. The `datablock_collection` template
 This object contains most of the relevant information for any resource and always has the same general structure, described in this section.
 
-| Field                                | Format          | Required | Description                                                         |
-| ------------------------------------ | --------------- | -------- | ------------------------------------------------------------------- |
+| Field                                | Format          | Required | Description                                                                |
+| ------------------------------------ | --------------- | -------- | -------------------------------------------------------------------------- |
 | \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
 | \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
 | ... (arbitrary number of datablocks) |
@@ -601,10 +601,10 @@ Clients MAY use this field as a display title, but SHOULD prefer the `title` fie
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level | Datablocks                                                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------- |
-| MUST              | `file_info` and exactly one of `file_fetch.*` or `unlock_link`                                    |
-| MAY               | `environment_map`, `loose_material_define`, `loose_material_apply`, `mtlx_apply`,`text`, `unlock` |
+| Requirement Level | Datablocks                                                           |
+| ----------------- | -------------------------------------------------------------------- |
+| MUST              | `file_info`,`file_handle`, `file_fetch.*`                            |
+| MAY               | `environment_map`, `loose_material.*`, `mtlx_apply`,`text`, `unlock` |
 
 # 6. Additional Endpoints
 
@@ -619,21 +619,21 @@ Additional endpoint types can be used to perform certain actions or retrieve add
 | `data` | `datablock_collection` | no       | Datablocks.               |
 
 This endpoint is invoked to perform an "unlocking" (usually meaning a "purchase") of a resource.
-After calling it the client can expect to resolve all previously withheld datablocks using the endpoint for unlocked datablocks specified in the `unlock_link` datablock.
+After calling it the client can expect to resolve all previously withheld downloads using the endpoint for unlocked data specified in the `file_fetch.download_post_unlock` datablock.
 The URI and parameters for this endpoint are communicated through the `unlock_queries` datablock.
 
 This endpoint currently does not use any datablocks.
 Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
 
-## 6.2. Unlocked Datablocks Endpoint
+## 6.2. Unlocked Data Endpoint
 
-| Field  | Format                 | Required | Description                           |
-| ------ | ---------------------- | -------- | ------------------------------------- |
-| `meta` | `meta`                 | yes      | Metadata, kind:`unlocked_datablocks`. |
-| `data` | `datablock_collection` | yes      | Datablocks.                           |
+| Field  | Format                 | Required | Description                     |
+| ------ | ---------------------- | -------- | ------------------------------- |
+| `meta` | `meta`                 | yes      | Metadata, kind:`unlocked_data`. |
+| `data` | `datablock_collection` | yes      | Datablocks.                     |
 
-This endpoint type responds with the previously withheld datablocks for one component, assuming that the client has made all the necessary calls to the unlocking endpoint.
-It gets called by the client for every component that had an `unlock_link` datablock assigned to it.
+This endpoint type responds with the previously withheld data for one component, assuming that the client has made all the necessary calls to the unlocking endpoint(s).
+It gets called by the client for every component that had an `file_fetch.download_post_unlock` datablock assigned to it and returns the "real" `file_fetch.download` datablock (which may be temporarily generated).
 
 The following datablocks are to be included in the `data` field:
 
@@ -756,16 +756,16 @@ This datablock has the following structure:
 
 #### 8.1.1.1. `header` structure
 
-| Field          | Format  | Required            | Description                                                                                                                                                               |
-| -------------- | ------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | string  | yes                 | Name of the header                                                                                                                                                        |
-| `default`      | string  | no                  | Default value as a suggestion to the client.                                                                                                                              |
-| `is_required`  | boolean | yes                 | Indicates if this header is required.                                                                                                                                     |
-| `is_sensitive` | boolean | yes                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#101-storing-sensitive-headers)    |
-| `prefix`       | string  | no                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`. |
-| `suffix`       | string  | no                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.   |
-| `title`        | string  | no                  | Title that the client SHOULD display to the user.                                                                                                                         |
-| `encoding`     | string  | no, default=`plain` | The encoding that the client MUST apply to the header value. MUST be one of `plain` or `base64`.                                                                          |
+| Field          | Format  | Required            | Description                                                                                                                                                                |
+| -------------- | ------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | string  | yes                 | Name of the header                                                                                                                                                         |
+| `default`      | string  | no                  | Default value as a suggestion to the client.                                                                                                                               |
+| `is_required`  | boolean | yes                 | Indicates if this header is required.                                                                                                                                      |
+| `is_sensitive` | boolean | yes                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#101-storing-sensitive-headers) |
+| `prefix`       | string  | no                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.  |
+| `suffix`       | string  | no                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.    |
+| `title`        | string  | no                  | Title that the client SHOULD display to the user.                                                                                                                          |
+| `encoding`     | string  | no, default=`plain` | The encoding that the client MUST apply to the header value. MUST be one of `plain` or `base64`.                                                                           |
 
 ### 8.1.2. `provider_reconfiguration`
 
@@ -822,60 +822,68 @@ It can be used to communicate the total number of results in a query where not a
 | `result_count_total` | int    | yes      | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
 
 
-
 ## 8.3. File-related datablocks
-
-These datablocks are related to files.
 
 ### 8.3.1. `file_info`
 
-This datablock contains information about the file represented by a component.
+This datablock contains information about any kind of file.
 
-| Field        | Format  | Required                       | Description                                                                      |
-| ------------ | ------- | ------------------------------ | -------------------------------------------------------------------------------- |
-| `local_path` | string  | yes, unless `behavior=archive` | The sub-path that this file should take in the directory of this implementation. |
-| `length`     | integer | no                             | The length of the file in bytes.                                                 |
-| `extension`  | string  | yes                            | The file extension indicating the format of this file.                           |
-| `behavior`   | string  | yes                            | One of `file_active`,`file_passive`,`archive`                                    |
+| Field       | Format  | Required | Description                                            |
+| ----------- | ------- | -------- | ------------------------------------------------------ |
+| `length`    | integer | no       | The length of the file in bytes.                       |
+| `extension` | string  | yes      | The file extension indicating the format of this file. |
 
-The `extension` MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if required, MUST include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
+The `extension` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
+MUST include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
 
-The `behavior` describes whether this file should be treated as an [active or passive file component](#271-active-vs-passive-components) or as an archive.
+### 8.3.2. `file_handle`
 
-If `behavior=archive` and the `local_path` is not `null`, the entire archive MUST be unpacked into the local path.
+This datablock indicates how this file should behave during the import process.
+The full description of component handling can be found in the [component handling section](#933-handling-component-files).
 
-If `behavior=archive` and the `local_path` *is* `null`, the archive MUST NOT be unpacked in full automatically. Instead, other components can reference data from this archive using the `file_fetch.from_archive` datablock.
-The client MAY unpack the entire archive into a temporary directory if it helps with processing the `file_fetch.from_archive` datablocks of other components.
+| Field        | Format | Required                                         | Description                                                                                |
+| ------------ | ------ | ------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `local_path` | string | yes, unless `behavior=archive_unpack_referenced` |                                                                                            |
+| `behavior`   | string | yes                                              | One of `single_active`,`single_passive`,`archive_unpack_fully`,`archive_unpack_referenced` |
 
-#### 8.3.1.1. `local_path` rules
+**If `behavior` is `single_*`:**
 
-##### 8.3.1.1.1. `behavior=file_*`
+The `local_file_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash".
+It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
-If `behavior=file_active` or `behavior=file_passive` then the `local_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash".
+`example.txt` or `sub/dir/example.txt` would be correct.
+`/example.txt`, `./example.txt` or `/sub/dir/example.txt` would be incorrect.
 
-The `local_path` MUST NOT contain relative path references (`./` or `../`) anywhere within it.
+**If `behavior` is `archive_*`:**
 
-`example.txt` or `sub/dir/example.txt` would be correct, `/example.txt`, `./example.txt` or `/sub/dir/example.txt` would be incorrect.
+The `local_path` MUST end with a slash ("trailing slash") and MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`).
+It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
-##### 8.3.1.1.2. `behavior=archive`
+`/`, `contents/` or `my/contents/` would be correct.
+`contents`,`./contents/`,`./contents`,`my/../../contents` or `../contents` would all be incorrect.
 
-In that case the local path MUST end with a slash ("trailing slash") and MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`).
-
-The `local_path` MUST NOT contain relative path references (`./` or `../`) anywhere within it.
-
-`contents/` or `my/contents/` would be correct, `contents`,`./contents/`,`./contents`,`my/../../contents` or `../contents` would all be incorrect.
-
-### 8.3.2. `file_fetch.download`
+### 8.3.3. `file_fetch.download`
 
 This datablock indicates that this is a file which can be downloaded directly using the provided query.
-The download destination is defined via the `file_info` datablock.
+
+The full description of component handling can be found in the [component handling section](#933-handling-component-files).
 
 The structure of this datablock follows the `fixed_query` template.
 
-### 8.3.3. `file_fetch.from_archive`
+### 8.3.4. `file_fetch.download_post_unlock`
+
+This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
+It indicates that when the referenced unlock query has been completed, the *real* `file_fetch.download` datablock can be received by performing the fixed query in `unlocked_data_query`
+
+| Field                 | Format        | Required | Description                                                                                                                                                                                                                                    |
+| --------------------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `unlock_query_id`     | string        | yes      | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_data_query`. |
+| `unlocked_data_query` | `fixed_query` | yes      | The query to fetch the previously withheld `file_fetch.download` datablock for this component if the unlocking was successful.                                                                                                                 |
+
+
+### 8.3.5. `file_fetch.from_archive`
 This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
-More about the handling in the [Component Handling section](#9-component-handling).
-The destination is defined via the `file_info` datablock.
+More about the handling in the [import and handling section](#9-implementation-analysis-and-handling).
 
 | Field                  | Format | Required                                                                                                                                                                                                                                                                                           | Description                                                                           |
 | ---------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -996,7 +1004,10 @@ An object that MUST conform to this format:
 | ------------ | ------ | -------- | --------------------------------------- |
 | `projection` | string | yes      | One of `equirectangular`, `mirror_ball` |
 
-### 8.5.2. `loose_material_define`
+### 8.5.2. `loose_material.define`
+
+This datablock is applied to a component that is part of a loose material, most likely a material map.
+It indicates which role the component should play in this material.
 
 | Field           | Format | Required | Description                                                                                                                               |
 | --------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1004,9 +1015,11 @@ An object that MUST conform to this format:
 | `map`           | string | yes      | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
 | `colorspace`    | string | no       | One of `srgb`, `linear`                                                                                                                   |
 
-### 8.5.3. `loose_material_apply`
-When applied to a component, it indicates that this component uses one or multiple materials defined using `loose_material_define` datablocks.
-Array of objects with this structure:
+### 8.5.3. `loose_material.apply`
+
+When applied to a component, it indicates that this component uses one or multiple materials defined using `loose_material.define` datablocks.
+
+The datablock is an **array of objects** with this structure:
 
 | Field                  | Format | Required | Description                                                                                                                           |
 | ---------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1062,6 +1075,8 @@ Information about files with the extension `.obj`.
 
 These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch.
 
+*Note that the `file_fetch.download_unlocked` datablock is also related to the unlocking system but is [grouped with the other `file_fetch.*` datablocks](#83-file-related-datablocks).* 
+
 ### 8.7.1. `unlock_balance`
 Information about the user's current account balance.
 
@@ -1071,29 +1086,20 @@ Information about the user's current account balance.
 | `balance_unit`       | string | yes      | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
 | `balance_refill_uri` | string | yes      | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form.    |
 
-### 8.7.2. `unlock_link`
-
-This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
-
-| Field                       | Format        | Required | Description                                                                                                                                                                                                                                          |
-| --------------------------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `unlock_query_id`           | string        | yes      | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_datablocks_query`. |
-| `unlocked_datablocks_query` | `fixed_query` | yes      | The query to fetch the datablocks for this component if the unlocking was successful.                                                                                                                                                                |
-
-### 8.7.3. `unlock_queries`
+### 8.7.2. `unlock_queries`
 
 This datablock contains the query or queries required to unlock all or some of the components in this implementation list.
 
 This datablock is an `array` consisting of `unlock_query` objects.
 
-#### 8.7.3.1. `unlock_query` structure
+#### 8.7.2.1. `unlock_query` structure
 
 | Field                       | Format        | Required                 | Description                                                                                                                                                                                    |
 | --------------------------- | ------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                        | string        | yes                      | This is the id by which `unlock_link` datablocks will reference this query.                                                                                                                    |
+| `id`                        | string        | yes                      | This is the id by which `file_fetch.download_post_unlock` datablocks will reference this query.                                                                                                |
 | `unlocked`                  | boolean       | yes                      | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
 | `price`                     | number        | only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
-| `unlock_query`              | `fixed_query` | only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                      |
+| `unlock_query`              | `fixed_query` | only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
 | `unlock_query_fallback_uri` | string        | no                       | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
 
 
@@ -1106,18 +1112,97 @@ This datablock is an `array` consisting of `unlock_query` objects.
 
 
 
-# 9. Component Handling
+# 9. Implementation analysis and handling
 
-After the client chooses a final implementation for which it is confident that it will be able to handle all components based on the contents of their datablocks, the client can then perform all the required downloads downloads and then process the components.
+## 9.1. Overview
 
-## 9.1. Handling Active and Passive Components
-When processing the components of an implementation, the `behavior` datablock decides what kind of actions the client should take on it.
+This specification generally does not focus heavily on the exact handling of assets implementations and their associated files on the client side, as it may vary greatly between different applications/clients.
+It only outlines a general structure that the client SHOULD follow in order to make its asset definitions as portable between applications as reasonably possible.
 
-If the behavior is `active`, then the client SHOULD make an attempt to load this file directly, for example through the host application's native import functionality.
+When receiving several implementations for the same asset from a provider, the client SHOULD, broadly, perform the following steps:
 
-If the behavior is `passive`, then the client SHOULD NOT make a direct attempt to load this file and only load it if it is referenced by another (active) component, either through a native reference in the component file itself or through a reference in the AssetFetch data (like `loose_material_apply`).
+1. Analyze the implementations and decide if there is one (or multiple) that it can handle.
+2. If multiple implementations are deemed acceptable, choose one to *actually* import.
+3. Run the import, which entails:
+   1. Dedicate a space in its local storage to the asset (this is almost certainly a directory but could theoretically also be another means of storage in a proprietary database system).
+   2. Performing any required unlocking queries using the information in the `unlock_queries`, `file_fetch.download_post_unlock` and other datablocks.
+   3. Fetch all files for all components using the instructions in their `file_fetch.*` datablocks.
+   4. Handle the component files using the instructions in the `file_handle`, `format.*` and other datablocks.
 
-## 9.2. Local Storage of Asset Files
+Client implementors SHOULD consider whether these steps are fitting to their environment and make deviations, if necessary.
+The client MAY choose create an intermediary plan to allow the user to preview the import process (steps taken, files downloaded, etc.) before it is performed.
+
+## 9.2. Implementation analysis
+
+When analyzing a set of implementation sent from the provider via the [implementation list endpoint](#54-implementation-list),
+the client SHOULD decide for every implementation whether it is "readable".
+It MAY represent this as a binary choice or a more gradual representation.
+
+Possible factors for this decision are:
+
+- The file types used in the implementation, as indicated by the `extension` field in the `file_handle` datablock.
+- The use of more advanced AssetFetch features such as archive handling or asset unlocking.
+- Format-specific indicators in the `format.*` datablock which indicate that the given file is incompatible with the client/host application. 
+
+## 9.3. Implementation import
+
+If at least one of the implementations offered by the provider has been deemed readable, the client can proceed and make an actual import attempt.
+This usually involves interaction with the host application which means that client implementors SHOULD consider the steps outlined in this section only as a rough indicator for how to perform the import.
+
+### 9.3.1. The implementation directory
+
+For handling the implementation of an asset offered by the provider the client SHOULD make a dedicated directory into which all the files described by all the components can be arranged.
+For this purpose it MAY use the `id` values transmitted on the provider-, asset- and implementation queries.
+The directory SHOULD be empty at the start of the component handling process.
+
+### 9.3.2. Performing unlock queries
+
+If the implementation contains components with a `file_fetch.download_post_unlock` datablock,
+then the client MUST perform the unlock query referenced in that datablock before it can proceed.
+Otherwise the resources may not be fully unlocked and the provider will likely refuse to hand over the files.
+
+### 9.3.3. Handling component files
+
+The behavior of a component is dictated by the value of the `behavior` field in the `file_handle` datablock.
+
+#### 9.3.3.1. Handling for `single_active`
+
+Fetch the file using the instructions in the `file_fetch.*` datablock and place it in the `local_path` listed in the `file_handle` datablock.
+Next, make an attempt to load this file directly, for example through the host application's native import functionality.
+
+#### 9.3.3.2. Handling for `single_passive`
+
+Fetch the file using the instructions in the `file_fetch.*` datablock and place it in the `local_path` listed in the `file_handle` datablock.
+
+The client SHOULD NOT make a direct attempt to load this file and only process it in the case that it is referenced by another (active) component.
+This can be either through a native reference in the component file itself (in which ase the host application's native import functionality will handle the references by itself)
+or through a reference in the AssetFetch data (like the `loose_material.apply` datablock), in which case the client needs to take additional action to handle the file.
+
+#### 9.3.3.3. Handling for `archive_unpack_fully`
+
+Fetch the file using the instructions in the `file_fetch.*` datablock and place it in a temporary location.
+
+Then fully unpack the contents of the archive into the implementation directory using the `local_path` in the `file_handle` datablock as the sub-path.
+
+#### 9.3.3.4. Handling for `archive_unpack_referenced`
+
+Fetch the file using the instructions in the `file_fetch.*` datablock and place it in a temporary location.
+
+Then unpack only those files that are referenced by other components in their `file_fetch.from_archive` datablocks.
+Use the `local_path` in the individual component's `file_handle` datablock as the unpacking destination.
+
+#### 9.3.3.5. Collisions in the implementation directory
+
+In general, if an implementation assigns the same `local_path` to two different components, then the client's behavior is undefined.
+Providers MUST avoid configurations that lead to this outcome.
+
+If the `local_path` of a component with behavior `single_*` overlaps with a file from within an archive with the behavior `archive_unpack_fully`, then the first (single)
+component SHOULD take priority and overwrite the file from within the archive.
+Therefore, the client SHOULD perform all unpacking initiated by archive components with the `archive_unpack_fully` value first, and then start handling the remaining components for individual files.
+
+Conflicts as the result of two archive components with `archive_unpack_fully` behavior have undefined behavior and MUST be avoided by the provider.
+
+## 9.4. Local Storage of Asset Files
 As described in the previous section, individual asset components/files may have implicit relationships to each other that are not directly visible from any of the datablocks such as relative file paths within project files.
 To ensure that these references are still functional, AssetFetch specifies certain rules regarding how clients arrange downloaded files in the local file system.
 
@@ -1126,28 +1211,35 @@ The location of this directory is not specified and can be fixed for all uses of
 Inside this directory it SHOULD place every file as specified in the `local_path` field of the component's `datablock`.
 When opening any downloaded file it SHOULD happen from this directory to ensure that relative file paths continue to work.
 
-## 9.3. Materials
+## 9.5. Materials
 
-### 9.3.1. Using native formats and hidden components
+Materials can be handled in several different ways, which are outlined in this section.
+
+### 9.5.1. Using native formats and hidden components
 Many file formats for 3D content - both vendor-specific as well as open - offer native support for referencing external texture files.
-Providers SHOULD use these "native" references whenever possible.
-When materials are used alongside a 3D model file with proper support, the material map components SHOULD be marked as passive.
+Providers SHOULD use these "native" material formats whenever possible.
+When materials are used alongside a 3D model file with proper support, the material map components SHOULD be marked with the behavior `single_passive`,
+since they will be referenced by the host application's native importer automatically.
 
-#### 9.3.1.1. MTLX
-The `mtlx.apply_material` datablock allows references from a mesh component to an mtlx component.
+#### 9.5.1.1. MTLX
+The `mtlx_apply` datablock allows references from a component representing a mesh to a component representing an MaterialX (MTLX) file.
 This allows the use of `.mtlx` files with mesh file formats that do not have the native ability to reference MTLX files.
 
-### 9.3.2. Using loose material declarations
-The workflow outlined in the previous section is not always easily achievable since not all file 3D file formats offer up-to-date (or any) support for defining materials.
-In those cases it is common practice to simply distribute the necessary material maps along with the mesh files without any concrete machine-readable description for how the maps should be applied
-The `loose_material_*` datablocks exist to limit the negative impacts of this limitation. They make it possible to define basic PBR materials through datablocks on the individual map components and reference them on the mesh component.
+### 9.5.2. Using loose material declarations
+The workflow outlined in the previous sections is not always easily achievable since not all file 3D file formats offer up-to-date (or any) support for defining materials.
+Provider may also have their own practical reasons for not offering their material definitions in a widely recognized machine-readable format.
+
+In those cases it is currently common practice to simply distribute the necessary material maps along with the mesh files without any concrete machine-readable description for how the maps should be applied.
+
+The `loose_material.*` datablocks exist to limit the negative impacts of this limitation.
+They make it possible to define basic PBR materials through datablocks on the individual map components and reference them on the mesh component.
 
 Providers SHOULD make use of this notation if, and only if, other more native representations of the material are unavailable of severely insufficient.
 
-## 9.4. Environments
-HDRI environments or skyboxes face a similar situation as materials: They can be represented using native formats, but a common practice is to provide them as a singular image file whose projection must be manually set by the artist.
-The `loose_environment` datablock works similar to the `loose_material` block and allows the provider to communicate that a component should be treated as an environment and what projection should be used.
-
+## 9.6. Environments
+HDRI environments or skyboxes face a similar situation as materials:
+They can be represented using native formats, but a common practice is to provide them as a singular image file whose projection must be manually inferred by the artist.
+The `loose_environment` datablock works similar to the `loose_material.*` datablocks and allows the provider to communicate that a component should be treated as an environment and what projection should be used.
 
 
 
@@ -1168,5 +1260,5 @@ They SHOULD consider storing secret headers through native operation system APIs
 
 ## 10.2. Avoiding Relative Paths in `local_path`
 Datablocks of the `fetch.*` family specify a local sub-path for every component that needs to be appended to a local path chosen by the client in order to assemble the correct file structure for this asset.
-As specified in the [datablock requirements](#8311-local_path-rules) the `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
+As specified in the [datablock requirements](#83-file-related-datablocks) the `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
 Clients MUST take cate to ensure that components with references like `./` or `../` in their local path are rejected.
