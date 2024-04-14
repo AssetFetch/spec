@@ -144,7 +144,7 @@ These are the key steps that are necessary to successfully browse for and downlo
 
 ### 3.1.1. Initialization
 The client makes an initial connection to the provider by making a call to an initialization endpoint communicated by the provider to the user through external channels.
-This initialization endpoint is freely accessible via HTTP GET and communicates key information for further usage of the provider's interface, such as:
+This initialization endpoint is freely accessible via HTTP(s) GET without any authentication and communicates key information for further usage of the provider's interface, such as:
 
 - The name and other metadata about the provider itself.
 - Whether the provider requires the client to authenticate itself through additional HTTP headers.
@@ -153,10 +153,10 @@ This initialization endpoint is freely accessible via HTTP GET and communicates 
 
 
 ### 3.1.2. Authentication (optional)
-The provider MAY require custom authentication headers, in which case the client MUST send these headers along with every request it performs to that provider, except for initialization.
+The provider MAY require custom authentication headers, in which case the client MUST send these headers along with every request it performs to that provider, unless the request is directed at the initialization endpoint.
 The names of these headers, if any, MUST be declared by the provider during the initialization.
-The client obtains the required header values, such as passwords or randomly generated access tokens, from the user through a GUI or from a cache or other storage location.
-The implementation of this possible storage is not part of the specification and left up to the client implementor.
+The client obtains the required header values, such as passwords or randomly generated access tokens, from the user through a GUI, from a cache or other mechanism.
+See [Security considerations](#10-security-considerations) for more details about credential handling.
 
 ### 3.1.3. Connection Status (optional)
 If the provider uses authentication, then it MUST offer a connection status endpoint whose URI is communicated during initialization and which the client SHOULD contact at least once after initialization to verify the correctness of the headers entered by the user.
