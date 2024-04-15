@@ -141,6 +141,7 @@ This section describes the general mechanisms by which AssetFetch operates.
 ## 3.1. Overview
 
 These are the key steps that are necessary to successfully browse for and download an asset from a provider.
+The full definition of the mentioned endpoints are covered in the [endpoints section](#5-endpoints).
 
 ### 3.1.1. Initialization
 The client makes an initial connection to the provider by making a call to an initialization endpoint communicated by the provider to the user through external channels.
@@ -151,7 +152,6 @@ This initialization endpoint is freely accessible via HTTP(s) GET without any au
 - The URI through which assets can be queried.
 - What parameters can be used to query for assets.
 
-
 ### 3.1.2. Authentication (optional)
 The provider MAY require custom authentication headers, in which case the client MUST send these headers along with every request it performs to that provider, unless the request is directed at the initialization endpoint.
 The names of these headers, if any, MUST be declared by the provider during the initialization.
@@ -159,21 +159,20 @@ The client obtains the required header values, such as passwords or randomly gen
 See [Security considerations](#10-security-considerations) for more details about credential handling.
 
 ### 3.1.3. Connection Status (optional)
-If the provider uses authentication, then it MUST offer a connection status endpoint whose URI is communicated during initialization and which the client SHOULD contact at least once after initialization to verify the correctness of the headers entered by the user.
+If the provider uses authentication, then it MUST offer a connection status endpoint whose URI is communicated during initialization and which the client SHOULD contact at least once after initialization to verify the correctness of the authentication values entered by the user.
 
 The connection status endpoint has two primary uses:
 
 - The provider SHOULD respond with user-specific metadata, such as a username or other account details which the client MAY display to the user to verify to them that they are properly connected to the provider.
 - If the provider wants to charge users for downloading assets using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance.
 
-After the initial call the client SHOULD call the connection status endpoint again after specific events to receive updated user data or account balance information.
-Recommended times for calling the connection status endpoint will be mentioned later TODO.
+After the initial call the client SHOULD periodically call the connection status endpoint again to receive updated user data or account balance information.
 
 ### 3.1.4. Browsing assets
-After successful initialization (and possibly authentication) the user MAY (or depending on the requirements by the provider MUST) enter values for the asset search parameters which were defined by the provider during the initialization step.
-Examples include keywords or a category selection.
+After successful initialization (and possibly authentication) the user enters search parameters which form an asset query.
+These parameters were defined by the provider during the initialization step and come in different formats, such as simple text strings or selections from a set of options.
 The client then loads a list of available assets from the provider.
-This list SHOULD includes general metadata about every asset, such as a name, a thumbnail image, license and other information.
+This list includes general metadata about every asset, such as a name, a thumbnail image, license and other information.
 It also MUST include information on how to query the provider for implementations of that asset.
 The user chooses one of the assets they wish to receive.
 
@@ -183,25 +182,27 @@ The first step of this process involves receiving a list of possible implementat
 The provider MAY request additional parameters for querying implementations in order to filter for asset-specific data like texture resolution, level of detail, etc.
 The exact parameters are defined by the provider.
 After getting the parameters from the user (if applicable) the client requests the list of available implementations for this asset. 
-The provider responds with a list of possible implementations available for this asset and the quality parameters chosen by the user.
-The implementations each consist of a list of components, each of which have metadata attached to them containing information about file formats, relationships and downloads.
+The provider responds with a list of possible implementations available for this asset and the parameters, such as resolution or other quality metrics, chosen by the user.
+The implementations each consist of a list of components, each of which have metadata attached to them, including information about file formats, relationships and downloads.
 The client analyzes the metadata declarations of each component in every proposed implementation in order to test it for compatibility.
 If at least one implementation turns out to be compatible with the client and its host application, the process can proceed.
 If more than one implementation is valid for the given client and its host application, it SHOULD ask the user to make the final choice.
 This whole process is comparable to the rarely used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
 
 ### 3.1.6. Unlocking (Optional)
-The provider MAY allow any user to download any asset for free and without authentication or restrictions, but it MAY also require payment for an asset.
+The provider MAY allow any user to download any asset for free and without authentication or restrictions, but it MAY also require payment for assets or impose other restrictions or quotas.
 To accommodate this, providers are able to mark resources as "unlockable", requiring further deliberate action by the client and user to access the files associated with their components.
 Unlocking works by linking individual components to an "unlocking request" (i.e. purchase).
-This mapping can be 1-to-1 where every component has its own unlocking query (for example for a texturing website that charges users individually for every texture map they download) or 1-to-many where one unlocking query is unlocking many different components (for example on a 3D website where purchasing a model usually unlocks all available model files and textures at once).
+This mapping can be 1-to-1 where every component has its own unlocking query (for example for a texturing website that charges users individually for every texture map they download) or 1-to-many where one unlocking query is unlocking many different component files (for example on a 3D website where purchasing a model usually unlocks all available model files and textures at once).
 
-When responding with the implementation list the provider MAY withhold certain datablocks related to downloading from the implementation's components.
+When responding with the implementation list the provider initially withholds the download information that would normally be sent.
 If it does that, then it MUST instead provide a list of possible unlocking queries, the mapping between components and unlocking queries and queries to receive the previously withheld download information for every component after the unlocking has happened.
+This method also allows the provider to generate and distribute temporary download links, if it chooses to do so.
 
-The client SHOULD then present the required unlocking queries (along with the accompanying charges to) to the user.
-If the user agrees, the client first performs the unlocking query (or queries) and then queries the provider for the previously withheld datablocks which contain the real (possibly ephemeral) download links.
-It should be noted that the AssetFetch does not handle the actual payment itself, users still need to perform any required account- and payment setup with the provider through external means, like the provider's website.
+The client SHOULD then present the required unlocking queries (along with the accompanying charges that the provider has declared will happen to) to the user.
+If the user agrees, the client first performs the unlocking query (or queries) and then queries the provider for the previously withheld datablocks which contain the real download links.
+
+**It should be noted that the AssetFetch does not handle the actual payment itself, users still need to perform any required account- and payment setup with the provider through external means, like the provider's website.**
 
 ### 3.1.7. Downloading and Handling
 After choosing a suitable implementation and unlocking all of it's datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
@@ -210,10 +211,10 @@ The choice about where this directory should be created is made between the clie
 Inside this directory the client SHOULD arrange the files as described by the provider in the implementation metadata to ensure that relative links between files remain intact.
 
 At this point the client can - either by itself or through calls to its host application - handle the files that it obtained.
-In the context of a 3D suite this usually involves importing the data into the current scene or a software-specific repository of local assets.
-This processing is aided by the metadata in the datablocks of every component sent by the provider which describes relevant attributes, recommended vendor-specific configurations or relationships between files.
+In the context of a 3D suite this "handling" usually involves importing the data into the current scene or a software-specific repository of local assets.
+This processing is aided by the metadata in the datablocks of every component sent by the provider which describes relevant attributes, recommended vendor- or format-specific configurations or relationships between components.
 
-At this point the interaction is complete and the user MAY start a new query for assets.
+At this point the interaction is complete and the user can start a new query for assets.
 
 ## 3.2. Sequence Diagram
 The following diagrams illustrate the general flow of information between the user, the client software and the provider as well as the most important actions taken by each party.
@@ -340,6 +341,7 @@ sequenceDiagram
 # 4. HTTP Communication
 
 This section describes general instructions for all HTTP communication described in this specification.
+The term "HTTP communication" also always includes communication via HTTPS instead of plain HTTP.
 
 ## 4.1. Request payloads
 
@@ -365,12 +367,13 @@ The client SHOULD send an appropriate user-agent header as defined in [RFC 9110]
 
 If the client is embedded in a host application, for example as an addon inside a 3D suite, it SHOULD set its first `product` and `product-version` identifier based on the host application and then describe the product and version of the client plugin itself afterwards.
 
-Examples for proper user-agents are:
-
 ```
+# Examples for plugins/addons:
 cinema4d/2024.2 MyAssetFetchPlugin/1.2.3
 3dsmax/2023u1 AssetFetchFor3dsMax/0.5.7
 blender/4.0.3 BlenderAssetFetch/v17
+
+# Example for a standalone client:
 standaloneAssetFetchClient/1.4.2.7
 ```
 
@@ -381,8 +384,8 @@ In this context, the specification differentiates between "variable" and "fixed"
 
 ### 4.4.1. Variable Query
 
-A **variable query** is an HTTP(S) request defined by its URI, method and a payload _that has been (partly) configured by the user_ which is sent by the client to the provider in order to receive data in response.
-For this purpose, the provider sends the client a list of parameters that it MAY (or MUST, depending on the configuration sent by the provider) use to construct the actual HTTP query to the provider.
+A **variable query** is an HTTP request defined by its URI, method and a payload _that has been (partly) configured by the user_ which is sent by the client to the provider in order to receive data in response.
+For this purpose, the provider sends the client a list of parameter values that the client MUST use to construct the actual HTTP query to the provider.
 For the client, handling a variable query usually involves drawing a GUI and asking the user to provide the values to be sent to the provider.
 
 A simple example for a variable query is a query for listing assets that allows the user to specify a list of keywords before the request is sent to the provider.
@@ -390,7 +393,8 @@ A simple example for a variable query is a query for listing assets that allows 
 #### 4.4.1.1. Variable Query Parameters
 
 The full field list of a variable query object can be found in the [`variable_query` datablock template](#721-variable_query).
-A variable query is composed of its URI, HTTP method and optionally one or multiple parameter definitions that are used to determine the body of the HTTP request.
+
+A variable query is composed of its URI, HTTP method and optionally one or multiple parameter definitions that are used to determine the payload of the HTTP request.
 
 Every parameter has a `title` property which the client SHOULD use to communicate the functionality of the given parameter to the user.
 The `id` property on the parameter dictates the actual key value that the client MUST use when composing the HTTP request.
@@ -400,7 +404,7 @@ If the provider offers one or multiple adjustable parameters, it MUST choose one
 
 - `text`: A string of text with no line breaks (`\r` and/or `\n`). When utilizing a GUI the client SHOULD use a one-line text input field to represent this parameter. The client MUST allow the use of an empty string.
 - `boolean`: A binary choice with `true` being represented by the value `1` and `false` with the value `0`. The client MUST NOT send any other response value for this parameter. When utilizing a GUI the client SHOULD use a tick-box or similar kind of menu item to represent this parameter.
-- `select`: A list of possible choices, each represented by a `value` which is the actual parameter value that the client MUST include in its HTTP request if the user chooses the choice in question and a `title` which the client SHOULD use to represent the choice to the user. When utilizing a GUI the client SHOULD use a drop-down or similar kind of menu item to represent this parameter.
+- `select`: A list of possible choices, each represented by a `value` which is the actual parameter value that the client MUST include in its HTTP request if the user chooses the choice in question and a `title` which the client SHOULD use to represent the choice to the user. When utilizing a GUI the client SHOULD use a drop-down or similar kind of menu to represent this parameter.
 - `fixed`: A fixed value that the client MUST include in its request verbatim. The client MAY reveal this value to the user, but MUST NOT allow any changes to this value.
 
 ### 4.4.2. Fixed Query
@@ -560,7 +564,7 @@ Every `asset` object MUST have the following structure:
 
 The `id` field MUST be unique among all assets for this provider.
 Clients MAY use this id when storing and organizing files on disk.
-Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
+Clients MAY use the id as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
 
 The following datablocks are to be included in the `data` field:
 
@@ -602,7 +606,7 @@ Every `implementation` object MUST have the following structure:
 The `id` field MUST be unique among all possible implementations the provider can offer for this asset, *even if not all of them are included in the returned implementation list*.
 The id may be reused for an implementation of a *different* asset.
 Clients MAY use this id when storing and organizing files on disk.
-Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
+Clients MAY use the id as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
 
 The following datablocks are to be included in the `data` field:
 
@@ -704,7 +708,7 @@ The resulting regular expression from these rules is `^[a-z0-9_]+(\.[a-z0-9_]+)?
 ## 7.2. Datablock value templates
 This section describes additional data types that can be used within other datablocks.
 They exist to eliminate the need to re-specify the same data structure in two different datablock definitions.
-*The templates can not be used directly as datablocks under their template name.*
+*The templates can not be used directly as datablocks under their template name, though some datablock completely inherit their structure under a new name.*
 
 ### 7.2.1. `variable_query`
 This template describes an HTTP query whose parameters are controllable by the user.
@@ -721,11 +725,11 @@ A parameter describes the attributes of one parameter for the query and how the 
 
 | Field     | Format            | Required                      | Description                                                                                                                                                                                                          |
 | --------- | ----------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`    | string            | yes                           | One of `text` / `boolean`  / `select` / `fixed`                                                                                                                                                                      |
+| `type`    | string            | yes                           | One of `text`, `boolean`, `select`, `fixed`                                                                                                                                                                          |
 | `id`      | string            | yes                           | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key when sending a response using this parameter.                                |
 | `title`   | string            | no                            | The title that the client SHOULD display to the user to represent this parameter.                                                                                                                                    |
 | `default` | string            | no                            | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
-| `choices` | array of `choice` | yes, if `select` type is used | This field contains the possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
+| `choices` | array of `choice` | yes, if `select` type is used | This field contains all possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
 
 #### 7.2.1.2. `choice` Structure
 A single choice for a `select` type parameter.
@@ -789,7 +793,7 @@ This datablock has the following structure:
 | `prefix`       | string  | no                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.  |
 | `suffix`       | string  | no                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.    |
 | `title`        | string  | no                  | Title that the client SHOULD display to the user.                                                                                                                          |
-| `encoding`     | string  | no, default=`plain` | The encoding that the client MUST apply to the header value. MUST be one of `plain` or `base64`.                                                                           |
+| `encoding`     | string  | no, default=`plain` | The encoding that the client MUST apply to the header value and the prefix/suffix. MUST be one of `plain` or `base64`.                                                     |
 
 ### 8.1.2. `provider_reconfiguration`
 
@@ -822,24 +826,21 @@ These datablocks all relate to the process of browsing for assets or implementat
 
 ### 8.2.1. `asset_list_query`
 Describes the variable query for fetching the list of available assets from a provider.
-
-Follows the `variable_query` template.
+It follows the `variable_query` template.
 
 ### 8.2.2. `implementation_list_query`
 Describes the variable query for fetching the list of available implementations for an asset from a provider.
-
-Follows the `variable_query` template.
+It follows the `variable_query` template.
 
 ### 8.2.3. `next_query`
 Describes a fixed query to fetch more results using the same parameters as the current query.
 The response to this query from the provider MUST be of the same `kind` as the query in which this datablock is contained.
-
 Follows the `fixed_query` template.
 
 ### 8.2.4. `response_statistics`
 
 This datablock contains statistics about the current response.
-It can be used to communicate the total number of results in a query where not all results can be communicated and are deferred using `next_query`.
+It can be used to communicate the total number of results in a query where not all results can be communicated in one response and are instead deferred using `next_query`.
 
 | Field                | Format | Required | Description                                                                                                                                                                                            |
 | -------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -1114,7 +1115,7 @@ Information about the user's current account balance.
 
 This datablock contains the query or queries required to unlock all or some of the components in this implementation list.
 
-This datablock is an `array` consisting of `unlock_query` objects.
+This datablock is **an array** consisting of `unlock_query` objects.
 
 #### 8.7.2.1. `unlock_query` structure
 
@@ -1206,7 +1207,7 @@ or through a reference in the AssetFetch data (like the `loose_material.apply` d
 
 Fetch the file using the instructions in the `file_fetch.*` datablock and place it in a temporary location.
 
-Then fully unpack the contents of the archive into the implementation directory using the `local_path` in the `file_handle` datablock as the sub-path.
+The client MUST unpack the full contents of the archive root into the implementation directory using the `local_path` in the `file_handle` datablock as the sub-path inside the implementation directory.
 
 #### 9.3.3.4. Handling for `archive_unpack_referenced`
 
