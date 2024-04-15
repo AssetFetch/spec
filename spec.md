@@ -1,105 +1,129 @@
 # 1. Introduction
 
-This document specifies **AssetFetch v0.3**, an HTTP- and JSON-based system for browsing, retrieving and handling/importing digital assets for media creation.
-The AssetFetch Protocol aims to provide a standardized way for artists to browse libraries of downloadable assets offered by providers *outside* their current production environment/pipeline, such as those of commercial or non-profit 3D asset vendors, marketplaces or other repositories of models, textures or any other kind of digital assets.
+This document specifies **AssetFetch v0.3**, an HTTP- and JSON-based system for 3D asset discovery, retrieval and handling/import inside of Digital Content Creation (DCC) apps.
+The AssetFetch Protocol aims to provide a standardized way for artists to browse libraries of downloadable assets offered by providers *outside* their current production environment or pipeline, such as those of commercial or non-profit 3D asset vendors, marketplaces or other repositories of models, textures or other kinds of assets for digital media production.
 
 ## 1.1. Motivation
 
-Acquiring pre-made assets for use in a project usually involves visiting the website of a vendor offering 3D models, materials, and other resources and downloading one or multiple files to local storage.
-These asset files are then manually imported into the desired application, a process which often involves additional manual steps for unpacking, file organization and adjustments after the initial import such as setting up a material from texture maps that came with a model file.
+Acquiring pre-made assets for use in a project usually involves visiting the website of a vendor offering 3D models, material or other resources and downloading one or multiple files to local storage.
+These asset files are then manually imported into the desired DCC application, a process which often involves additional steps for unpacking, file organization and adjustments after the initial import such as manually setting up a material from texture maps that came with a model file.
 
 When trying to work with a large volume of third-party assets this workflow can become rather laborious, even more so when trying to experiment with multiple assets to see which works best in a scene.
-Recognizing this issue, multiple vendors have started creating bespoke solutions that allow artists to browse an individual vendor's asset library in a much more integrated fashion, for example through an additional window or panel right in a 3D suite.
-This vastly improves the user experience of browsing, downloading and importing assets and help artists to focus on their core creative objective.
+Recognizing this issue, multiple vendors have started creating bespoke solutions that allow artists to browse an individual vendor's asset library in a much more integrated fashion, for example through an additional window or panel integrated into the graphical user interface in a 3D suite.
+This vastly improves the user experience of browsing, downloading and importing assets and helps artists to focus on their core creative objective.
 
-However, these solutions, which are usually implemented using addons/plugins and are hard-coded to work with one 3D suite and one vendor, come with their own set of issues:
+However, these solutions are usually implemented using addons/plugins and are hard-coded to work with one 3D suite and one vendor, which creates a new set of issues:
 
 Vendors wanting to offer this improved user experience for their customers find themselves needing to build and maintain multiple pieces of software with limited opportunities for code reuse as every new plugin must be built within the language, framework and constraints presented by the target host application.
 
-In light of this, many vendors to only offer a native integration for one or two applications or no native integrations at all because they don't have the resources and skills required or because development is not justifiable from a business perspective.
+In light of this, many vendors choose to only offer a native integration for one or two applications or no native integrations at all.
+This may be because they don't have the resources and skills required or because development of such systems is not justifiable from a business perspective.
 
-Conversely, large vendors who can afford to develop and continuously maintain native integrations for many different applications can benefit from a lock-in effect as only they can provide the convenience and speed that artists are accustomed to - limiting their choices.
+Conversely, large vendors who can afford to develop and continuously maintain native integrations for many different DCC applications can benefit from a lock-in effect as only they can provide the convenience and speed that artists are accustomed to - limiting artist's choices.
 
-**The AssetFetch system aims to help in creating an artist experience similar to the existing native integrations with less development overhead in order to increase interoperability between vendors and applications and allow more vendors - especially smaller ones - to offer their assets to artists right in the applications where they need them.**
+## 1.2. Vision
 
-## 1.2. Goals
+The AssetFetch system aims to create an artist experience similar to the existing native integrations with less development overhead in order to increase interoperability between vendors and DCC applications to allow more vendors - especially smaller ones - to offer their assets to artists right in the DCC applications where they need them.
 
-These are the goals of the AssetFetch specification:
+## 1.3. Goals of this specification
 
-- Describe a provider-independent way of enumerating, filtering and previewing assets.
+These are the goals of the AssetFetch specification, outlined in this document:
+
+- Describe a flexible, extensible way of discovering, filtering and previewing assets.
 - Facilitate the *one-time and one-directional transfer* of an asset with all its files from a provider to a client.
-- Allow providers to describe the structure of their assets (i.e. how the files they provide should work together) in a way that allows for semi- or fully-automated handling on the client-side with the smallest amount of "fix-up" work that is achievable. 
+- Allow providers to describe the structure of their assets (i.e. how the files they provide should work together) in a machine-readable way that allows for semi- or fully-automated handling of assets on the client-side with the smallest amount of manual adjustments that is achievable. 
 <br><br>
-- Work without additional coordination or custom code between the two parties.
+- Work without custom code that is specific for one vendor-application combination.
 - Make offering assets a low-threshold process for implementors on the provider side.
-- Allow implementors on the client side (for whom the implementation is somewhat harder) to easily get to an MVP-stage and gradually build out their implementations from there.
+- Allow implementors on the client side (for whom the implementation is likely harder) to easily get to an MVP-stage and gradually build out their implementations from there.
 
-## 1.3. Non-Goals
+## 1.4. Non-Goals
 
-In order to maintain focus and make the implementation achievable AssetFetch does not want to:
+In order to maintain focus and make the implementation achievable with a reasonable amount of effort AssetFetch does not want to:
 
 - Act as a full asset management system for project- or studio-internal use, i.e. one that permanently tracks potentially evolving assets within an ongoing production. AssetFetch shares some ideas and data structures from [OpenAssetIO](https://openassetio.org/) but is not meant as a competitor or replacement for it, rather as a supplementary system. It might even be possible to run AssetFetch on top of OpenAssetIO in future versions.
-- Act as a new file format for describing complex 3D scenes in great detail. This is left to [OpenUSD](https://openusd.org) or [MaterialX](https://materialx.org/).
+- Act as a new file format for describing complex 3D scenes in great detail. This is left to [OpenUSD](https://openusd.org) or [MaterialX](https://materialx.org/). Instead, the focus lies on describing the interactions and relationships between files with existing, well-known file formats.
 
 # 2. Terminology
 
+This section describes several key terms that will be used throughout this document.
+
 ## 2.1. User
->The human who uses AssetFetch client.
+>The human who uses an AssetFetch client.
 
 ## 2.2. Client
->A piece of software built to interact with the AssetFetch-API of a provider in order to download resources from a provider.
+>A piece of software built to interact with the AssetFetch-API of a provider in order to receive resources from it.
 
 ## 2.3. Host application
 >An application into which the client is integrated.
 
-A client can be a standalone application but it more likely is integrated into another host application, like a 3D suite, in the form of a plugin/addon.
+A client can be a standalone application but in most implementation scenarios it will likely be integrated into another host application, like a 3D suite or other DCC application, in the form of a plugin/addon.
 The crucial difference to existing provider-specific plugins/addons is that only one implementation needs to be developed and maintained per application, instead of one per provider-application pairing.
 In reality there may of course still be multiple client plugins developed for the same application, but the choice for one of them should have less of an impact.
 
 ## 2.4. Provider
->The place that offers assets by hosting an AssetFetch-compliant HTTP(S)-Endpoint.
+>The actor that offers assets by hosting an AssetFetch-compliant HTTP(S)-Endpoint.
 
 This provider can be a commercial platform that is offering 3D assets for sale or an open repository providing content for free.
+The provider hosts the AssetFetch API as an HTTP(s)-based service.
 
 ## 2.5. Asset
 >A reusable *logical* media element in the context of a digital project.
 
-The emphasis is put on the term "logical" to indicate that one asset does not necessarily represent a single file as it might be composed of one or multiple meshes, textures, bones, particle systems, simulation data, etc. that are kept in multiple files.
+The emphasis is put on the term "logical" to indicate that one asset does not necessarily represent a single file.
+It might be composed of one or multiple meshes, textures, bones, particle systems, simulation data, etc. that are kept in multiple files.
 
 - A model of a chair with its mesh and textures is considered one asset.
 - An HDRI environment map is considered one asset.
-- A character with textures and a rig is considered one asset.
+- A character model with textures and a rig is considered one asset.
 
 ## 2.6. (Asset-)Implementation
-> A concrete collection of components, almost always files, that represent the asset in exactly one way for a specific use case, potentially even just for one specific application.
+> A concrete collection of components (files) that represents an asset in exactly one way for one specific use case, potentially even just for one specific application.
 
-When describing the transfer of assets from a provider to a client it is common for the provider to have the same asset available in many different quality levels (resolutions or LODs) and file formats for different applications.
+When describing the transfer of assets from a provider to a client it is common for the provider to have the same asset available in many different variations.
+
+These variations may be:
+- Small semantic variations, like different colors or design alterations that do not change the nature of the asset so much that it becomes a new asset.
+- Quality variations, like multiple texture resolutions or LODs (Levels of Detail) for a mesh.
+- Purely technical variations, like offering the same asset with the same general level of technical fidelity in multiple file formats and file-arrangements for different applications.
+
 Some vendors allow their users to control these parameters with great precision so that they only need to download the asset in exactly the format and quality that is desired.
-This exact choice - or rather the collection of files with metadata that is a result of it - is considered the "implementation of an asset".
+This exact choice - or rather the collection of files with metadata that is a result of it - is considered an  "**implementation** of an asset".
 
-- An OBJ file containing the LOD1 mesh of a chair along with a set of TIFF texture maps measuring 512x512 pixels each is considered one implementation of the chair asset. Using the LOD0 version instead yields a new implementation of the same asset.
+- An OBJ file containing the LOD1 mesh of a chair along with a set of TIFF texture maps measuring 512x512 pixels each is considered one implementation of the chair asset. Using the LOD0 version instead yields a new implementation of the same chair asset.
 - An EXR image with a resolution of 8192x4096 pixels in an equirectangular projection is considered one implementation.
 Tonemapping the EXR image into a JPG image yields a new implementation of the same asset.
-- A BLEND file containing a character model, its rig and all its textures (again with a specific resolution) packed into it is considered one implementation.
-A UASSET file containing the same character and the same texture resolution set up for Unreal Engine instead of Blender is considered a different implementation (of the same asset, since the logical element is still the same character).
+- A BLEND file containing a character model, its rig and all its textures (again with a specific resolution) all packed into it is considered one implementation.
+- A UASSET file containing the same character set up for Unreal Engine instead of Blender is considered a different implementation (of the same asset, since the logical element is still the same character).
 
 ## 2.7. (Implementation-)Component
-> A piece of digital information, almost always a file, that is part of an asset implementation.
+> A piece of digital information, generally a file, that is part of an asset implementation.
 
-- The roughness map of the aforementioned chair implementation is one component.
-- The EXR file containing the panoramic environment is a component - The only component in the implementation of that environment.
+- The 512px .TIFF roughness map of the aforementioned chair implementation is one component.
+- The EXR file containing the panoramic environment is a component. It happens to be the only component in the implementation of that environment.
 - The BLEND file with the character model and textures packed into it is also considered one component since the BLEND file is a black box for any program except Blender.
 - When working with archives, the archive itself as well as its contents are considered components.
-A ZIP archive with the chair model as an FBX file and its textures as PNG files is represented as one component for the ZIP archive and one component for every file in it (with some exceptions when using specific unpacking configurations).
+A ZIP archive with the chair model as an FBX file and its textures as PNG files is represented as one component for the ZIP archive and then one component for each file in it (with some exceptions when using specific archive unpacking configurations).
 
-### 2.7.1. Active vs. Passive Components
+### 2.7.1. Component "activeness"
 Not all components of an implementation must be actively processed by the client in order to use them and are instead handled implicitly by the host application.
-When a client instructs its host to load a component and this component causes multiple other components to be loaded (for example a mesh file referencing two textures) then the first component would be called "active" (because from the client's perspective it needed active handling) whereas the components referenced by it are called "passive" (because the AssetFetch client didn't need to handle them directly).
+
+- When trying to import an implementation consisting of an OBJ-file, an MTL-file and several material maps into a DCC application, then it is generally sufficient to invoke the application's native OBJ import functionality with the OBJ-file as the target.
+The references made inside OBJ-file will prompt the application to handle the MTL-file which then loads the supplemental texture maps without any further explicit invocation.
+- Some formats like [OpenUSD](https://openusd.org/) allow for more complex references between files. This way an entire scene can be represented by one "root" file which contains references to other files which in turn reference even more files.
+
+In both of the given examples, only one file would need to be "actively" handled by the user (or by a client trying to automate the user's work) with the remaining work getting delegated to the host application.
+
+When a client instructs its host to load a component and this component causes multiple other components to be loaded (for example a mesh file referencing two textures) then the first component would be called "active" (because from the client's perspective it needed active handling) whereas the components referenced by it are called "passive" (because the AssetFetch client did not need to handle them directly).
 
 ## 2.8. Datablock
 > A piece of metadata of a certain type and structure that can be attached to most other datastructures defined by AssetFetch.
 
-Datablocks are extremely flexible and sometimes reusable pieces of metadata that enable the communication of specific attributes, instructions how to parse other data elsewhere, relationships, or how to properly interact with a provider's API in the first place.
+Datablocks are extremely flexible and sometimes reusable pieces of metadata that enable the communication a broad range of metadata:
+
+- Attributes of providers, assets, implementations or other resources
+- Instructions for parsing or otherwise handling specific data
+- Relationships between resources
 
 
 
@@ -117,39 +141,38 @@ This section describes the general mechanisms by which AssetFetch operates.
 ## 3.1. Overview
 
 These are the key steps that are necessary to successfully browse for and download an asset from a provider.
+The full definition of the mentioned endpoints are covered in the [endpoints section](#5-endpoints).
 
 ### 3.1.1. Initialization
 The client makes an initial connection to the provider by making a call to an initialization endpoint communicated by the provider to the user through external channels.
-This initialization endpoint is freely accessible via HTTP GET and communicates key information for further usage of the provider's interface, such as:
+This initialization endpoint is freely accessible via HTTP(s) GET without any authentication and communicates key information for further usage of the provider's interface, such as:
 
 - The name and other metadata about the provider itself.
 - Whether the provider requires the client to authenticate itself through additional HTTP headers.
 - The URI through which assets can be queried.
 - What parameters can be used to query for assets.
 
-
 ### 3.1.2. Authentication (optional)
-The provider MAY require custom authentication headers, in which case the client MUST send these headers along with every request it performs to that provider, except for initialization.
+The provider MAY require custom authentication headers, in which case the client MUST send these headers along with every request it performs to that provider, unless the request is directed at the initialization endpoint.
 The names of these headers, if any, MUST be declared by the provider during the initialization.
-The client obtains the required header values, such as passwords or randomly generated access tokens, from the user through a GUI or from a cache or other storage location.
-The implementation of this possible storage is not part of the specification and left up to the client implementor.
+The client obtains the required header values, such as passwords or randomly generated access tokens, from the user through a GUI, from a cache or other mechanism.
+See [Security considerations](#10-security-considerations) for more details about credential handling.
 
 ### 3.1.3. Connection Status (optional)
-If the provider uses authentication, then it MUST offer a connection status endpoint whose URI is communicated during initialization and which the client SHOULD contact at least once after initialization to verify the correctness of the headers entered by the user.
+If the provider uses authentication, then it MUST offer a connection status endpoint whose URI is communicated during initialization and which the client SHOULD contact at least once after initialization to verify the correctness of the authentication values entered by the user.
 
 The connection status endpoint has two primary uses:
 
 - The provider SHOULD respond with user-specific metadata, such as a username or other account details which the client MAY display to the user to verify to them that they are properly connected to the provider.
 - If the provider wants to charge users for downloading assets using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance.
 
-After the initial call the client SHOULD call the connection status endpoint again after specific events to receive updated user data or account balance information.
-Recommended times for calling the connection status endpoint will be mentioned later TODO.
+After the initial call the client SHOULD periodically call the connection status endpoint again to receive updated user data or account balance information.
 
 ### 3.1.4. Browsing assets
-After successful initialization (and possibly authentication) the user MAY (or depending on the requirements by the provider MUST) enter values for the asset search parameters which were defined by the provider during the initialization step.
-Examples include keywords or a category selection.
+After successful initialization (and possibly authentication) the user enters search parameters which form an asset query.
+These parameters were defined by the provider during the initialization step and come in different formats, such as simple text strings or selections from a set of options.
 The client then loads a list of available assets from the provider.
-This list SHOULD includes general metadata about every asset, such as a name, a thumbnail image, license and other information.
+This list includes general metadata about every asset, such as a name, a thumbnail image, license and other information.
 It also MUST include information on how to query the provider for implementations of that asset.
 The user chooses one of the assets they wish to receive.
 
@@ -159,25 +182,27 @@ The first step of this process involves receiving a list of possible implementat
 The provider MAY request additional parameters for querying implementations in order to filter for asset-specific data like texture resolution, level of detail, etc.
 The exact parameters are defined by the provider.
 After getting the parameters from the user (if applicable) the client requests the list of available implementations for this asset. 
-The provider responds with a list of possible implementations available for this asset and the quality parameters chosen by the user.
-The implementations each consist of a list of components, each of which have metadata attached to them containing information about file formats, relationships and downloads.
+The provider responds with a list of possible implementations available for this asset and the parameters, such as resolution or other quality metrics, chosen by the user.
+The implementations each consist of a list of components, each of which have metadata attached to them, including information about file formats, relationships and downloads.
 The client analyzes the metadata declarations of each component in every proposed implementation in order to test it for compatibility.
 If at least one implementation turns out to be compatible with the client and its host application, the process can proceed.
 If more than one implementation is valid for the given client and its host application, it SHOULD ask the user to make the final choice.
 This whole process is comparable to the rarely used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
 
 ### 3.1.6. Unlocking (Optional)
-The provider MAY allow any user to download any asset for free and without authentication or restrictions, but it MAY also require payment for an asset.
+The provider MAY allow any user to download any asset for free and without authentication or restrictions, but it MAY also require payment for assets or impose other restrictions or quotas.
 To accommodate this, providers are able to mark resources as "unlockable", requiring further deliberate action by the client and user to access the files associated with their components.
 Unlocking works by linking individual components to an "unlocking request" (i.e. purchase).
-This mapping can be 1-to-1 where every component has its own unlocking query (for example for a texturing website that charges users individually for every texture map they download) or 1-to-many where one unlocking query is unlocking many different components (for example on a 3D website where purchasing a model usually unlocks all available model files and textures at once).
+This mapping can be 1-to-1 where every component has its own unlocking query (for example for a texturing website that charges users individually for every texture map they download) or 1-to-many where one unlocking query is unlocking many different component files (for example on a 3D website where purchasing a model usually unlocks all available model files and textures at once).
 
-When responding with the implementation list the provider MAY withhold certain datablocks related to downloading from the implementation's components.
+When responding with the implementation list the provider initially withholds the download information that would normally be sent.
 If it does that, then it MUST instead provide a list of possible unlocking queries, the mapping between components and unlocking queries and queries to receive the previously withheld download information for every component after the unlocking has happened.
+This method also allows the provider to generate and distribute temporary download links, if it chooses to do so.
 
-The client SHOULD then present the required unlocking queries (along with the accompanying charges to) to the user.
-If the user agrees, the client first performs the unlocking query (or queries) and then queries the provider for the previously withheld datablocks which contain the real (possibly ephemeral) download links.
-It should be noted that the AssetFetch does not handle the actual payment itself, users still need to perform any required account- and payment setup with the provider through external means, like the provider's website.
+The client SHOULD then present the required unlocking queries (along with the accompanying charges that the provider has declared will happen to) to the user.
+If the user agrees, the client first performs the unlocking query (or queries) and then queries the provider for the previously withheld datablocks which contain the real download links.
+
+**It should be noted that the AssetFetch does not handle the actual payment itself, users still need to perform any required account- and payment setup with the provider through external means, like the provider's website.**
 
 ### 3.1.7. Downloading and Handling
 After choosing a suitable implementation and unlocking all of it's datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
@@ -186,10 +211,10 @@ The choice about where this directory should be created is made between the clie
 Inside this directory the client SHOULD arrange the files as described by the provider in the implementation metadata to ensure that relative links between files remain intact.
 
 At this point the client can - either by itself or through calls to its host application - handle the files that it obtained.
-In the context of a 3D suite this usually involves importing the data into the current scene or a software-specific repository of local assets.
-This processing is aided by the metadata in the datablocks of every component sent by the provider which describes relevant attributes, recommended vendor-specific configurations or relationships between files.
+In the context of a 3D suite this "handling" usually involves importing the data into the current scene or a software-specific repository of local assets.
+This processing is aided by the metadata in the datablocks of every component sent by the provider which describes relevant attributes, recommended vendor- or format-specific configurations or relationships between components.
 
-At this point the interaction is complete and the user MAY start a new query for assets.
+At this point the interaction is complete and the user can start a new query for assets.
 
 ## 3.2. Sequence Diagram
 The following diagrams illustrate the general flow of information between the user, the client software and the provider as well as the most important actions taken by each party.
@@ -316,6 +341,7 @@ sequenceDiagram
 # 4. HTTP Communication
 
 This section describes general instructions for all HTTP communication described in this specification.
+The term "HTTP communication" also always includes communication via HTTPS instead of plain HTTP.
 
 ## 4.1. Request payloads
 
@@ -341,12 +367,13 @@ The client SHOULD send an appropriate user-agent header as defined in [RFC 9110]
 
 If the client is embedded in a host application, for example as an addon inside a 3D suite, it SHOULD set its first `product` and `product-version` identifier based on the host application and then describe the product and version of the client plugin itself afterwards.
 
-Examples for proper user-agents are:
-
 ```
+# Examples for plugins/addons:
 cinema4d/2024.2 MyAssetFetchPlugin/1.2.3
 3dsmax/2023u1 AssetFetchFor3dsMax/0.5.7
 blender/4.0.3 BlenderAssetFetch/v17
+
+# Example for a standalone client:
 standaloneAssetFetchClient/1.4.2.7
 ```
 
@@ -357,8 +384,8 @@ In this context, the specification differentiates between "variable" and "fixed"
 
 ### 4.4.1. Variable Query
 
-A **variable query** is an HTTP(S) request defined by its URI, method and a payload _that has been (partly) configured by the user_ which is sent by the client to the provider in order to receive data in response.
-For this purpose, the provider sends the client a list of parameters that it MAY (or MUST, depending on the configuration sent by the provider) use to construct the actual HTTP query to the provider.
+A **variable query** is an HTTP request defined by its URI, method and a payload _that has been (partly) configured by the user_ which is sent by the client to the provider in order to receive data in response.
+For this purpose, the provider sends the client a list of parameter values that the client MUST use to construct the actual HTTP query to the provider.
 For the client, handling a variable query usually involves drawing a GUI and asking the user to provide the values to be sent to the provider.
 
 A simple example for a variable query is a query for listing assets that allows the user to specify a list of keywords before the request is sent to the provider.
@@ -366,7 +393,8 @@ A simple example for a variable query is a query for listing assets that allows 
 #### 4.4.1.1. Variable Query Parameters
 
 The full field list of a variable query object can be found in the [`variable_query` datablock template](#721-variable_query).
-A variable query is composed of its URI, HTTP method and optionally one or multiple parameter definitions that are used to determine the body of the HTTP request.
+
+A variable query is composed of its URI, HTTP method and optionally one or multiple parameter definitions that are used to determine the payload of the HTTP request.
 
 Every parameter has a `title` property which the client SHOULD use to communicate the functionality of the given parameter to the user.
 The `id` property on the parameter dictates the actual key value that the client MUST use when composing the HTTP request.
@@ -376,7 +404,7 @@ If the provider offers one or multiple adjustable parameters, it MUST choose one
 
 - `text`: A string of text with no line breaks (`\r` and/or `\n`). When utilizing a GUI the client SHOULD use a one-line text input field to represent this parameter. The client MUST allow the use of an empty string.
 - `boolean`: A binary choice with `true` being represented by the value `1` and `false` with the value `0`. The client MUST NOT send any other response value for this parameter. When utilizing a GUI the client SHOULD use a tick-box or similar kind of menu item to represent this parameter.
-- `select`: A list of possible choices, each represented by a `value` which is the actual parameter value that the client MUST include in its HTTP request if the user chooses the choice in question and a `title` which the client SHOULD use to represent the choice to the user. When utilizing a GUI the client SHOULD use a drop-down or similar kind of menu item to represent this parameter.
+- `select`: A list of possible choices, each represented by a `value` which is the actual parameter value that the client MUST include in its HTTP request if the user chooses the choice in question and a `title` which the client SHOULD use to represent the choice to the user. When utilizing a GUI the client SHOULD use a drop-down or similar kind of menu to represent this parameter.
 - `fixed`: A fixed value that the client MUST include in its request verbatim. The client MAY reveal this value to the user, but MUST NOT allow any changes to this value.
 
 ### 4.4.2. Fixed Query
@@ -536,7 +564,7 @@ Every `asset` object MUST have the following structure:
 
 The `id` field MUST be unique among all assets for this provider.
 Clients MAY use this id when storing and organizing files on disk.
-Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
+Clients MAY use the id as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
 
 The following datablocks are to be included in the `data` field:
 
@@ -578,7 +606,7 @@ Every `implementation` object MUST have the following structure:
 The `id` field MUST be unique among all possible implementations the provider can offer for this asset, *even if not all of them are included in the returned implementation list*.
 The id may be reused for an implementation of a *different* asset.
 Clients MAY use this id when storing and organizing files on disk.
-Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
+Clients MAY use the id as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
 
 The following datablocks are to be included in the `data` field:
 
@@ -680,7 +708,7 @@ The resulting regular expression from these rules is `^[a-z0-9_]+(\.[a-z0-9_]+)?
 ## 7.2. Datablock value templates
 This section describes additional data types that can be used within other datablocks.
 They exist to eliminate the need to re-specify the same data structure in two different datablock definitions.
-*The templates can not be used directly as datablocks under their template name.*
+*The templates can not be used directly as datablocks under their template name, though some datablock completely inherit their structure under a new name.*
 
 ### 7.2.1. `variable_query`
 This template describes an HTTP query whose parameters are controllable by the user.
@@ -697,11 +725,11 @@ A parameter describes the attributes of one parameter for the query and how the 
 
 | Field     | Format            | Required                      | Description                                                                                                                                                                                                          |
 | --------- | ----------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`    | string            | yes                           | One of `text` / `boolean`  / `select` / `fixed`                                                                                                                                                                      |
+| `type`    | string            | yes                           | One of `text`, `boolean`, `select`, `fixed`                                                                                                                                                                          |
 | `id`      | string            | yes                           | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key when sending a response using this parameter.                                |
 | `title`   | string            | no                            | The title that the client SHOULD display to the user to represent this parameter.                                                                                                                                    |
 | `default` | string            | no                            | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
-| `choices` | array of `choice` | yes, if `select` type is used | This field contains the possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
+| `choices` | array of `choice` | yes, if `select` type is used | This field contains all possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
 
 #### 7.2.1.2. `choice` Structure
 A single choice for a `select` type parameter.
@@ -765,7 +793,7 @@ This datablock has the following structure:
 | `prefix`       | string  | no                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.  |
 | `suffix`       | string  | no                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.    |
 | `title`        | string  | no                  | Title that the client SHOULD display to the user.                                                                                                                          |
-| `encoding`     | string  | no, default=`plain` | The encoding that the client MUST apply to the header value. MUST be one of `plain` or `base64`.                                                                           |
+| `encoding`     | string  | no, default=`plain` | The encoding that the client MUST apply to the header value and the prefix/suffix. MUST be one of `plain` or `base64`.                                                     |
 
 ### 8.1.2. `provider_reconfiguration`
 
@@ -798,24 +826,21 @@ These datablocks all relate to the process of browsing for assets or implementat
 
 ### 8.2.1. `asset_list_query`
 Describes the variable query for fetching the list of available assets from a provider.
-
-Follows the `variable_query` template.
+It follows the `variable_query` template.
 
 ### 8.2.2. `implementation_list_query`
 Describes the variable query for fetching the list of available implementations for an asset from a provider.
-
-Follows the `variable_query` template.
+It follows the `variable_query` template.
 
 ### 8.2.3. `next_query`
 Describes a fixed query to fetch more results using the same parameters as the current query.
 The response to this query from the provider MUST be of the same `kind` as the query in which this datablock is contained.
-
 Follows the `fixed_query` template.
 
 ### 8.2.4. `response_statistics`
 
 This datablock contains statistics about the current response.
-It can be used to communicate the total number of results in a query where not all results can be communicated and are deferred using `next_query`.
+It can be used to communicate the total number of results in a query where not all results can be communicated in one response and are instead deferred using `next_query`.
 
 | Field                | Format | Required | Description                                                                                                                                                                                            |
 | -------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -1090,7 +1115,7 @@ Information about the user's current account balance.
 
 This datablock contains the query or queries required to unlock all or some of the components in this implementation list.
 
-This datablock is an `array` consisting of `unlock_query` objects.
+This datablock is **an array** consisting of `unlock_query` objects.
 
 #### 8.7.2.1. `unlock_query` structure
 
@@ -1182,7 +1207,7 @@ or through a reference in the AssetFetch data (like the `loose_material.apply` d
 
 Fetch the file using the instructions in the `file_fetch.*` datablock and place it in a temporary location.
 
-Then fully unpack the contents of the archive into the implementation directory using the `local_path` in the `file_handle` datablock as the sub-path.
+The client MUST unpack the full contents of the archive root into the implementation directory using the `local_path` in the `file_handle` datablock as the sub-path inside the implementation directory.
 
 #### 9.3.3.4. Handling for `archive_unpack_referenced`
 
