@@ -932,6 +932,7 @@ General text information to be displayed to the user.
 References to external websites for documentation or support.
 
 An array of objects each of which MUST follow this format:
+
 | Field      | Format | Required | Description                                                                                                   |
 | ---------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------- |
 | `title`    | string | yes      | The title to display for this web reference.                                                                  |
@@ -973,6 +974,7 @@ Array of objects that MUST have this structure:
 Contains general information about the physical dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh data.
 
 An object that MUST conform to this format:
+
 | Field      | Format | Required | Description                    |
 | ---------- | ------ | -------- | ------------------------------ |
 | `width_m`  | float  | yes      | Width of the referenced asset  |
@@ -983,6 +985,7 @@ An object that MUST conform to this format:
 Contains general information about the physical dimensions of a two-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh-,texture-, or uv data.
 
 An object that MUST conform to this format:
+
 | Field      | Format | Required | Description                    |
 | ---------- | ------ | -------- | ------------------------------ |
 | `width_m`  | float  | yes      | Width of the referenced asset  |
@@ -992,6 +995,7 @@ An object that MUST conform to this format:
 Contains a list of preview images with `uri`s and `alt`-Strings associated to the asset.
 
 An array where every field must conform to the following structure:
+
 | Field | Format | Required | Description                                                                                                   |
 | ----- | ------ | -------- | ------------------------------------------------------------------------------------------------------------- |
 | `alt` | string | no       | An "alt" String for the image.                                                                                |
@@ -1001,6 +1005,7 @@ An array where every field must conform to the following structure:
 Contains information about a thumbnail for an asset. The thumbnail can be provided in multiple resolutions.
 
 An object that MUST conform to this format:
+
 | Field  | Format | Required | Description                    |
 | ------ | ------ | -------- | ------------------------------ |
 | `alt`  | string | no       | An "alt" String for the image. |
@@ -1025,6 +1030,7 @@ In many cases the relationships can be represented purely by placing component f
 The presence of this datablock on a component indicates that it is an environment map.
 This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR), not if the environment is already wrapped in another format with native support.
 An object that MUST conform to this format:
+
 | Field        | Format | Required | Description                             |
 | ------------ | ------ | -------- | --------------------------------------- |
 | `projection` | string | yes      | One of `equirectangular`, `mirror_ball` |
