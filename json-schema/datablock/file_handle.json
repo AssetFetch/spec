@@ -11,9 +11,10 @@
 		"behavior": {
 			"type": "string",
 			"enum": [
-				"file_active",
-				"file_passive",
-				"archive"
+				"single_active",
+				"single_passive",
+				"archive_unpack_fully",
+				"archive_unpack_referenced"
 			]
 		}
 	},
