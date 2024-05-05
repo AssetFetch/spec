@@ -632,7 +632,7 @@ The following datablocks are to be included in the `data` field:
 | Requirement Level | Datablocks                                                           |
 | ----------------- | -------------------------------------------------------------------- |
 | MUST              | `file_info`,`file_handle`, `file_fetch.*`                            |
-| MAY               | `environment_map`, `loose_material.*`, `mtlx_apply`,`text`, `unlock` |
+| MAY               | `environment_map`, `loose_material.*`, `mtlx_apply`,`text` |
 
 # 6. Additional Endpoints
 
