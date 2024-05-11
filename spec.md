@@ -873,7 +873,7 @@ The full description of component handling can be found in the [component handli
 
 **If `behavior` is `single_*`:**
 
-The `local_file_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash".
+The `local_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash".
 It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
 `example.txt` or `sub/dir/example.txt` would be correct.
