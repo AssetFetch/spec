@@ -1106,7 +1106,7 @@ Information about files with the extension `.obj`.
 
 These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch.
 
-*Note that the `file_fetch.download_unlocked` datablock is also related to the unlocking system but is [grouped with the other `file_fetch.*` datablocks](#83-file-related-datablocks).* 
+*Note that the `file_fetch.download_post_unlock` datablock is also related to the unlocking system but is [grouped with the other `file_fetch.*` datablocks](#83-file-related-datablocks).* 
 
 ### 8.7.1. `unlock_balance`
 Information about the user's current account balance.
