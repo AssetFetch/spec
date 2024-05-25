@@ -9,7 +9,8 @@ The AssetFetch Protocol aims to provide a standardized way for artists to browse
 
 It aims to help in creating an artist experience similar to existing native integrations, such as proprietary import plugins like, with less development overhead in order to increase interoperability between vendors and applications and allow more vendors - especially smaller ones - to offer their assets to artists right in the applications where they need them.
 
-Currently, a draft of version 0.2 is available and can be read in [spec.md](./spec.md).
+The latest version is *0.3*.
+A draft of version 0.4 can be read in [spec.md](./spec.md).
 
 # Features
 
