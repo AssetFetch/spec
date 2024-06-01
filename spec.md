@@ -1031,9 +1031,10 @@ The presence of this datablock on a component indicates that it is an environmen
 This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR), not if the environment is already wrapped in another format with native support.
 An object that MUST conform to this format:
 
-| Field        | Format | Required | Description                             |
-| ------------ | ------ | -------- | --------------------------------------- |
-| `projection` | string | yes      | One of `equirectangular`, `mirror_ball` |
+| Field              | Format | Required | Description                             |
+| ------------------ | ------ | -------- | --------------------------------------- |
+| `projection`       | string | yes      | One of `equirectangular`, `mirror_ball` |
+| `environment_name` | string | yes      |                                         |
 
 ### 8.5.2. `loose_material.define`
 
