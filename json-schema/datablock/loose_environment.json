@@ -9,9 +9,13 @@
 		"projection":{
 			"type":"string",
 			"enum": ["equirectangular","mirror_ball"]
+		},
+		"environment_name":{
+			"type":"string"
 		}
 	},
 	"required": [
-		"projection"
+		"projection",
+		"environment_name"
 	]
 }
