@@ -212,7 +212,7 @@ If it does that, then it MUST instead provide a list of possible unlocking queri
 The client SHOULD then present the required unlocking queries (along with the accompanying charges, if any, that the provider has declared will happen to) to the user.
 If the user agrees, the client first performs the unlocking query (or queries) required to unlock all components it wants to download and then queries the provider for the previously withheld real download links, which may be ephemeral or otherwise personalized to the user.
 
-**It should be noted that the AssetFetch does not handle the actual payment itself, users still need to perform any required account- and payment setup with the provider through external means, usually the provider's website.**
+**AssetFetch does not handle the actual payment itself, users still need to perform any required account- and payment setup with the provider through external means, usually the provider's website.**
 
 Comparing this workflow with the unrestricted example outlined at the start of this section, the workflow for downloading a component file is extended by several steps:
 
