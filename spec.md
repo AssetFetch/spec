@@ -232,7 +232,7 @@ The following section outlines examples to illustrate the kinds of relationships
 
 #### 3.1.6.2. Asset unlocking architectures
 
-Providers wanting to make use of asset unlocking usually have an existing model for how assets can be unlocked/purchased.
+Providers wanting to make use of asset unlocking usually have an established model for how assets can be unlocked/purchased.
 This section outlines examples for how implementation components can be linked with unlocking queries to illustrate possible architectures that can be modeled within AssetFetch.
 
 ##### 3.1.6.2.1. Asset-level unlocking
@@ -372,39 +372,11 @@ graph RL;
 
 ```
 
-<!--
+#### 3.1.6.3. Unlocking query inclusion
 
-```mermaid
-graph
-	Query1KCOL["fa:fa-unlock Unlocking Query (1K color)"]
-	Query1KRGH["fa:fa-unlock Unlocking Query (1K roughness)"]
-	Query1KNRM["fa:fa-unlock Unlocking Query (1K normal)"]
-
-	Query2KCOL["fa:fa-unlock Unlocking Query (2K color)"]
-	Query2KRGH["fa:fa-unlock Unlocking Query (2K roughness)"]
-	Query2KNRM["fa:fa-unlock Unlocking Query (2K normal)"]
-
-	Query4KCOL["fa:fa-unlock Unlocking Query (4K color)"]
-	Query4KRGH["fa:fa-unlock Unlocking Query (4K roughness)"]
-	Query4KNRM["fa:fa-unlock Unlocking Query (4K normal)"]
-
-	Query4KCOL -- > Query2KCOL
-	Query4KCOL -- > Query1KCOL
-
-	Query4KRGH -- > Query2KRGH
-	Query4KRGH -- > Query1KRGH
-
-	Query4KNRM -- > Query2KNRM
-	Query4KNRM -- > Query1KNRM
-
-	Query2KCOL -- > Query1KCOL
-	Query2KRGH -- > Query1KRGH
-	Query2KNRM -- > Query1KNRM
-
-```
-
--->
-
+In some cases it is desirable to also convey the relationship between several unlocking queries in the AssetFetch data.
+For example, if one unlocking query which grants access to high quality/resolution implementations of an asset, then it is common practice to also grant access to the lower quality/resolution implementations which would have been another purchase otherwise.
+This kind of "inclusion" between unlocking queries is handled via a `child_queries` field which lists the other unlocking queries a client can also consider to be unlocked after executing one query. See [the `unlock_query` structure description](#8721-unlock_query-structure).
 
 ### 3.1.7. Downloading and Handling
 After choosing a suitable implementation and unlocking all of it's datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
@@ -1327,13 +1299,14 @@ This datablock is **an array** consisting of `unlock_query` objects.
 
 #### 8.7.2.1. `unlock_query` structure
 
-| Field                       | Format        | Required                 | Description                                                                                                                                                                                    |
-| --------------------------- | ------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                        | string        | yes                      | This is the id by which `file_fetch.download_post_unlock` datablocks will reference this query.                                                                                                |
-| `unlocked`                  | boolean       | yes                      | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
-| `price`                     | number        | only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
-| `unlock_query`              | `fixed_query` | only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
-| `unlock_query_fallback_uri` | string        | no                       | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
+| Field                | Format            | Required                 | Description                                                                                                                                                                                    |
+| -------------------- | ----------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                 | string            | yes                      | This is the id by which `file_fetch.download_post_unlock` datablocks will reference this query.                                                                                                |
+| `unlocked`           | boolean           | yes                      | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
+| `price`              | number            | only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
+| `query`              | `fixed_query`     | only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
+| `child_queries`      | Array of `string` | no                       | A list containing the ids of other queries that can also be considered "unlocked" if this query has been executed.                                                                             |
+| `query_fallback_uri` | string            | no                       | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
 
 
 
