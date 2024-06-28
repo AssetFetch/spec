@@ -134,60 +134,83 @@ Datablocks are extremely flexible and sometimes reusable pieces of metadata that
 
 
 
-# 3. General Operation
+# 3. General operation
 
-This section describes the general mechanisms by which AssetFetch operates.
+This section describes the steps by which AssetFetch operates in general terms.
+The following sections will then describe the exact implementation by defining the exact HTTP parameters and (JSON-) datastructures.
 
-## 3.1. Overview
+## 3.1. AssetFetch interaction steps
 
 These are the key steps that are necessary to successfully browse for and download an asset from a provider.
-The full definition of the mentioned endpoints are covered in the [endpoints section](#5-endpoints).
 
-### 3.1.1. Initialization
-The client makes an initial connection to the provider by making a call to an initialization endpoint communicated by the provider to the user through external channels.
-This initialization endpoint is freely accessible via HTTP(s) GET without any authentication and communicates key information for further usage of the provider's interface, such as:
+### 3.1.1. Communicating the initialization URI
 
-- The name and other metadata about the provider itself.
-- Whether the provider requires the client to authenticate itself through additional HTTP headers.
-- The URI through which assets can be queried.
+The first point of contact between a client and a provider is made using an initialization URI which the user enters into the client (comparable to the URI of an RSS feed).
+This URI is communicated from the provider to the user via external channels, such as the provider's website.
+
+### 3.1.2. Initialization
+The client makes an initial connection to the provider by making a call to an initialization endpoint.
+This initialization endpoint is freely accessible via HTTP(s) GET without any authentication and communicates key information for further usage of the provider's AssetFetch interface, namely:
+
+- The provider's name and other general metadata.
+- Whether the provider requires the client to authenticate itself through additional HTTP headers and how to do this.
+- The endpoint through which assets can be queried.
 - What parameters can be used to query for assets.
 
-### 3.1.2. Authentication (optional)
+### 3.1.3. Authentication & Connection status (optional)
 The provider MAY require custom authentication headers, in which case the client MUST send these headers along with every request it performs to that provider, unless the request is directed at the initialization endpoint.
-The names of these headers, if any, MUST be declared by the provider during the initialization.
 The client obtains the required header values, such as passwords or randomly generated access tokens, from the user through a GUI, from a cache or other mechanism.
 See [Security considerations](#10-security-considerations) for more details about credential handling.
 
-### 3.1.3. Connection Status (optional)
-If the provider uses authentication, then it MUST offer a connection status endpoint whose URI is communicated during initialization and which the client SHOULD contact at least once after initialization to verify the correctness of the authentication values entered by the user.
+If the provider uses authentication, then it MUST offer a connection status endpoint which is advertised during initialization and which the client SHOULD contact at least once after initialization to verify the correctness of the authentication values entered by the user.
 
 The connection status endpoint has two primary uses:
 
-- The provider SHOULD respond with user-specific metadata, such as a username or other account details which the client MAY display to the user to verify to them that they are properly connected to the provider.
-- If the provider wants to charge users for downloading assets using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance.
-
-After the initial call the client SHOULD periodically call the connection status endpoint again to receive updated user data or account balance information.
+- The provider SHOULD respond with user-specific metadata, such as a username or other account details which the client SHOULD display to the user to confirm that they are properly connected to the provider.
+- If the provider implements "asset unlocking" (purchasing) using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance.
 
 ### 3.1.4. Browsing assets
-After successful initialization (and possibly authentication) the user enters search parameters which form an asset query.
-These parameters were defined by the provider during the initialization step and come in different formats, such as simple text strings or selections from a set of options.
-The client then loads a list of available assets from the provider.
+After successful initialization (and possibly authentication) the client is ready to browse assets.
+The provider might send a static, unchanging list of available assets, but it MAY also require specific parameters for generating a dynamic asset list.
+In that case, the names and kinds of parameters were defined by the provider during the initialization step.
+Parameters can come in different formats, such as simple text strings or selections from a set of options, similar to what can be represented with a `<form>` tag in HTML.
+Possible examples for parameters for this query are:
+
+- A general keyword search field
+- A type- or category selection
+- Sorting options
+- Binary choices, such as limiting the selection to already purchased assets
+
+After receiving the parameter values from the user the client then requests and displays a list of available assets from the provider.
 This list includes general metadata about every asset, such as a name, a thumbnail image, license and other information.
-It also MUST include information on how to query the provider for implementations of that asset.
-The user chooses one of the assets they wish to receive.
+It also MUST include information on how to query the provider for implementations of every asset.
+The user chooses one of the assets they wish to fetch.
 
 ### 3.1.5. Choosing an implementation
-In order to load an asset a specific implementation of that asset needs to be chosen.
-The first step of this process involves receiving a list of possible implementations from the provider using the information on how to request it sent by the provider along with the other asset metadata.
-The provider MAY request additional parameters for querying implementations in order to filter for asset-specific data like texture resolution, level of detail, etc.
-The exact parameters are defined by the provider.
-After getting the parameters from the user (if applicable) the client requests the list of available implementations for this asset. 
-The provider responds with a list of possible implementations available for this asset and the parameters, such as resolution or other quality metrics, chosen by the user.
+In order to load an asset a specific *implementation* of that asset needs to be chosen.
+
+The process for choosing an implementation follows a similar pattern to that of choosing an asset.
+The provider MAY again require specific parameters for choosing an implementation.
+Possible examples for parameters for this query are:
+
+- Texture resolution & format
+  - possibly including variable resolutions and format choices for each texture map
+- Level-of-Detail selection
+- Possible small semantic choices, such as a selection of color variations
+
+Again, after getting the parameters from the user (if applicable) the client requests the list of available implementations for this asset. 
+The provider responds with a *list of possible implementations* available for this asset and the implementation parameters chosen by the user.
+Every entry in this list represents one implementation that matches the user's parameter choices.
+The differences between these implementations SHOULD only be of technical nature, such as different encodings or file format representations of the same resource with roughly the same quality.
 The implementations each consist of a list of components, each of which have metadata attached to them, including information about file formats, relationships and downloads.
-The client analyzes the metadata declarations of each component in every proposed implementation in order to test it for compatibility.
+The actual component files are not transmitted at this stage, only their metadata.
+
+The client analyzes the metadata of each component in every proposed implementation in order to test it for compatibility.
+This check covers basic file compatibility ("Does the proposed implementation use a file format that the client/host application is able to open?") as well as metadata-level compatibility ("Does the proposed implementation only use AssetFetch features which the client/host application is able to support?")
 If at least one implementation turns out to be compatible with the client and its host application, the process can proceed.
-If more than one implementation is valid for the given client and its host application, it SHOULD ask the user to make the final choice.
-This whole process is comparable to the rarely used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
+If more than one implementation is valid for the given client and its host application, the client MAY ask the user to make the final choice.
+
+Overall, this process is comparable to the less commonly used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
 
 ### 3.1.6. Unlocking (Optional)
 The provider MAY allow any user to download any asset for free and without authentication or restrictions, but it MAY also require payment for assets or impose other restrictions or quotas.
@@ -204,17 +227,29 @@ If the user agrees, the client first performs the unlocking query (or queries) a
 
 **It should be noted that the AssetFetch does not handle the actual payment itself, users still need to perform any required account- and payment setup with the provider through external means, like the provider's website.**
 
-### 3.1.7. Downloading and Handling
-After choosing a suitable implementation and unlocking all of it's datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
-The choice about where this directory should be created is made between the client and user through configuration and is not part of the specification.
+### 3.1.7. Downloading
+After choosing a suitable implementation and unlocking all of its datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
+The client MAY use the ids of the asset and the implementation to create the following directory structure:
 
-Inside this directory the client SHOULD arrange the files as described by the provider in the implementation metadata to ensure that relative links between files remain intact.
+> `<base directory>/<asset id>/<implementation id>/`
+
+Inside this directory the client SHOULD arrange the files as described by the provider in the `local_path` field in the implementation metadata to ensure that relative links between files remain intact.
 
 At this point the client can - either by itself or through calls to its host application - handle the files that it obtained.
-In the context of a 3D suite this "handling" usually involves importing the data into the current scene or a software-specific repository of local assets.
-This processing is aided by the metadata in the datablocks of every component sent by the provider which describes relevant attributes, recommended vendor- or format-specific configurations or relationships between components.
 
-At this point the interaction is complete and the user can start a new query for assets.
+### 3.1.8. Handling
+
+The AssetFetch data does not encode a fixed, imperative series of steps for handling an asset.
+Instead, it describes properties of and relationships between components which the client uses to generate an appropriate series of steps for handling the file inside its environment.
+This usually entails multiple steps, such as importing resources into the currently opened project or scene or importing resources into a central repository, like a software-specific local asset library. 
+
+The processing is aided by the metadata in the datablocks of every component sent by the provider which describes relevant attributes, recommended vendor- or format-specific configurations or relationships between components.
+
+
+
+
+
+
 
 ## 3.2. Sequence Diagram
 The following diagrams illustrate the general flow of information between the user, the client software and the provider as well as the most important actions taken by each party.
@@ -629,9 +664,9 @@ Clients MAY use this field as a display title, but SHOULD prefer the `title` fie
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level | Datablocks                                                           |
-| ----------------- | -------------------------------------------------------------------- |
-| MUST              | `file_info`,`file_handle`, `file_fetch.*`                            |
+| Requirement Level | Datablocks                                                 |
+| ----------------- | ---------------------------------------------------------- |
+| MUST              | `file_info`,`file_handle`, `file_fetch.*`                  |
 | MAY               | `environment_map`, `loose_material.*`, `mtlx_apply`,`text` |
 
 # 6. Additional Endpoints
