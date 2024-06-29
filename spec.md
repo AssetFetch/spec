@@ -189,20 +189,194 @@ If at least one implementation turns out to be compatible with the client and it
 If more than one implementation is valid for the given client and its host application, it SHOULD ask the user to make the final choice.
 This whole process is comparable to the rarely used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
 
-### 3.1.6. Unlocking (Optional)
-The provider MAY allow any user to download any asset for free and without authentication or restrictions, but it MAY also require payment for assets or impose other restrictions or quotas.
-To accommodate this, providers are able to mark resources as "unlockable", requiring further deliberate action by the client and user to access the files associated with their components.
-Unlocking works by linking individual components to an "unlocking request" (i.e. purchase).
-This mapping can be 1-to-1 where every component has its own unlocking query (for example for a texturing website that charges users individually for every texture map they download) or 1-to-many where one unlocking query is unlocking many different component files (for example on a 3D website where purchasing a model usually unlocks all available model files and textures at once).
+### 3.1.6. Asset unlocking (optional)
 
+#### 3.1.6.1. Asset unlocking overview
+The standard operating mode of AssetFetch is to freely distribute the download links (and therefore the files) for any asset implementation, leading to a download workflow that follows a simple structure:
+
+- Client parses component data received from the provider
+- Client finds download information in component data
+- Client performs HTTP(s) download
+
+The download is either publicly accessible via HTTP without any limitations or only accessible with the right authentication headers, as outlined in [the authentication](#312-authentication-optional) section.
+
+However, the provider MAY choose to employ more granular access limitations to component resources to require payment, impose usage quotas, make use of dynamically generated temporary download links, or add other limitations to control asset distribution.
+To accommodate this, providers are able to define an additional "unlocking" procedure, requiring further deliberate action by the client and user to access the files associated with components.
+
+In this context, the act of "unlocking" refers to an action that happens in the provider's backend which causes previously not downloadable resources to become downloadable, usually with some side-effect on the provider's backend, such as a reduction in account balance (i.e. a "purchase") or incrementing a counter for free daily downloads.
+
+The unlocking system in AssetFetch works by linking individual components to an "unlocking query".
 When responding with the implementation list the provider initially withholds the download information that would normally be sent.
 If it does that, then it MUST instead provide a list of possible unlocking queries, the mapping between components and unlocking queries and queries to receive the previously withheld download information for every component after the unlocking has happened.
-This method also allows the provider to generate and distribute temporary download links, if it chooses to do so.
 
-The client SHOULD then present the required unlocking queries (along with the accompanying charges that the provider has declared will happen to) to the user.
-If the user agrees, the client first performs the unlocking query (or queries) and then queries the provider for the previously withheld datablocks which contain the real download links.
+The client SHOULD then present the required unlocking queries (along with the accompanying charges, if any, that the provider has declared will happen to) to the user.
+If the user agrees, the client first performs the unlocking query (or queries) required to unlock all components it wants to download and then queries the provider for the previously withheld real download links, which may be ephemeral or otherwise personalized to the user.
 
-**It should be noted that the AssetFetch does not handle the actual payment itself, users still need to perform any required account- and payment setup with the provider through external means, like the provider's website.**
+**AssetFetch does not handle the actual payment itself, users still need to perform any required account- and payment setup with the provider through external means, usually the provider's website.**
+
+Comparing this workflow with the unrestricted example outlined at the start of this section, the workflow for downloading a component file is extended by several steps:
+
+- Client parses component data received from the provider
+- Client finds unlocking query in component data
+- Client asks user for confirmation, possibly displaying pricing info sent by the provider
+- User confirms the unlocking action 
+- Client performs the unlocking query
+- Provider registers that the user is now allowed to perform the download
+- Client requests the actual download information from the provider
+- Provider responds with the (possibly temporary or personalized) download information
+- Client parses newly received download information
+- Client performs HTTP(s) download
+
+This component-level linking gives providers flexibility in how they structure the unlocking process.
+The following section outlines examples to illustrate the kinds of relationships that can be modeled using unlocking queries.
+
+#### 3.1.6.2. Asset unlocking architectures
+
+Providers wanting to make use of asset unlocking usually have an established model for how assets can be unlocked/purchased.
+This section outlines examples for how implementation components can be linked with unlocking queries to illustrate possible architectures that can be modeled within AssetFetch.
+
+##### 3.1.6.2.1. Asset-level unlocking
+A common architecture in asset stores is to sell *assets* and give users the freedom to download *any implementation* of the purchased asset that is available, regardless of resolution, poly-count or file format.
+One purchase unlocks everything.
+
+In AssetFetch this is modeled by having only one "master" unlocking query that all components in all implementations of that specific asset reference.
+Once this unlocking query has been made once, download information for all linked components can immediately be requested from the provider.
+
+In this example, two implementations of the same asset - one as a .OBJ file and one as a .USDC file - are linked to the same unlocking query, indicating that purchasing the asset gives the user access to all implementations:
+
+```mermaid
+graph RL;
+
+    subgraph Implementation A
+    CompA1["fa:fa-cube .OBJ model"] 
+    CompA2["fa:fa-image .TIFF texture"] 
+    CompA3["fa:fa-file-code .MTL file"]
+    end
+
+	subgraph Implementation B
+    CompB1["fa:fa-box-archive .USDC model"] 
+    CompB2["fa:fa-note-sticky .TIFF texture"] 
+    end
+
+    Query1["fa:fa-unlock Main Unlocking Query "]
+
+	CompA1 --- Query1
+	CompA2 --- Query1
+	CompA3 --- Query1
+
+	CompB1 --- Query1
+	CompB2 --- Query1
+```
+
+##### 3.1.6.2.2. Tiered unlocking 
+
+Another approach many providers like to take is to sell multiple quality levels (in terms of texture resolution or level-of-detail) of one asset separately, but still allow for free file format selection after purchase.
+
+In this case there are several possible unlocking queries, one for each quality level to which all the respective components are linked:
+
+```mermaid
+graph RL;
+
+    subgraph HIGH-RES Implementation A
+    CompA1h["fa:fa-cube .OBJ model (High-Poly)"] 
+    CompA2h["fa:fa-image .TIFF texture (High-Resolution)"] 
+    CompA3h["fa:fa-file-code .MTL file"]
+    end
+
+	subgraph HIGH-RES Implementation B
+    CompB1h["fa:fa-box-archive .USDC model (High-Poly)"] 
+    CompB2h["fa:fa-note-sticky .TIFF texture (High-Resolution)"] 
+    end
+
+	subgraph LOW-RES Implementation A
+    CompA1l["fa:fa-cube .OBJ model (Low-Poly)"] 
+    CompA2l["fa:fa-image .JPG texture (Low-Resolution)"] 
+    CompA3l["fa:fa-file-code .MTL file"]
+    end
+
+	subgraph LOW-RES Implementation B
+    CompB1l["fa:fa-box-archive .USDC model (Low-Poly)"] 
+    CompB2l["fa:fa-note-sticky .JPG texture (Low-Resolution)"] 
+    end
+
+    Query1["fa:fa-unlock Unlocking Query (HIGH-RES)"]
+	Query2["fa:fa-unlock Unlocking Query (LOW-RES)"]
+	
+
+	CompA1h --- Query1
+	CompA2h --- Query1
+	CompA3h --- Query1
+
+	CompB1h --- Query1
+	CompB2h --- Query1
+
+
+	CompA1l --- Query2
+	CompA2l --- Query2
+	CompA3l --- Query2
+
+	CompB1l --- Query2
+	CompB2l --- Query2
+```
+
+##### 3.1.6.2.3. Component-level unlocking
+
+Providers that have opted for an even more granular purchasing structure can create individual queries for every component.
+An example would be a texturing website that sells every PBR map of a material individually:
+
+
+```mermaid
+graph RL;
+
+    subgraph 4K implementation
+    Comp4KCOL["fa:fa-image 4K color map"] 
+    Comp4KRGH["fa:fa-image 4K roughness map"] 
+    Comp4KNRM["fa:fa-image 4K normal map"]
+    end
+	
+    Query4KCOL["fa:fa-unlock Unlocking Query (4K color)"]
+	Query4KRGH["fa:fa-unlock Unlocking Query (4K roughness)"]
+	Query4KNRM["fa:fa-unlock Unlocking Query (4K normal)"]
+
+	Comp4KCOL --- Query4KCOL
+	Comp4KRGH --- Query4KRGH
+	Comp4KNRM --- Query4KNRM
+
+	subgraph 2K implementation
+    Comp2KCOL["fa:fa-image 2K color map"] 
+    Comp2KRGH["fa:fa-image 2K roughness map"] 
+    Comp2KNRM["fa:fa-image 2K normal map"]
+    end
+	
+    Query2KCOL["fa:fa-unlock Unlocking Query (2K color)"]
+	Query2KRGH["fa:fa-unlock Unlocking Query (2K roughness)"]
+	Query2KNRM["fa:fa-unlock Unlocking Query (2K normal)"]
+
+	Comp2KCOL --- Query2KCOL
+	Comp2KRGH --- Query2KRGH
+	Comp2KNRM --- Query2KNRM
+
+	subgraph 1K implementation
+    Comp1KCOL["fa:fa-image 1K color map"] 
+    Comp1KRGH["fa:fa-image 1K roughness map"] 
+    Comp1KNRM["fa:fa-image 1K normal map"]
+    end
+	
+    Query1KCOL["fa:fa-unlock Unlocking Query (1K color)"]
+	Query1KRGH["fa:fa-unlock Unlocking Query (1K roughness)"]
+	Query1KNRM["fa:fa-unlock Unlocking Query (1K normal)"]
+
+	Comp1KCOL --- Query1KCOL
+	Comp1KRGH --- Query1KRGH
+	Comp1KNRM --- Query1KNRM
+
+```
+
+#### 3.1.6.3. Unlocking query inclusion
+
+In some cases it is desirable to also convey the relationship between several unlocking queries in the AssetFetch data.
+For example, if one unlocking query which grants access to high quality/resolution implementations of an asset, then it is common practice to also grant access to the lower quality/resolution implementations which would have been another purchase otherwise.
+This kind of "inclusion" between unlocking queries is handled via a `child_queries` field which lists the other unlocking queries a client can also consider to be unlocked after executing one query. See [the `unlock_query` structure description](#8721-unlock_query-structure).
 
 ### 3.1.7. Downloading and Handling
 After choosing a suitable implementation and unlocking all of it's datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
@@ -629,9 +803,9 @@ Clients MAY use this field as a display title, but SHOULD prefer the `title` fie
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level | Datablocks                                                           |
-| ----------------- | -------------------------------------------------------------------- |
-| MUST              | `file_info`,`file_handle`, `file_fetch.*`                            |
+| Requirement Level | Datablocks                                                 |
+| ----------------- | ---------------------------------------------------------- |
+| MUST              | `file_info`,`file_handle`, `file_fetch.*`                  |
 | MAY               | `environment_map`, `loose_material.*`, `mtlx_apply`,`text` |
 
 # 6. Additional Endpoints
@@ -1125,13 +1299,14 @@ This datablock is **an array** consisting of `unlock_query` objects.
 
 #### 8.7.2.1. `unlock_query` structure
 
-| Field                       | Format        | Required                 | Description                                                                                                                                                                                    |
-| --------------------------- | ------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                        | string        | yes                      | This is the id by which `file_fetch.download_post_unlock` datablocks will reference this query.                                                                                                |
-| `unlocked`                  | boolean       | yes                      | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
-| `price`                     | number        | only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
-| `unlock_query`              | `fixed_query` | only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
-| `unlock_query_fallback_uri` | string        | no                       | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
+| Field                | Format            | Required                 | Description                                                                                                                                                                                    |
+| -------------------- | ----------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                 | string            | yes                      | This is the id by which `file_fetch.download_post_unlock` datablocks will reference this query.                                                                                                |
+| `unlocked`           | boolean           | yes                      | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
+| `price`              | number            | only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
+| `query`              | `fixed_query`     | only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
+| `child_queries`      | Array of `string` | no                       | A list containing the ids of other queries that can also be considered "unlocked" if this query has been executed.                                                                             |
+| `query_fallback_uri` | string            | no                       | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
 
 
 
@@ -1293,3 +1468,9 @@ They SHOULD consider storing secret headers through native operation system APIs
 Datablocks of the `fetch.*` family specify a local sub-path for every component that needs to be appended to a local path chosen by the client in order to assemble the correct file structure for this asset.
 As specified in the [datablock requirements](#83-file-related-datablocks) the `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
 Clients MUST take cate to ensure that components with references like `./` or `../` in their local path are rejected.
+
+<!-- CDN Link to use FontAwesomeIcons in some of the diagrams -->
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  rel="stylesheet"
+/>
