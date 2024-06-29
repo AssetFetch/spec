@@ -18,10 +18,16 @@
 			"price": {
 				"type": "number"
 			},
-			"unlock_query": {
+			"query": {
 				"$ref": "../template/fixed_query.json"
 			},
-			"unlock_query_fallback_uri": {
+			"child_queries": {
+				"type": "array",
+				"items": {
+					"type": "string"
+				}
+			},
+			"query_fallback_uri": {
 				"oneOf": [
 					{
 						"type": "string",
