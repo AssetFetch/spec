@@ -167,12 +167,6 @@ Generally, the following interactions are modeled:
 
 The order in which the actions are described here is the order in which they occur in regular use, though certain actions MAY be skipped (as denoted) or repeated.
 
-
-
-
-
-This section describes the individual provider-client-interactions along with actions undertaken by only one party modeled by AssetFetch in more detail.
-
 ## 3.2. Initialization
 
 The first point of contact between a client and a provider is the initialization URI which the user enters into the client, comparable to the URI of an RSS feed.
@@ -217,7 +211,7 @@ In that case, the names and kinds of parameters were defined by the provider dur
 Parameters can come in different formats, such as simple text strings or selections from a set of options, similar to what can be represented with a `<form>` tag in HTML.
 Possible examples for parameters for this query are:
 
-- A general keyword search field
+- A general keyword-based search field
 - A type- or category selection
 - Sorting options
 - Binary choices, such as limiting the selection to already purchased assets
@@ -437,8 +431,9 @@ sequenceDiagram
 
 # 4. Endpoints
 
+This section outlines general information about the HTTP-endpoints required for AssetFetch along with the specific structural requirements for the JSON-response on every endpoint.
 
-This section outlines general information about AssetFetch endpoints along with the specific structural requirements for every endpoint.
+TODO add reference to HTTP section.
 
 ## 4.1. About Endpoints
 
@@ -448,24 +443,33 @@ The interaction model described in the [General Operation](#3-general-operation)
 - An endpoint for querying assets
 - An endpoint for querying implementations of one specific asset
 
-Depending on which features it wants to use, the provider MUST implement:
-- A connection status endpoint if it wants to use custom headers for authentication
-- An endpoint for unlocking resources
-- An endpoint for obtaining previously withheld datablocks if it wants to support asset unlocking (i.e. purchases)
+Depending on which features it wants to use, the provider MAY implement:
+- An endpoint for performing a connection status check (MUST be implemented if the provider wants to use user authentication)
+- An endpoint for unlocking resources (MUST be implemented if the provider wants to use asset unlocking)
+- An endpoint for obtaining previously withheld datablocks (MUST be implemented if it wants to use asset unlocking)
 
-The URI for the initialization endpoint is communicated by the provider to the user through external means (such as listing it on the provider's website).
-The URIs and parameters for all subsequent endpoints are not defined explicitly by the specification and are communicated from the provider to the client.
-This gives the provider great flexibility in how to structure its data and backend implementation.
+*The specific URIs or sub-paths for these endpoint are not prescribed by AssetFetch.*
+The URI and parameters for every endpoint besides the initialization endpoint are communicated by the provider to the client in the response data to a previously made request.
 
-### 4.1.1. The `meta` template
+## 4.2. Response data templates
+
+This section describes data structures that are used in responses from several or even all endpoints.
+These templates are later referenced during the description of the individual endpoints.
+
+### 4.2.1. The `meta` template
 All provider responses on all endpoints MUST carry the `meta` field to communicate key information about the current response.
 
-| Field         | Format | Required | Description                                                                                                                               |
-| ------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `response_id` | string | no       | An ID for this specific response from the provider.                                                                                       |
-| `version`     | string | yes      | The version of AssetFetch that this response is intended for.                                                                             |
-| `kind`        | string | yes      | The kind of data that is being transmitted with this response. The exact value of this field is specified individually for each endpoint. |
-| `message`     | string | no       | An arbitrary message to attach to this response.                                                                                          |
+All instances of this template MUST have the following structure:
+
+| Field         | Format | Requirement                 | Description                                                                                                                               |
+| ------------- | ------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `response_id` | string | MAY                         | An ID for this specific response from the provider.                                                                                       |
+| `version`     | string | MUST                        | The version of AssetFetch that this response is intended for.                                                                             |
+| `kind`        | string | MUST                        | The kind of data that is being transmitted with this response. The exact value of this field is specified individually for each endpoint. |
+| `message`     | string | SHOULD, if an error occurs. | An arbitrary message to attach to this response.                                                                                          |
+
+The `version` field MUST contain the AssetFetch version that this response is modeled after.
+The string MUST have the format `<Major>.<Minor>`, for example `0.4`.
 
 The `response_id` field is designed to aid with logging and troubleshooting, should the need arise.
 The provider MAY set this field, in which case they SHOULD keep a log of the responses and their ids, especially in the case of an error.
@@ -474,18 +478,22 @@ If a request fails, the provider SHOULD use the `message` field to communicate m
 
 Clients SHOULD display the `response_id` and `message` fields to the user if a query was unsuccessful, as indicated by the HTTP status code.
 
-### 4.1.2. The `datablock_collection` template
-This object contains most of the relevant information for any resource and always has the same general structure, described in this section.
+### 4.2.2. The `datablock_collection` template
 
-| Field                                | Format          | Required | Description                                                                |
-| ------------------------------------ | --------------- | -------- | -------------------------------------------------------------------------- |
-| \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
-| \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
+Nearly every piece of information in AssetFetch is communicated through a datablock, which has a name and a clearly defined structure.
+The datablock collection is a JSON object that uses the datablock's name as a key and its structure as the value.
+
+All instances of this template MUST have the following structure:
+
+| Field                                | Format          | Description                                                                |
+| ------------------------------------ | --------------- | -------------------------------------------------------------------------- |
+| \<string-key\>                       | object or array | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
+| \<string-key\>                       | object or array | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
 | ... (arbitrary number of datablocks) |
 
 Every key of this data object is the identifier for the datablock stored in that key's field.
 
-The example below illustrates an object called `data` whose structure follows the `datablock_collection` template with two datablocks (`block_type_1` and `block_type_2`) which have a varying structure.
+The example below illustrates a datablock collection called `data` whose structure follows the `datablock_collection` template with two datablocks (`block_type_1` and `block_type_2`) which have a varying structure.
 
 ```
 {
@@ -503,52 +511,50 @@ The example below illustrates an object called `data` whose structure follows th
 }
 ```
 
-## 4.2. Initialization 
+## 4.3. Endpoint: Initialization 
 
-This endpoint is the first point of contact between a client and a provider.
-The provider MUST NOT require any kind of authentication for interaction with it.
-It's URI is initially typed or copy-pasted by the user into a client and is used to communicate key details about the provider as well as how the interaction between client and provider should proceed.
-
-The response on this endpoint MUST have the following structure:
-
-| Field  | Format                 | Required | Description                                                                                                                                                                                                       |
-| ------ | ---------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `meta` | `meta`                 | yes      | Metadata, kind: `initialization`.                                                                                                                                                                                 |
-| `id`   | string                 | yes      | An id that identifies this provider. It MUST match the regular expression `[a-z0-9-\.]`. Providers SHOULD use a domain name (e.g. `example.com` or `sub.example.com`) as the ID, if applicable in their use-case. |
-| `data` | `datablock_collection` | yes      |                                                                                                                                                                                                                   |
-
-The following datablocks are to be included in the `data` field:
-
-| Requirement Level                    | Datablocks                                         |
-| ------------------------------------ | -------------------------------------------------- |
-| MUST                                 | `asset_list_query`                                 |
-| SHOULD                               | `text`                                             |
-| MAY                                  | `branding`, `authors`, `license`, `web_references` |
-| MUST, only if authentication is used | `provider_configuration`                           |
-
-
-## 4.3. Asset List
-
-The URI and available parameters for this endpoint are communicated by the server to the client using the `asset_list_query` datablock on the initialization endpoint.
+Its URI is initially entered by the user into a client and this endpoint is the first point of contact between a client and a provider.
+It is used to communicate key details about the provider as well as how the interaction between client and provider should proceed.
 
 The response on this endpoint MUST have the following structure:
 
-| Field    | Format                 | Required | Description                   |
-| -------- | ---------------------- | -------- | ----------------------------- |
-| `meta`   | `meta`                 | yes      | Metadata, kind: `asset_list`. |
-| `data`   | `datablock_collection` | yes      |                               |
-| `assets` | Array of `asset`       | yes      |                               |
+| Field  | Format                 | Requirement | Description                                                                                                                                                                                                       |
+| ------ | ---------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `meta` | `meta`                 | MUST        | Metadata, kind: `initialization`.                                                                                                                                                                                 |
+| `id`   | string                 | MUST        | An id that identifies this provider. It MUST match the regular expression `[a-z0-9-\.]`. Providers SHOULD use a domain name (e.g. `example.com` or `sub.example.com`) as the ID, if applicable in their use-case. |
+| `data` | `datablock_collection` | MUST        |                                                                                                                                                                                                                   |
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level | Datablocks                                        |
-| ----------------- | ------------------------------------------------- |
-| MAY               | Any or all of `next_query`, `response_statistics` |
+| Requirement                     | Datablocks                                         |
+| ------------------------------- | -------------------------------------------------- |
+| MUST                            | `asset_list_query`                                 |
+| SHOULD                          | `text`                                             |
+| MAY                             | `branding`, `authors`, `license`, `web_references` |
+| MUST, if authentication is used | `provider_configuration`                           |
+
+## 4.4. Asset List
+
+The URI and available HTTP parameters for this endpoint are communicated by the server to the client using the `asset_list_query` datablock on the initialization endpoint.
+
+The response on this endpoint MUST have the following structure:
+
+| Field    | Format                 | Requirement | Description                   |
+| -------- | ---------------------- | ----------- | ----------------------------- |
+| `meta`   | `meta`                 | MUST        | Metadata, kind: `asset_list`. |
+| `data`   | `datablock_collection` | MUST        |                               |
+| `assets` | Array of `asset`       | MUST        |                               |
+
+The following datablocks are to be included in the `data` field:
+
+| Requirement | Datablocks                          |
+| ----------- | ----------------------------------- |
+| MAY         | `next_query`, `response_statistics` |
 
 The `assets` field MUST NOT contain more than 100 items for one response.
-If the provider finds more assets than 100 assets which match the query it MAY use the `next_query` datablock to define a fixed query that the client can use to fetch more results.
+If the provider finds more assets than 100 assets which match the query it SHOULD use the `next_query` datablock to define a fixed query that the client can use to fetch more results.
 
-### 4.3.1. `asset` Structure
+### 4.4.1. `asset` Structure
 
 Every `asset` object MUST have the following structure:
 
@@ -570,7 +576,7 @@ The following datablocks are to be included in the `data` field:
 | MAY               | `preview_image_supplemental`, `license`, `authors`, `dimensions.*`,`web_references` |
 
 
-## 4.4. Implementation List
+## 4.5. Implementation List
 
 This endpoint returns one or several implementations for one specific asset.
 The URI and available parameters for this endpoint are communicated by the server to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
@@ -588,7 +594,7 @@ The following datablocks are to be included in the `data` field:
 | MUST, only if asset unlocking is being used | `unlock_queries`      |
 | MAY                                         | `response_statistics` |
 
-### 4.4.1. `implementation` Structure
+### 4.5.1. `implementation` Structure
 
 Every `implementation` object MUST have the following structure:
 
@@ -609,7 +615,7 @@ The following datablocks are to be included in the `data` field:
 | ----------------- | ---------- |
 | SHOULD            | `text`     |
 
-### 4.4.2. `component` Structure
+### 4.5.2. `component` Structure
 
 Every `component` object MUST have the following structure:
 
