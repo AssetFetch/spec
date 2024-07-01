@@ -493,6 +493,8 @@ All instances of this template MUST have the following structure:
 
 Every key of this data object is the identifier for the datablock stored in that key's field.
 
+#### Example
+
 The example below illustrates a datablock collection called `data` whose structure follows the `datablock_collection` template with two datablocks (`block_type_1` and `block_type_2`) which have a varying structure.
 
 ```
@@ -632,7 +634,7 @@ The following datablocks are to be included in the `data` field:
 
 | Requirement Level | Datablocks                                                 |
 | ----------------- | ---------------------------------------------------------- |
-| MUST              | `file_info`,`file_handle`, `fetch.*`                  |
+| MUST              | `file_info`,`file_handle`, `fetch.*`                       |
 | MAY               | `environment_map`, `loose_material.*`, `mtlx_apply`,`text` |
 
 # 5. Additional Endpoints
@@ -666,8 +668,8 @@ It gets called by the client for every component that had an `fetch.download_pos
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level | Datablocks            |
-| ----------------- | --------------------- |
+| Requirement Level | Datablocks       |
+| ----------------- | ---------------- |
 | MUST              | `fetch.download` |
 
 
@@ -924,7 +926,7 @@ It indicates that when the referenced unlock query has been completed, the *real
 | Field                 | Format        | Required | Description                                                                                                                                                                                                                                    |
 | --------------------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `unlock_query_id`     | string        | yes      | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_data_query`. |
-| `unlocked_data_query` | `fixed_query` | yes      | The query to fetch the previously withheld `fetch.download` datablock for this component if the unlocking was successful.                                                                                                                 |
+| `unlocked_data_query` | `fixed_query` | yes      | The query to fetch the previously withheld `fetch.download` datablock for this component if the unlocking was successful.                                                                                                                      |
 
 
 ### 7.4.3. `fetch.from_archive`
@@ -1148,7 +1150,7 @@ This datablock is **an array** consisting of `unlock_query` objects.
 
 | Field                | Format            | Required                 | Description                                                                                                                                                                                    |
 | -------------------- | ----------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                 | string            | yes                      | This is the id by which `fetch.download_post_unlock` datablocks will reference this query.                                                                                                |
+| `id`                 | string            | yes                      | This is the id by which `fetch.download_post_unlock` datablocks will reference this query.                                                                                                     |
 | `unlocked`           | boolean           | yes                      | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
 | `price`              | number            | only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
 | `query`              | `fixed_query`     | only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
