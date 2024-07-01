@@ -848,92 +848,63 @@ It can be used to communicate the total number of results in a query where not a
 | `result_count_total` | int    | MUST        | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
 
 
-## 7.3. File-related datablocks
+## 7.3. Handling-related datablocks
 
-### 7.3.1. `file_info`
+### 7.3.1. `handle.file`
+
+This datablock indicates how this file should be handled during the import process.
+The full description of component handling can be found in the [component handling section](#933-handling-component-files).
 
 This datablock contains information about any kind of file.
 
-| Field       | Format  | Requirement | Description                                            |
-| ----------- | ------- | ----------- | ------------------------------------------------------ |
-| `length`    | integer | MAY         | The length of the file in bytes.                       |
-| `extension` | string  | MUST        | The file extension indicating the format of this file. |
+| Field             | Format  | Requirement | Description                                                                              |
+| ----------------- | ------- | ----------- | ---------------------------------------------------------------------------------------- |
+| `length`          | integer | MAY         | The length of the file in bytes.                                                         |
+| `format`          | string  | MUST        | The file extension indicating the format of this file.                                   |
+| `is_passive`      | boolean | MUST        | Indicates whether this file should be treated as a passive component. TODO add reference |
+| `local_file_path` | string  | MUST        | Local (sub-)path where the file MUST be placed by the client.                            |
 
-The `extension` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
-MUST include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
+#### 7.3.1.1. `format` rules
 
-## Behavior-related datablocks
+The `format` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
+SHOULD include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
 
-### `behavior.passive`
+#### 7.3.1.2. `local_file_path` rules
 
-| Field        | Format | Requirement | Description                                                   |
-| ------------ | ------ | ----------- | ------------------------------------------------------------- |
-| `local_path` | string | MUST        | Local (sub-)path where the file MUST be placed by the client. |
-
-### `behavior.active`
-
-
-| Field        | Format | Requirement | Description                                                   |
-| ------------ | ------ | ----------- | ------------------------------------------------------------- |
-| `local_path` | string | MUST        | Local (sub-)path where the file MUST be placed by the client. |
-
-### `behavior.archive`
-
-| Field             | Format | Requirement | Description                                                |
-| ----------------- | ------ | ----------- | ---------------------------------------------------------- |
-| `unpack_fully` |
-| `local_directory` | string | MUST        | Local (sub-)directory inside the implementation directory. |
-
-
-### `behavior.loose_material_map`
-
-
-| Field        | Format | Requirement | Description                                                   |
-| ------------ | ------ | ----------- | ------------------------------------------------------------- |
-| `local_path` | string | MUST        | Local (sub-)path where the file MUST be placed by the client. |
-
-### `behavior.loose_environment_map`
-
-
-| Field        | Format | Requirement | Description                                                   |
-| ------------ | ------ | ----------- | ------------------------------------------------------------- |
-| `local_path` | string | MUST        | Local (sub-)path where the file MUST be placed by the client. |
-
-
-## Material-related datablocks
-
-### `material.from_loose_maps`
-
-
-
-### `material.from_mtlx`
-
-### 7.3.2. `file_handle`
-
-This datablock indicates how this file should behave during the import process.
-The full description of component handling can be found in the [component handling section](#933-handling-component-files).
-
-| Field      | Format | Required | Description                                                                                |
-| ---------- | ------ | -------- | ------------------------------------------------------------------------------------------ |
-| `behavior` | string | yes      | One of `single_active`,`single_passive`,`archive_unpack_fully`,`archive_unpack_referenced` |
-
-**If `behavior` is `single_*`:**
-
-The `local_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash".
+The `local_file_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash".
 It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
 `example.txt` or `sub/dir/example.txt` would be correct.
+
 `/example.txt`, `./example.txt` or `/sub/dir/example.txt` would be incorrect.
 
-**If `behavior` is `archive_*`:**
+### 7.3.2. `handle.archive`
 
-The `local_path` MUST end with a slash ("trailing slash") and MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`).
+This datablock indicates how this file should be handled during the import process.
+The full description of component handling can be found in the [component handling section](#933-handling-component-files).
+
+This datablock contains information about any kind of file.
+
+| Field                  | Format  | Requirement                  | Description                                                                                                                 |
+| ---------------------- | ------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `length`               | integer | MAY                          | The length of the file in bytes.                                                                                            |
+| `format`               | string  | MUST                         | The file extension indicating the format of this file.                                                                      |
+| `unpack_fully`         | boolean | MUST                         | Indicates whether or not the entire archive should be extracted into the local implementation directory. TODO add reference |
+| `local_directory_path` | string  | MUST, if `unpack_fully=true` | Local (sub-)path where the file MUST be placed by the client.                                                               |
+
+
+#### 7.3.2.1. `local_directory_path` rules
+
+The `local_directory_path` MUST end with a slash ("trailing slash") and MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`).
 It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
 `/`, `contents/` or `my/contents/` would be correct.
+
 `contents`,`./contents/`,`./contents`,`my/../../contents` or `../contents` would all be incorrect.
 
-### 7.3.3. `file_fetch.download`
+## 7.4. Fetching-related datablocks
+
+### 7.4.1. `file_fetch.download`
 
 This datablock indicates that this is a file which can be downloaded directly using the provided query.
 
@@ -941,7 +912,7 @@ The full description of component handling can be found in the [component handli
 
 The structure of this datablock follows the `fixed_query` template.
 
-### 7.3.4. `file_fetch.download_post_unlock`
+### 7.4.2. `file_fetch.download_post_unlock`
 
 This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
 It indicates that when the referenced unlock query has been completed, the *real* `file_fetch.download` datablock can be received by performing the fixed query in `unlocked_data_query`
@@ -952,7 +923,7 @@ It indicates that when the referenced unlock query has been completed, the *real
 | `unlocked_data_query` | `fixed_query` | yes      | The query to fetch the previously withheld `file_fetch.download` datablock for this component if the unlocking was successful.                                                                                                                 |
 
 
-### 7.3.5. `file_fetch.from_archive`
+### 7.4.3. `file_fetch.from_archive`
 This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
 More about the handling in the [import and handling section](#9-implementation-analysis-and-handling).
 
@@ -961,11 +932,11 @@ More about the handling in the [import and handling section](#9-implementation-a
 | `archive_component_id` | string | yes                                                                                                                                                                                                                                                                                                | The id of the component representing the archive that this component is contained in. |
 | `component_path`       | string | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`). |
 
-## 7.4. Display related datablocks
+## 7.5. Display related datablocks
 
 These datablocks relate to how assets and their details are displayed to the user.
 
-### 7.4.1. `text`
+### 7.5.1. `text`
 General text information to be displayed to the user.
 
 | Field         | Format | Required | Description                                    |
@@ -974,7 +945,7 @@ General text information to be displayed to the user.
 | `description` | string | no       | A description text for the datablocks subject. |
 
 
-### 7.4.2. `web_references`
+### 7.5.2. `web_references`
 References to external websites for documentation or support.
 
 An array of objects each of which MUST follow this format:
@@ -985,7 +956,7 @@ An array of objects each of which MUST follow this format:
 | `uri`      | string | yes      | The URL to be opened in the users browser.                                                                    |
 | `icon_uri` | string | yes      | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
-### 7.4.3. `branding`
+### 7.5.3. `branding`
 Brand information about the provider.
 
 | Field             | Format | Required | Description                                                                                                                   |
@@ -995,7 +966,7 @@ Brand information about the provider.
 | `logo_wide_uri`   | string | no       | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD be transparent.                    |
 | `banner_uri`      | string | no       | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent. |
 
-### 7.4.4. `license`
+### 7.5.4. `license`
 Contains license information.
 When attached to an asset, it means that the license information only applies to that asset, when applied to a provider, it means that the license information applies to all assets offered through that provider.
 
@@ -1004,7 +975,7 @@ When attached to an asset, it means that the license information only applies to
 | `license_spdx` | string | no       | MUST be an [SPDX license identifier](https://spdx.org/licenses/) or be left unset/null if not applicable. |
 | `license_uri`  | string | no       | URI which the client SHOULD offer to open in the user's web browser to learn more about the license.      |
 
-### 7.4.5. `authors`
+### 7.5.5. `authors`
 
 This datablock can be used to communicate the author(s) of a particular asset.
 
@@ -1016,7 +987,7 @@ Array of objects that MUST have this structure:
 | `uri`  | string | no       | A URI for this author, for example a profile link.              |
 | `role` | string | no       | The role that the author has had in the creation of this asset. |
 
-### 7.4.6. `dimensions.3d`
+### 7.5.6. `dimensions.3d`
 Contains general information about the physical dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh data.
 
 An object that MUST conform to this format:
@@ -1027,7 +998,7 @@ An object that MUST conform to this format:
 | `height_m` | float  | yes      | Height of the referenced asset |
 | `depth_m`  | float  | yes      | Depth of the referenced asset  |
 
-### 7.4.7. `dimensions.2d`
+### 7.5.7. `dimensions.2d`
 Contains general information about the physical dimensions of a two-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh-,texture-, or uv data.
 
 An object that MUST conform to this format:
@@ -1037,7 +1008,7 @@ An object that MUST conform to this format:
 | `width_m`  | float  | yes      | Width of the referenced asset  |
 | `height_m` | float  | yes      | Height of the referenced asset |
 
-### 7.4.8. `preview_image_supplemental`
+### 7.5.8. `preview_image_supplemental`
 Contains a list of preview images with `uri`s and `alt`-Strings associated to the asset.
 
 An array where every field must conform to the following structure:
@@ -1047,7 +1018,7 @@ An array where every field must conform to the following structure:
 | `alt` | string | no       | An "alt" String for the image.                                                                                |
 | `uri` | string | yes      | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
-### 7.4.9. `preview_image_thumbnail`
+### 7.5.9. `preview_image_thumbnail`
 Contains information about a thumbnail for an asset. The thumbnail can be provided in multiple resolutions.
 
 An object that MUST conform to this format:
@@ -1057,7 +1028,7 @@ An object that MUST conform to this format:
 | `alt`  | string | no       | An "alt" String for the image. |
 | `uris` | object | yes      | See structure described below. |
 
-#### 7.4.9.1. `uris` Structure
+#### 7.5.9.1. `uris` Structure
 
 The `uris` field MUST be an object whose keys are strings containing an integer and whose values are strings.
 The object MUST have at least one member.
@@ -1067,12 +1038,12 @@ If the image is not a square, its key SHOULD be set based on the pixel count of 
 The image's media type SHOULD be one of `image/png` or `image/jpeg`.
 If the provider does not have insight into the dimensions of the thumbnail that it is referring the client to, it SHOULD use use the key `0` for the thumbnail url.
 
-## 7.5. File handling and relationship datablocks
+## 7.6. File handling and relationship datablocks
 
 These datablocks describe how files relate to each other.
 In many cases the relationships can be represented purely by placing component files adjacently in one directory and making only some of them "active", but in some cases it is necessary to declare relationships explicitly in AssetFetch.
 
-### 7.5.1. `loose_environment`
+### 7.6.1. `loose_environment`
 The presence of this datablock on a component indicates that it is an environment map.
 This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR), not if the environment is already wrapped in another format with native support.
 An object that MUST conform to this format:
@@ -1081,7 +1052,7 @@ An object that MUST conform to this format:
 | ------------ | ------ | -------- | --------------------------------------- |
 | `projection` | string | yes      | One of `equirectangular`, `mirror_ball` |
 
-### 7.5.2. `loose_material.define`
+### 7.6.2. `loose_material.define`
 
 This datablock is applied to a component that is part of a loose material, most likely a material map.
 It indicates which role the component should play in this material.
@@ -1092,7 +1063,7 @@ It indicates which role the component should play in this material.
 | `map`           | string | yes      | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
 | `colorspace`    | string | no       | One of `srgb`, `linear`                                                                                                                   |
 
-### 7.5.3. `loose_material.apply`
+### 7.6.3. `loose_material.apply`
 
 When applied to a component, it indicates that this component uses one or multiple materials defined using `loose_material.define` datablocks.
 
@@ -1103,7 +1074,7 @@ The datablock is an **array of objects** with this structure:
 | `material_name`        | string | yes      | Name of the material used in the definition datablocks                                                                                |
 | `apply_selectively_to` | string | no       | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
 
-### 7.5.4. `mtlx_apply`
+### 7.6.4. `mtlx_apply`
 When applied to a component, it indicates that this component makes use of a material defined in mtlx document represented by another component.
 
 | Field                  | Format | Required | Description                                                                                                                           |
@@ -1112,11 +1083,11 @@ When applied to a component, it indicates that this component makes use of a mat
 | `mtlx_material`        | string | no       | Optional reference for which material to use from the mtlx file, if it contains multiple.                                             |
 | `apply_selectively_to` | string | no       | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
 
-## 7.6. File-format specific datablocks
+## 7.7. File-format specific datablocks
 
 These datablocks relate to one specific file format.
 
-### 7.6.1. `format.blend`
+### 7.7.1. `format.blend`
 Information about files with the extension `.blend`.
 This information is intended to help the client understand the file.
 
@@ -1126,21 +1097,21 @@ This information is intended to help the client understand the file.
 | `is_asset` | boolean           | no       | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
 | `targets`  | array of `target` | no       | Array containing the blender structures inside the file that are relevant to the asset.                           |
 
-#### 7.6.1.1. `target` Structure
+#### 7.7.1.1. `target` Structure
 
 | Field   | Format            | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | ------- | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `kind`  | `string`          | yes      | One of `actions`, `armatures`, `brushes`, `cache_files`, `cameras`, `collections`, `curves`, `fonts`, `grease_pencils`, `hair_curves`, `images`, `lattices`, `lightprobes`, `lights`, `linestyles`, `masks`, `materials`, `meshes`, `metaballs`, `movieclips`, `node_groups`, `objects`, `paint_curves`, `palettes`, `particles`, `pointclouds`, `scenes`, `screens`, `simulations`, `sounds`, `speakers`, `texts`, `textures`, `volumes`, `workspaces`, `worlds` |
 | `names` | Array of `string` | yes      | List of the names of the resources to import.                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
-### 7.6.2. `format.usd`
+### 7.7.2. `format.usd`
 Information about files with the extension `.usd`.
 
 | Field      | Format  | Required | Description                                                                |
 | ---------- | ------- | -------- | -------------------------------------------------------------------------- |
 | `is_crate` | boolean | no       | Indicates whether this file is a "crate" (like .usdc) or not (like .usda). |
 
-### 7.6.3. `format.obj`
+### 7.7.3. `format.obj`
 Information about files with the extension `.obj`.
 
 | Field     | Format | Required | Description                                                        |
@@ -1148,13 +1119,13 @@ Information about files with the extension `.obj`.
 | `up_axis` | string | yes      | Indicates which axis should be treated as up. MUST be `+y` or `+z` |
 
 
-## 7.7. Unlocking-related datablocks
+## 7.8. Unlocking-related datablocks
 
 These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch.
 
 *Note that the `file_fetch.download_post_unlock` datablock is also related to the unlocking system but is [grouped with the other `file_fetch.*` datablocks](#83-file-related-datablocks).* 
 
-### 7.7.1. `unlock_balance`
+### 7.8.1. `unlock_balance`
 Information about the user's current account balance.
 
 | Field                | Format | Required | Description                                                                                                 |
@@ -1163,13 +1134,13 @@ Information about the user's current account balance.
 | `balance_unit`       | string | yes      | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
 | `balance_refill_uri` | string | yes      | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form.    |
 
-### 7.7.2. `unlock_queries`
+### 7.8.2. `unlock_queries`
 
 This datablock contains the query or queries required to unlock all or some of the components in this implementation list.
 
 This datablock is **an array** consisting of `unlock_query` objects.
 
-#### 7.7.2.1. `unlock_query` structure
+#### 7.8.2.1. `unlock_query` structure
 
 | Field                | Format            | Required                 | Description                                                                                                                                                                                    |
 | -------------------- | ----------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
