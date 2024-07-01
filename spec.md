@@ -558,10 +558,10 @@ If the provider finds more assets than 100 assets which match the query it SHOUL
 
 Every `asset` object MUST have the following structure:
 
-| Field  | Format                 | Required | Description                                                                 |
-| ------ | ---------------------- | -------- | --------------------------------------------------------------------------- |
-| `id`   | string                 | yes      | Unique id for this asset. Must match the regular expression `[a-z0-9_-\.]+` |
-| `data` | `datablock_collection` | yes      |                                                                             |
+| Field  | Format                 | Requirement | Description                                                                 |
+| ------ | ---------------------- | ----------- | --------------------------------------------------------------------------- |
+| `id`   | string                 | MUST        | Unique id for this asset. Must match the regular expression `[a-z0-9_-\.]+` |
+| `data` | `datablock_collection` | MUST        |                                                                             |
 
 The `id` field MUST be unique among all assets for this provider.
 Clients MAY use this id when storing and organizing files on disk.
@@ -569,11 +569,11 @@ Clients MAY use the id as a display title, but SHOULD prefer the `title` field i
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level | Datablocks                                                                          |
-| ----------------- | ----------------------------------------------------------------------------------- |
-| MUST              | `implementation_list_query`                                                         |
-| SHOULD            | `preview_image_thumbnail`, `text`                                                   |
-| MAY               | `preview_image_supplemental`, `license`, `authors`, `dimensions.*`,`web_references` |
+| Requirement | Datablocks                                                                          |
+| ----------- | ----------------------------------------------------------------------------------- |
+| MUST        | `implementation_list_query`                                                         |
+| SHOULD      | `preview_image_thumbnail`, `text`                                                   |
+| MAY         | `preview_image_supplemental`, `license`, `authors`, `dimensions.*`,`web_references` |
 
 
 ## 4.5. Implementation List
@@ -581,28 +581,28 @@ The following datablocks are to be included in the `data` field:
 This endpoint returns one or several implementations for one specific asset.
 The URI and available parameters for this endpoint are communicated by the server to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
 
-| Field             | Format                    | Required | Description                                              |
-| ----------------- | ------------------------- | -------- | -------------------------------------------------------- |
-| `meta`            | `meta`                    | yes      | Metadata, kind: `implementation_list`.                   |
-| `data`            | `datablock_collection`    | yes      | Datablocks that apply to the entire implementation list. |
-| `implementations` | Array of `implementation` | yes      |                                                          |
+| Field             | Format                    | Requirement | Description                                              |
+| ----------------- | ------------------------- | ----------- | -------------------------------------------------------- |
+| `meta`            | `meta`                    | MUST        | Metadata, kind: `implementation_list`.                   |
+| `data`            | `datablock_collection`    | MUST        | Datablocks that apply to the entire implementation list. |
+| `implementations` | Array of `implementation` | MUST        |                                                          |
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level                           | Datablocks            |
-| ------------------------------------------- | --------------------- |
-| MUST, only if asset unlocking is being used | `unlock_queries`      |
-| MAY                                         | `response_statistics` |
+| Requirement Level                      | Datablocks            |
+| -------------------------------------- | --------------------- |
+| MUST, if asset unlocking is being used | `unlock_queries`      |
+| MAY                                    | `response_statistics` |
 
 ### 4.5.1. `implementation` Structure
 
 Every `implementation` object MUST have the following structure:
 
-| Field        | Format                 | Required | Description                                                                             |
-| ------------ | ---------------------- | -------- | --------------------------------------------------------------------------------------- |
-| `id`         | string                 | yes      | A unique id for this implementation. Must match the regular expression `[a-z0-9_-\.]+`. |
-| `data`       | `datablock_collection` | yes      | Datablocks that apply to this specific implementation.                                  |
-| `components` | Array of `component`   | yes      |                                                                                         |
+| Field        | Format                 | Requirement | Description                                                                             |
+| ------------ | ---------------------- | ----------- | --------------------------------------------------------------------------------------- |
+| `id`         | string                 | MUST        | A unique id for this implementation. Must match the regular expression `[a-z0-9_-\.]+`. |
+| `data`       | `datablock_collection` | MUST        | Datablocks that apply to this specific implementation.                                  |
+| `components` | Array of `component`   | MUST        |                                                                                         |
 
 The `id` field MUST be unique among all possible implementations the provider can offer for this asset, *even if not all of them are included in the returned implementation list*.
 The id may be reused for an implementation of a *different* asset.
@@ -619,10 +619,10 @@ The following datablocks are to be included in the `data` field:
 
 Every `component` object MUST have the following structure:
 
-| Field  | Format     | Required | Description                                                                        |
-| ------ | ---------- | -------- | ---------------------------------------------------------------------------------- |
-| `id`   | string     | yes      | A unique id for this component. Must match the regular expression `[a-z0-9_-\.]+`. |
-| `data` | datablocks | yes      | Datablocks for this specific component.                                            |
+| Field  | Format     | Requirement | Description                                                                        |
+| ------ | ---------- | ----------- | ---------------------------------------------------------------------------------- |
+| `id`   | string     | MUST        | A unique id for this component. Must match the regular expression `[a-z0-9_-\.]+`. |
+| `data` | datablocks | MUST        | Datablocks for this specific component.                                            |
 
 The `id` field MUST be unique among all components inside one implementation, but MAY be reused for a component in a different implementation.
 Clients MAY use this id when storing and organizing files on disk.
@@ -642,10 +642,10 @@ Additional endpoint types can be used to perform certain actions or retrieve add
 
 ## 5.1. Unlocking Endpoint
 
-| Field  | Format                 | Required | Description               |
-| ------ | ---------------------- | -------- | ------------------------- |
-| `meta` | `meta`                 | yes      | Metadata, kind: `unlock`. |
-| `data` | `datablock_collection` | no       | Datablocks.               |
+| Field  | Format                 | Requirement | Description               |
+| ------ | ---------------------- | ----------- | ------------------------- |
+| `meta` | `meta`                 | MUST        | Metadata, kind: `unlock`. |
+| `data` | `datablock_collection` | MAY         | Datablocks.               |
 
 This endpoint is invoked to perform an "unlocking" (usually meaning a "purchase") of a resource.
 After calling it the client can expect to resolve all previously withheld downloads using the endpoint for unlocked data specified in the `file_fetch.download_post_unlock` datablock.
@@ -656,10 +656,10 @@ Only the HTTP status code and potentially the data in the `meta` field are used 
 
 ## 5.2. Unlocked Data Endpoint
 
-| Field  | Format                 | Required | Description                     |
-| ------ | ---------------------- | -------- | ------------------------------- |
-| `meta` | `meta`                 | yes      | Metadata, kind:`unlocked_data`. |
-| `data` | `datablock_collection` | yes      | Datablocks.                     |
+| Field  | Format                 | Requirement | Description                     |
+| ------ | ---------------------- | ----------- | ------------------------------- |
+| `meta` | `meta`                 | MUST        | Metadata, kind:`unlocked_data`. |
+| `data` | `datablock_collection` | MUST        | Datablocks.                     |
 
 This endpoint type responds with the previously withheld data for one component, assuming that the client has made all the necessary calls to the unlocking endpoint(s).
 It gets called by the client for every component that had an `file_fetch.download_post_unlock` datablock assigned to it and returns the "real" `file_fetch.download` datablock (which may be temporarily generated).
@@ -673,10 +673,10 @@ The following datablocks are to be included in the `data` field:
 
 ## 5.3. Connection Status Endpoint
 
-| Field  | Format                 | Required | Description                         |
-| ------ | ---------------------- | -------- | ----------------------------------- |
-| `meta` | `meta`                 | yes      | Metadata, kind: `connection_status` |
-| `data` | `datablock_collection` | yes      | Datablocks.                         |
+| Field  | Format                 | Requirement | Description                         |
+| ------ | ---------------------- | ----------- | ----------------------------------- |
+| `meta` | `meta`                 | MUST        | Metadata, kind: `connection_status` |
+| `data` | `datablock_collection` | MUST        | Datablocks.                         |
 
 The URI and parameters for the balance endpoint are communicated by the provider to the client through the `provider_configuration` datablock.
 
@@ -715,40 +715,40 @@ They exist to eliminate the need to re-specify the same data structure in two di
 This template describes an HTTP query whose parameters are controllable by the user.
 See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more details.
 
-| Field        | Format               | Required | Description                                 |
-| ------------ | -------------------- | -------- | ------------------------------------------- |
-| `uri`        | string               | yes      | The URI to send the request to.             |
-| `method`     | string               | yes      | One of `get`, `post`                        |
-| `parameters` | array of `parameter` | yes      | The configurable parameters for this query. |
+| Field        | Format               | Requirement | Description                                 |
+| ------------ | -------------------- | ----------- | ------------------------------------------- |
+| `uri`        | string               | MUST        | The URI to send the request to.             |
+| `method`     | string               | MUST        | One of `get`, `post`                        |
+| `parameters` | array of `parameter` | MUST        | The configurable parameters for this query. |
 
 #### 6.2.1.1. `parameter` Structure
 A parameter describes the attributes of one parameter for the query and how the client can present this to its user.
 
-| Field     | Format            | Required                      | Description                                                                                                                                                                                                          |
-| --------- | ----------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`    | string            | yes                           | One of `text`, `boolean`, `select`, `fixed`                                                                                                                                                                          |
-| `id`      | string            | yes                           | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key when sending a response using this parameter.                                |
-| `title`   | string            | no                            | The title that the client SHOULD display to the user to represent this parameter.                                                                                                                                    |
-| `default` | string            | no                            | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
-| `choices` | array of `choice` | yes, if `select` type is used | This field contains all possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
+| Field     | Format            | Requirement                    | Description                                                                                                                                                                                                          |
+| --------- | ----------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`    | string            | MUST                           | One of `text`, `boolean`, `select`, `fixed`                                                                                                                                                                          |
+| `id`      | string            | MUST                           | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key when sending a response using this parameter.                                |
+| `title`   | string            | MAY                            | The title that the client SHOULD display to the user to represent this parameter.                                                                                                                                    |
+| `default` | string            | MAY                            | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
+| `choices` | array of `choice` | MUST, if `select` type is used | This field contains all possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
 
 #### 6.2.1.2. `choice` Structure
 A single choice for a `select` type parameter.
 
-| Field   | Format | Required | Description                                                                                   |
-| ------- | ------ | -------- | --------------------------------------------------------------------------------------------- |
-| `value` | string | yes      | The value that the client MUST use in its HTTP response if the user has selected this choice. |
-| `title` | string | yes      | The title that the client SHOULD display to the user to represent this choice.                |
+| Field   | Format | Requirement | Description                                                                                   |
+| ------- | ------ | ----------- | --------------------------------------------------------------------------------------------- |
+| `value` | string | MUST        | The value that the client MUST use in its HTTP response if the user has selected this choice. |
+| `title` | string | MUST        | The title that the client SHOULD display to the user to represent this choice.                |
 
 ### 6.2.2. `fixed_query`
 This template describes a fixed query that can be sent by the client to the provider without additional user input or configuration.
 See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more details.
 
-| Field     | Format                        | Required | Description                                         |
-| --------- | ----------------------------- | -------- | --------------------------------------------------- |
-| `uri`     | string                        | yes      | The URI to contact for getting more results.        |
-| `method`  | string                        | yes      | MUST be one of `get` or `post`                      |
-| `payload` | object with string properties | no       | The keys and values for the payload of the request. |
+| Field     | Format                        | Requirement | Description                                         |
+| --------- | ----------------------------- | ----------- | --------------------------------------------------- |
+| `uri`     | string                        | MUST        | The URI to contact for getting more results.        |
+| `method`  | string                        | MUST        | MUST be one of `get` or `post`                      |
+| `payload` | object with string properties | MAY         | The keys and values for the payload of the request. |
 
 
 
@@ -775,35 +775,35 @@ Headers that the provider expects to receive from the client on every subsequent
 
 This datablock has the following structure:
 
-| Field                          | Format            | Required | Description                                                                                                       |
-| ------------------------------ | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `headers`                      | Array of `header` | yes      | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request.     |
-| `connection_status_query`      | `fixed_query`     | yes      | Query to use for checking whether the provided headers are valid und for obtaining connection status information. |
-| `header_acquisition_uri`       | string            | no       | A URI that the client MAY offer to open in the user's web browser to help them obtain the header values.          |
-| `header_acquisition_uri_title` | string            | no       | Title for the `acquisition_uri`.                                                                                  |
+| Field                          | Format            | Requirement | Description                                                                                                       |
+| ------------------------------ | ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| `headers`                      | Array of `header` | MUST        | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request.     |
+| `connection_status_query`      | `fixed_query`     | MUST        | Query to use for checking whether the provided headers are valid und for obtaining connection status information. |
+| `header_acquisition_uri`       | string            | MAY         | A URI that the client MAY offer to open in the user's web browser to help them obtain the header values.          |
+| `header_acquisition_uri_title` | string            | MAY         | Title for the `acquisition_uri`.                                                                                  |
 
 
 #### 7.1.1.1. `header` structure
 
-| Field          | Format  | Required            | Description                                                                                                                                                                |
-| -------------- | ------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | string  | yes                 | Name of the header                                                                                                                                                         |
-| `default`      | string  | no                  | Default value as a suggestion to the client.                                                                                                                               |
-| `is_required`  | boolean | yes                 | Indicates if this header is required.                                                                                                                                      |
-| `is_sensitive` | boolean | yes                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#101-storing-sensitive-headers) |
-| `prefix`       | string  | no                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.  |
-| `suffix`       | string  | no                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.    |
-| `title`        | string  | no                  | Title that the client SHOULD display to the user.                                                                                                                          |
-| `encoding`     | string  | no, default=`plain` | The encoding that the client MUST apply to the header value and the prefix/suffix. MUST be one of `plain` or `base64`.                                                     |
+| Field          | Format  | Required             | Description                                                                                                                                                                |
+| -------------- | ------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | string  | MUST                 | Name of the header                                                                                                                                                         |
+| `default`      | string  | MAY                  | Default value as a suggestion to the client.                                                                                                                               |
+| `is_required`  | boolean | MUST                 | Indicates if this header is required.                                                                                                                                      |
+| `is_sensitive` | boolean | MUST                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#101-storing-sensitive-headers) |
+| `prefix`       | string  | MAY                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.  |
+| `suffix`       | string  | MAY                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.    |
+| `title`        | string  | MAY                  | Title that the client SHOULD display to the user.                                                                                                                          |
+| `encoding`     | string  | MAY, default=`plain` | The encoding that the client MUST apply to the header value and the prefix/suffix. MUST be one of `plain` or `base64`.                                                     |
 
 ### 7.1.2. `provider_reconfiguration`
 
 This datablock allows the provider to communicate to the client that a new set of headers that it MUST sent along with every request instead of those entered by the user until a new initialization is performed.
 The client MUST fully replace the values defined using the requirements from the original `provider_configuration` datablock with the new values defined in this datablock.
 
-| Field     | Format | Required | Description                                                                                                                                             |
-| --------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `headers` | Object | yes      | An object whose properties MUST all be strings. The keys indicate the new header names, the property values represent the new header values to be used. |
+| Field     | Format | Requirement | Description                                                                                                                                             |
+| --------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `headers` | Object | MUST        | An object whose properties MUST all be strings. The keys indicate the new header names, the property values represent the new header values to be used. |
 
 
 These new headers effectively act like cookies used on web sites.
@@ -815,11 +815,11 @@ Clients MAY require the user to confirm the new header values before starting to
 
 This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
 
-| Field              | Format | Required | Description                                                                                                            |
-| ------------------ | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `display_name`     | string | no       | The name of the user to display.                                                                                       |
-| `display_tier`     | string | no       | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.                 |
-| `display_icon_uri` | string | no       | URI to an image with an aspect ratio of 1:1, for example a profile picture or icon representing the subscription tier. |
+| Field              | Format | Requirement | Description                                                                                                            |
+| ------------------ | ------ | ----------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `display_name`     | string | MAY         | The name of the user to display.                                                                                       |
+| `display_tier`     | string | MAY         | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.                 |
+| `display_icon_uri` | string | MAY         | URI to an image with an aspect ratio of 1:1, for example a profile picture or icon representing the subscription tier. |
 
 ## 7.2. Browsing-related datablocks
 
@@ -843,9 +843,9 @@ Follows the `fixed_query` template.
 This datablock contains statistics about the current response.
 It can be used to communicate the total number of results in a query where not all results can be communicated in one response and are instead deferred using `next_query`.
 
-| Field                | Format | Required | Description                                                                                                                                                                                            |
-| -------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `result_count_total` | int    | yes      | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
+| Field                | Format | Requirement | Description                                                                                                                                                                                            |
+| -------------------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `result_count_total` | int    | MUST        | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
 
 
 ## 7.3. File-related datablocks
@@ -854,10 +854,10 @@ It can be used to communicate the total number of results in a query where not a
 
 This datablock contains information about any kind of file.
 
-| Field       | Format  | Required | Description                                            |
-| ----------- | ------- | -------- | ------------------------------------------------------ |
-| `length`    | integer | no       | The length of the file in bytes.                       |
-| `extension` | string  | yes      | The file extension indicating the format of this file. |
+| Field       | Format  | Requirement | Description                                            |
+| ----------- | ------- | ----------- | ------------------------------------------------------ |
+| `length`    | integer | MAY         | The length of the file in bytes.                       |
+| `extension` | string  | MUST        | The file extension indicating the format of this file. |
 
 The `extension` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
 MUST include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
