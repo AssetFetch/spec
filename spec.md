@@ -892,8 +892,12 @@ This datablock contains information about any kind of file.
 | `unpack_fully`         | boolean | MUST                         | Indicates whether or not the entire archive should be extracted into the local implementation directory. TODO add reference |
 | `local_directory_path` | string  | MUST, if `unpack_fully=true` | Local (sub-)path where the file MUST be placed by the client.                                                               |
 
+#### 7.3.2.1. `format` rules
 
-#### 7.3.2.1. `local_directory_path` rules
+The `format` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
+SHOULD include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
+
+#### 7.3.2.2. `local_directory_path` rules
 
 The `local_directory_path` MUST end with a slash ("trailing slash") and MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`).
 It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
