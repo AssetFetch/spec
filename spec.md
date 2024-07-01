@@ -493,7 +493,7 @@ All instances of this template MUST have the following structure:
 
 Every key of this data object is the identifier for the datablock stored in that key's field.
 
-#### Example
+#### 4.2.2.1. Example
 
 The example below illustrates a datablock collection called `data` whose structure follows the `datablock_collection` template with two datablocks (`block_type_1` and `block_type_2`) which have a varying structure.
 
@@ -1336,38 +1336,38 @@ This kind of "inclusion" between unlocking queries is handled via a `child_queri
 
 ## 10.1. Overview
 
-This specification generally does not focus heavily on the exact handling of assets implementations and their associated files on the client side, as it may vary greatly between different applications/clients.
-It only outlines a general structure that the client SHOULD follow in order to make its asset definitions as portable between applications as reasonably possible.
+During typical AssetFetch operation, there are two situations where the data of an individual asset implementation needs to be parsed in detail:
+- During implementation negotiation, when the client guesses which of the implementations offered by the provider it will be able to process properly.
+- While planning the actual import process, i.e. how to import or otherwise handle the component files once they have  been downloaded.
 
-When receiving several implementations for the same asset from a provider, the client SHOULD, broadly, perform the following steps:
+The parsing/handling process is inherently difficult to capture as part of a standard specification, as it inevitably varies between different host applications, clients as well as file formats.
+Therefore, the steps described here can inherently not be as specific as those in other sections and defining a concrete implementation of the handling process is to some extent up to client developers.
 
-1. Analyze the implementations and decide if there is one (or multiple) that it can handle.
-2. If multiple implementations are deemed acceptable, choose one to *actually* import.
-3. Run the import, which entails:
-   1. Dedicate a space in its local storage to the asset (this is almost certainly a directory but could theoretically also be another means of storage in a proprietary database system).
-   2. Performing any required unlocking queries using the information in the `unlock_queries`, `fetch.download_post_unlock` and other datablocks.
-   3. Fetch all files for all components using the instructions in their `fetch.*` datablocks.
-   4. Handle the component files using the instructions in the `file_handle`, `format.*` and other datablocks.
-
-Client implementors SHOULD consider whether these steps are fitting to their environment and make deviations, if necessary.
-The client MAY choose create an intermediary plan to allow the user to preview the import process (steps taken, files downloaded, etc.) before it is performed.
+However, this section will outline a general structure for how both the AssetFetch metadata as well as the actual component files of an implementation should be interpreted.
+Every client SHOULD follow these interpretations as much as possible within the constraints of its host application and general computing environment in order to make AssetFetch's definitions as portable between applications as reasonably possible.
 
 ## 10.2. Implementation analysis
 
-When analyzing a set of implementation sent from the provider via the [implementation list endpoint](#54-implementation-list),
-the client SHOULD decide for every implementation whether it is "readable".
+When analyzing a set of implementations sent from the provider via the [implementation list endpoint](#54-implementation-list), the client SHOULD decide for every implementation whether it is "readable".
 It MAY represent this as a binary choice or a more gradual representation.
 
 Possible factors for this decision are:
 
-- The file types used in the implementation, as indicated by the `extension` field in the `file_handle` datablock.
-- The use of more advanced AssetFetch features such as archive handling or asset unlocking.
-- Format-specific indicators in the `format.*` datablock which indicate that the given file is incompatible with the client/host application. 
+### 10.2.1. General file format analysis
+The file types used in the implementation, as indicated by the `extension` field in the `handle.*` datablock.
 
-## 10.3. Implementation import
+### 10.2.2. Specific file format analysis
+Format-specific indicators in the `format.*` datablock which indicate that the given file is incompatible with the client/host application. 
 
-If at least one of the implementations offered by the provider has been deemed readable, the client can proceed and make an actual import attempt.
-This usually involves interaction with the host application which means that client implementors SHOULD consider the steps outlined in this section only as a rough indicator for how to perform the import.
+### 10.2.3. AssetFetch feature analysis
+The use of more advanced AssetFetch features such as archive handling or asset unlocking.
+
+TODO extend this
+
+## 10.3. Import planning
+
+This section describes a blueprint for the actual steps to take after receiving final confirmation from the user that the import of a specific asset implementation should commence.
+Parts of this process are usually delegated to the host application.
 
 ### 10.3.1. The implementation directory
 
