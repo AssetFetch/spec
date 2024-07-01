@@ -632,7 +632,7 @@ The following datablocks are to be included in the `data` field:
 
 | Requirement Level | Datablocks                                                 |
 | ----------------- | ---------------------------------------------------------- |
-| MUST              | `file_info`,`file_handle`, `file_fetch.*`                  |
+| MUST              | `file_info`,`file_handle`, `fetch.*`                  |
 | MAY               | `environment_map`, `loose_material.*`, `mtlx_apply`,`text` |
 
 # 5. Additional Endpoints
@@ -648,7 +648,7 @@ Additional endpoint types can be used to perform certain actions or retrieve add
 | `data` | `datablock_collection` | MAY         | Datablocks.               |
 
 This endpoint is invoked to perform an "unlocking" (usually meaning a "purchase") of a resource.
-After calling it the client can expect to resolve all previously withheld downloads using the endpoint for unlocked data specified in the `file_fetch.download_post_unlock` datablock.
+After calling it the client can expect to resolve all previously withheld downloads using the endpoint for unlocked data specified in the `fetch.download_post_unlock` datablock.
 The URI and parameters for this endpoint are communicated through the `unlock_queries` datablock.
 
 This endpoint currently does not use any datablocks.
@@ -662,13 +662,13 @@ Only the HTTP status code and potentially the data in the `meta` field are used 
 | `data` | `datablock_collection` | MUST        | Datablocks.                     |
 
 This endpoint type responds with the previously withheld data for one component, assuming that the client has made all the necessary calls to the unlocking endpoint(s).
-It gets called by the client for every component that had an `file_fetch.download_post_unlock` datablock assigned to it and returns the "real" `file_fetch.download` datablock (which may be temporarily generated).
+It gets called by the client for every component that had an `fetch.download_post_unlock` datablock assigned to it and returns the "real" `fetch.download` datablock (which may be temporarily generated).
 
 The following datablocks are to be included in the `data` field:
 
 | Requirement Level | Datablocks            |
 | ----------------- | --------------------- |
-| MUST              | `file_fetch.download` |
+| MUST              | `fetch.download` |
 
 
 ## 5.3. Connection Status Endpoint
@@ -904,7 +904,7 @@ It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
 ## 7.4. Fetching-related datablocks
 
-### 7.4.1. `file_fetch.download`
+### 7.4.1. `fetch.download`
 
 This datablock indicates that this is a file which can be downloaded directly using the provided query.
 
@@ -912,18 +912,18 @@ The full description of component handling can be found in the [component handli
 
 The structure of this datablock follows the `fixed_query` template.
 
-### 7.4.2. `file_fetch.download_post_unlock`
+### 7.4.2. `fetch.download_post_unlock`
 
 This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
-It indicates that when the referenced unlock query has been completed, the *real* `file_fetch.download` datablock can be received by performing the fixed query in `unlocked_data_query`
+It indicates that when the referenced unlock query has been completed, the *real* `fetch.download` datablock can be received by performing the fixed query in `unlocked_data_query`
 
 | Field                 | Format        | Required | Description                                                                                                                                                                                                                                    |
 | --------------------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `unlock_query_id`     | string        | yes      | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_data_query`. |
-| `unlocked_data_query` | `fixed_query` | yes      | The query to fetch the previously withheld `file_fetch.download` datablock for this component if the unlocking was successful.                                                                                                                 |
+| `unlocked_data_query` | `fixed_query` | yes      | The query to fetch the previously withheld `fetch.download` datablock for this component if the unlocking was successful.                                                                                                                 |
 
 
-### 7.4.3. `file_fetch.from_archive`
+### 7.4.3. `fetch.from_archive`
 This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
 More about the handling in the [import and handling section](#9-implementation-analysis-and-handling).
 
@@ -1123,7 +1123,7 @@ Information about files with the extension `.obj`.
 
 These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch.
 
-*Note that the `file_fetch.download_post_unlock` datablock is also related to the unlocking system but is [grouped with the other `file_fetch.*` datablocks](#83-file-related-datablocks).* 
+*Note that the `fetch.download_post_unlock` datablock is also related to the unlocking system but is [grouped with the other `fetch.*` datablocks](#83-file-related-datablocks).* 
 
 ### 7.8.1. `unlock_balance`
 Information about the user's current account balance.
@@ -1144,7 +1144,7 @@ This datablock is **an array** consisting of `unlock_query` objects.
 
 | Field                | Format            | Required                 | Description                                                                                                                                                                                    |
 | -------------------- | ----------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                 | string            | yes                      | This is the id by which `file_fetch.download_post_unlock` datablocks will reference this query.                                                                                                |
+| `id`                 | string            | yes                      | This is the id by which `fetch.download_post_unlock` datablocks will reference this query.                                                                                                |
 | `unlocked`           | boolean           | yes                      | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
 | `price`              | number            | only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
 | `query`              | `fixed_query`     | only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
@@ -1339,8 +1339,8 @@ When receiving several implementations for the same asset from a provider, the c
 2. If multiple implementations are deemed acceptable, choose one to *actually* import.
 3. Run the import, which entails:
    1. Dedicate a space in its local storage to the asset (this is almost certainly a directory but could theoretically also be another means of storage in a proprietary database system).
-   2. Performing any required unlocking queries using the information in the `unlock_queries`, `file_fetch.download_post_unlock` and other datablocks.
-   3. Fetch all files for all components using the instructions in their `file_fetch.*` datablocks.
+   2. Performing any required unlocking queries using the information in the `unlock_queries`, `fetch.download_post_unlock` and other datablocks.
+   3. Fetch all files for all components using the instructions in their `fetch.*` datablocks.
    4. Handle the component files using the instructions in the `file_handle`, `format.*` and other datablocks.
 
 Client implementors SHOULD consider whether these steps are fitting to their environment and make deviations, if necessary.
@@ -1371,7 +1371,7 @@ The directory SHOULD be empty at the start of the component handling process.
 
 ### 10.3.2. Performing unlock queries
 
-If the implementation contains components with a `file_fetch.download_post_unlock` datablock,
+If the implementation contains components with a `fetch.download_post_unlock` datablock,
 then the client MUST perform the unlock query referenced in that datablock before it can proceed.
 Otherwise the resources may not be fully unlocked and the provider will likely refuse to hand over the files.
 
@@ -1381,12 +1381,12 @@ The behavior of a component is dictated by the value of the `behavior` field in 
 
 #### 10.3.3.1. Handling for `single_active`
 
-Fetch the file using the instructions in the `file_fetch.*` datablock and place it in the `local_path` listed in the `file_handle` datablock.
+Fetch the file using the instructions in the `fetch.*` datablock and place it in the `local_path` listed in the `file_handle` datablock.
 Next, make an attempt to load this file directly, for example through the host application's native import functionality.
 
 #### 10.3.3.2. Handling for `single_passive`
 
-Fetch the file using the instructions in the `file_fetch.*` datablock and place it in the `local_path` listed in the `file_handle` datablock.
+Fetch the file using the instructions in the `fetch.*` datablock and place it in the `local_path` listed in the `file_handle` datablock.
 
 The client SHOULD NOT make a direct attempt to load this file and only process it in the case that it is referenced by another (active) component.
 This can be either through a native reference in the component file itself (in which ase the host application's native import functionality will handle the references by itself)
@@ -1394,15 +1394,15 @@ or through a reference in the AssetFetch data (like the `loose_material.apply` d
 
 #### 10.3.3.3. Handling for `archive_unpack_fully`
 
-Fetch the file using the instructions in the `file_fetch.*` datablock and place it in a temporary location.
+Fetch the file using the instructions in the `fetch.*` datablock and place it in a temporary location.
 
 The client MUST unpack the full contents of the archive root into the implementation directory using the `local_path` in the `file_handle` datablock as the sub-path inside the implementation directory.
 
 #### 10.3.3.4. Handling for `archive_unpack_referenced`
 
-Fetch the file using the instructions in the `file_fetch.*` datablock and place it in a temporary location.
+Fetch the file using the instructions in the `fetch.*` datablock and place it in a temporary location.
 
-Then unpack only those files that are referenced by other components in their `file_fetch.from_archive` datablocks.
+Then unpack only those files that are referenced by other components in their `fetch.from_archive` datablocks.
 Use the `local_path` in the individual component's `file_handle` datablock as the unpacking destination.
 
 #### 10.3.3.5. Collisions in the implementation directory
