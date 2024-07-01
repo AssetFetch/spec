@@ -862,15 +862,60 @@ This datablock contains information about any kind of file.
 The `extension` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
 MUST include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
 
+## Behavior-related datablocks
+
+### `behavior.passive`
+
+| Field        | Format | Requirement | Description                                                   |
+| ------------ | ------ | ----------- | ------------------------------------------------------------- |
+| `local_path` | string | MUST        | Local (sub-)path where the file MUST be placed by the client. |
+
+### `behavior.active`
+
+
+| Field        | Format | Requirement | Description                                                   |
+| ------------ | ------ | ----------- | ------------------------------------------------------------- |
+| `local_path` | string | MUST        | Local (sub-)path where the file MUST be placed by the client. |
+
+### `behavior.archive`
+
+| Field             | Format | Requirement | Description                                                |
+| ----------------- | ------ | ----------- | ---------------------------------------------------------- |
+| `unpack_fully` |
+| `local_directory` | string | MUST        | Local (sub-)directory inside the implementation directory. |
+
+
+### `behavior.loose_material_map`
+
+
+| Field        | Format | Requirement | Description                                                   |
+| ------------ | ------ | ----------- | ------------------------------------------------------------- |
+| `local_path` | string | MUST        | Local (sub-)path where the file MUST be placed by the client. |
+
+### `behavior.loose_environment_map`
+
+
+| Field        | Format | Requirement | Description                                                   |
+| ------------ | ------ | ----------- | ------------------------------------------------------------- |
+| `local_path` | string | MUST        | Local (sub-)path where the file MUST be placed by the client. |
+
+
+## Material-related datablocks
+
+### `material.from_loose_maps`
+
+
+
+### `material.from_mtlx`
+
 ### 7.3.2. `file_handle`
 
 This datablock indicates how this file should behave during the import process.
 The full description of component handling can be found in the [component handling section](#933-handling-component-files).
 
-| Field        | Format | Required                                         | Description                                                                                |
-| ------------ | ------ | ------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| `local_path` | string | yes, unless `behavior=archive_unpack_referenced` |                                                                                            |
-| `behavior`   | string | yes                                              | One of `single_active`,`single_passive`,`archive_unpack_fully`,`archive_unpack_referenced` |
+| Field      | Format | Required | Description                                                                                |
+| ---------- | ------ | -------- | ------------------------------------------------------------------------------------------ |
+| `behavior` | string | yes      | One of `single_active`,`single_passive`,`archive_unpack_fully`,`archive_unpack_referenced` |
 
 **If `behavior` is `single_*`:**
 
@@ -1310,7 +1355,7 @@ This kind of "inclusion" between unlocking queries is handled via a `child_queri
 
 
 
-# 10. Implementation analysis and handling
+# 10. Working with asset implementations
 
 ## 10.1. Overview
 
