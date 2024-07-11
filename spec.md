@@ -1164,6 +1164,8 @@ This datablock is **an array** consisting of `unlock_query` objects.
 
 # 8. Authentication architectures
 
+TODO
+
 ## 8.1. Static tokens
 
 ## 8.2. Session tokens
@@ -1337,10 +1339,10 @@ This kind of "inclusion" between unlocking queries is handled via a `child_queri
 ## 10.1. Overview
 
 During typical AssetFetch operation, there are two situations where the data of an individual asset implementation needs to be parsed in detail:
-- During implementation negotiation, when the client guesses which of the implementations offered by the provider it will be able to process properly.
-- While planning the actual import process, i.e. how to import or otherwise handle the component files once they have  been downloaded.
+- During *implementation negotiation*, when the client analyzes a set of implementation guesses using the metadata offered by the provider which of them it will be able to handle properly.
+- While performing the *actual import process*, i.e. how to import or otherwise handle the component files once they have been downloaded.
 
-The parsing/handling process is inherently difficult to capture as part of a standard specification, as it inevitably varies between different host applications, clients as well as file formats.
+The exact details of the parsing and handling processes are inherently different between host applications, clients as well as file formats.
 Therefore, the steps described here can inherently not be as specific as those in other sections and defining a concrete implementation of the handling process is to some extent up to client developers.
 
 However, this section will outline a general structure for how both the AssetFetch metadata as well as the actual component files of an implementation should be interpreted.
@@ -1349,9 +1351,9 @@ Every client SHOULD follow these interpretations as much as possible within the 
 ## 10.2. Implementation analysis
 
 When analyzing a set of implementations sent from the provider via the [implementation list endpoint](#54-implementation-list), the client SHOULD decide for every implementation whether it is "readable".
-It MAY represent this as a binary choice or a more gradual representation.
+It MAY represent this as a binary choice or a more gradual or qualitative representation, such as a compatibility rating.
 
-Possible factors for this decision are:
+Factors which the client SHOULD consider for this decision are:
 
 ### 10.2.1. General file format analysis
 The file types used in the implementation, as indicated by the `extension` field in the `handle.*` datablock.
@@ -1364,22 +1366,52 @@ The use of more advanced AssetFetch features such as archive handling or asset u
 
 TODO extend this
 
-## 10.3. Import planning
+## 10.3. Import planning and execution
 
 This section describes a blueprint for the actual steps to take after receiving final confirmation from the user that the import of a specific asset implementation should commence.
 Parts of this process are usually delegated to the host application.
 
 ### 10.3.1. The implementation directory
 
-For handling the implementation of an asset offered by the provider the client SHOULD make a dedicated directory into which all the files described by all the components can be arranged.
-For this purpose it MAY use the `id` values transmitted on the provider-, asset- and implementation queries.
+For handling the implementation of an asset downloaded from a provider the client SHOULD make a dedicated directory into which all the files described by all the components can be arranged.
 The directory SHOULD be empty at the start of the component handling process.
 
-### 10.3.2. Performing unlock queries
+For this purpose it MAY use the `id` values available on the respective data structures of every provider, asset and implementation to create a directory structure such as:
 
-If the implementation contains components with a `fetch.download_post_unlock` datablock,
-then the client MUST perform the unlock query referenced in that datablock before it can proceed.
-Otherwise the resources may not be fully unlocked and the provider will likely refuse to hand over the files.
+> `<common base directory>/<provider id>/<asset id>/<implementation id>/`
+
+For example:
+
+> `/home/user/provider.example.com/paving_stones_017/2048px_jpg/<files go here>`
+
+<!--Inside this directory the client SHOULD arrange the files as described by the provider in the `local_file_path` field in the `` implementation metadata to ensure that relative links between files remain intact. -->
+
+### 10.3.2. Fetching component files
+
+This sections describes the fetching process of all component files that make up a specific implementation.
+
+The key datablock to consider during this process is `fetch.*`.
+
+#### Handling for `fetch.download`
+
+This datablock indicates that the file is available for immediate download.
+If a component which the client intends to use carries this datablock then the client can immediately proceed to download the file using the provided HTTP-query and handle it according to its `handle.*` datablock (as discussed in the next section). 
+
+#### Handling for `fetch.download_post_unlock`
+
+This datablock indicates that the download will only be available after it has been unlocked.
+In this case, the client:
+
+1. MUST first perform the unlock query specified in the `unlock_query_id` field, which points to one of the unlocking queries in the `unlocking_queries` datablock. The provider responds with a simple acknowledgement without a data payload.
+2. MUST then call the "unlocked data" endpoint as described in the `unlocked_data_query` field (TODO add reference). The provider responds with a `fetch.download` datablock (which MAY be ephemeral in the sense that the query expires after a set period of time).
+
+The client MUST proceed as described for `fetch.download` in the previous section.
+
+#### Handling for `fetch.from_archive`
+
+This datablock indicates that the component file in question is contained in an archive described by another component, referenced via the `archive_component_id`.
+
+TODO continue here -----------------------------------------------------------------
 
 ### 10.3.3. Handling component files
 
