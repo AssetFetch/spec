@@ -422,14 +422,116 @@ sequenceDiagram
 
 
 
+# 4. HTTP Communication
 
-# 4. Endpoints
+## 4.1. HTTP vs. HTTPS
+This section describes general instructions for all HTTP communication described in this specification. The term "HTTP query/communication/..." also always includes the HTTP*S* counterpart.
+AssetFetch generally allows all queries to happen via both plain HTTP and HTTPS, but clients MAY choose to limit themselves to either one and/or display additional messages/warnings to users when communicating via plain HTTP, as is common practice in modern web browsers.
+
+## 4.2. Request payloads
+
+The payload of all HTTP requests from a client to a provider MUST be encoded as [`application/x-www-form-urlencoded`](https://url.spec.whatwg.org/#application/x-www-form-urlencoded), the same format that is used by standard HTML forms.
+
+Examples for a valid query payload are shown below. 
+```
+q=wood,old&min_resolution=512
+lod=0
+query=&category=marble
+```
+
+This encoding for request data is already extremely widespread and can therefore usually be handled using standard libraries, both on the provider- and on the client-side.
+
+## 4.3. Response payloads
+
+The payload of all HTTP responses from a provider MUST be valid [JSON](https://www.json.org/) and SHOULD use the `Content-Type` header `application/json`.
+The exact structure of the data for individual endpoints and other API resources is specified in the [Endpoint section](#5-endpoints).
+
+## 4.4. User-Agent
+
+The client SHOULD send an appropriate user-agent header as defined in [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#field.user-agent).
+
+If the client is embedded in a host application, for example as an addon inside a 3D suite, it SHOULD set its first `product` and `product-version` identifier based on the host application and then describe the product and version of the client plugin itself afterwards.
+
+```
+# Examples for plugins/addons:
+cinema4d/2024.2 MyAssetFetchPlugin/1.2.3
+3dsmax/2023u1 AssetFetchFor3dsMax/0.5.7
+blender/4.0.3 BlenderAssetFetch/v17
+
+# Example for a standalone client:
+standaloneAssetFetchClient/1.4.2.7
+```
+
+## 4.5. Variable and Fixed Queries
+
+In AssetFetch, there are several instances where the provider needs to describe a possible HTTP request that a client can make to perform a certain action or obtain data, such as browsing for assets, unlocking components or downloading files.
+In this context, the specification differentiates between "variable" and "fixed" queries.
+
+### 4.5.1. Variable Query
+
+A **variable query** is an HTTP request defined by its URI, method and a payload _that has been (partly) configured by the user_ which is sent by the client to the provider in order to receive data in response.
+For this purpose, the provider sends the client a list of parameter values that the client MUST use to construct the actual HTTP query to the provider.
+For the client, handling a variable query usually involves drawing a GUI and asking the user to provide the values to be sent to the provider.
+
+A simple example for a variable query is a query for listing assets that allows the user to specify a list of keywords before the request is sent to the provider.
+
+#### 4.5.1.1. Variable Query Parameters
+
+The full field list of a variable query object can be found in the [`variable_query` datablock template](#721-variable_query).
+
+A variable query is composed of its URI, HTTP method and optionally one or multiple parameter definitions that are used to determine the payload of the HTTP request.
+
+Every parameter has a `title` property which the client SHOULD use to communicate the functionality of the given parameter to the user.
+The `id` property on the parameter dictates the actual key value that the client MUST use when composing the HTTP request.
+
+The nature of the final value of the parameter is dictated by its `type`.
+If the provider offers one or multiple adjustable parameters, it MUST choose one of the following parameter types for each parameter:
+
+- `text`: A string of text with no line breaks (`\r` and/or `\n`). When utilizing a GUI the client SHOULD use a one-line text input field to represent this parameter. The client MUST allow the use of an empty string.
+- `boolean`: A binary choice with `true` being represented by the value `1` and `false` with the value `0`. The client MUST NOT send any other response value for this parameter. When utilizing a GUI the client SHOULD use a tick-box or similar kind of menu item to represent this parameter.
+- `select`: A list of possible choices, each represented by a `value` which is the actual parameter value that the client MUST include in its HTTP request if the user chooses the choice in question and a `title` which the client SHOULD use to represent the choice to the user. When utilizing a GUI the client SHOULD use a drop-down or similar kind of menu to represent this parameter.
+- `fixed`: A fixed value that the client MUST include in its request verbatim. The client MAY reveal this value to the user, but MUST NOT allow any changes to this value.
+
+### 4.5.2. Fixed Query
+
+The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#722-fixed_query).
+
+A **fixed query** is an HTTP(S) request defined by its URI, method and a payload _that is not configurable by the user_  which is sent by the client to the provider in order to receive data in response.
+
+In this case the provider only transmits the description of the query to the client whose only decision is whether or not to actually send the query with the given parameters to the provider.
+
+A typical example for a fixed query is a download option for a file where the client only has the choice to invoke or not invoke the download.
+
+## 4.6. HTTP Codes and Error Handling
+
+Every response sent from an AssetFetch provider MUST use HTTP Status codes appropriately.
+
+In concrete terms, this means:
+
+- If a provider managed to successfully process the query then the response code SHOULD be `200 - OK`. Even if the query sent by the client leads to zero results in the context of a search with potentially zero to infinitely many results, the response code SHOULD still be `200 - OK`.
+- If a provider receives a query that references a specific resource which does not exist, such as a query for implementations of an asset that the provider does not recognize, it SHOULD respond with code `404 - Not Found`.
+- If the provider can not parse the query data sent by the client properly, it SHOULD respond with code `400 - Bad Request`.
+- If a provider receives a query an any other endpoint than the initialization endpoint without one of the headers it defined as required during the initialization it SHOULD send status code `401 - Unauthorized`. This indicates that the client is unaware of required headers and SHOULD cause the client to contact the initialization endpoint for that provider again in order to receive updated information about required headers.
+- If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to perform a download that has not been unlocked, the provider MAY respond with code `402 - Payment Required` instead.
+
+If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
+This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#511-the-meta-template), if they have content.
+
+
+
+
+
+
+
+
+
+# 5. Endpoints
 
 This section outlines general information about the HTTP-endpoints required for AssetFetch along with the specific structural requirements for the JSON-response on every endpoint.
 
 TODO add reference to HTTP section.
 
-## 4.1. About Endpoints
+## 5.1. About Endpoints
 
 The interaction model described in the [General Operation](#3-general-operation) section principally implies that there are three kinds of HTTP(s)-based endpoints that a provider MUST implement:
 
@@ -445,12 +547,12 @@ Depending on which features it wants to use, the provider MAY implement:
 *The specific URIs or sub-paths for these endpoint are not prescribed by AssetFetch.*
 The URI and parameters for every endpoint besides the initialization endpoint are communicated by the provider to the client in the response data to a previously made request.
 
-## 4.2. Response data templates
+## 5.2. Response data templates
 
 This section describes data structures that are used in responses from several or even all endpoints.
 These templates are later referenced during the description of the individual endpoints.
 
-### 4.2.1. The `meta` template
+### 5.2.1. The `meta` template
 All provider responses on all endpoints MUST carry the `meta` field to communicate key information about the current response.
 
 All instances of this template MUST have the following structure:
@@ -472,7 +574,7 @@ If a request fails, the provider SHOULD use the `message` field to communicate m
 
 Clients SHOULD display the `response_id` and `message` fields to the user if a query was unsuccessful, as indicated by the HTTP status code.
 
-### 4.2.2. The `datablock_collection` template
+### 5.2.2. The `datablock_collection` template
 
 Nearly every piece of information in AssetFetch is communicated through a datablock, which has a name and a clearly defined structure.
 The datablock collection is a JSON object that uses the datablock's name as a key and its structure as the value.
@@ -487,7 +589,7 @@ All instances of this template MUST have the following structure:
 
 Every key of this data object is the identifier for the datablock stored in that key's field.
 
-#### 4.2.2.1. Example
+#### 5.2.2.1. Example
 
 The example below illustrates a datablock collection called `data` whose structure follows the `datablock_collection` template with two datablocks (`block_type_1` and `block_type_2`) which have a varying structure.
 
@@ -507,7 +609,7 @@ The example below illustrates a datablock collection called `data` whose structu
 }
 ```
 
-## 4.3. Endpoint: Initialization 
+## 5.3. Endpoint: Initialization 
 
 Its URI is initially entered by the user into a client and this endpoint is the first point of contact between a client and a provider.
 It is used to communicate key details about the provider as well as how the interaction between client and provider should proceed.
@@ -529,7 +631,7 @@ The following datablocks are to be included in the `data` field:
 | MAY                             | `branding`, `authors`, `license`, `web_references` |
 | MUST, if authentication is used | `provider_configuration`                           |
 
-## 4.4. Asset List
+## 5.4. Asset List
 
 The URI and available HTTP parameters for this endpoint are communicated by the server to the client using the `asset_list_query` datablock on the initialization endpoint.
 
@@ -550,7 +652,7 @@ The following datablocks are to be included in the `data` field:
 The `assets` field MUST NOT contain more than 100 items for one response.
 If the provider finds more assets than 100 assets which match the query it SHOULD use the `next_query` datablock to define a fixed query that the client can use to fetch more results.
 
-### 4.4.1. `asset` Structure
+### 5.4.1. `asset` Structure
 
 Every `asset` object MUST have the following structure:
 
@@ -572,7 +674,7 @@ The following datablocks are to be included in the `data` field:
 | MAY         | `preview_image_supplemental`, `license`, `authors`, `dimensions.*`,`web_references` |
 
 
-## 4.5. Implementation List
+## 5.5. Implementation List
 
 This endpoint returns one or several implementations for one specific asset.
 The URI and available parameters for this endpoint are communicated by the server to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
@@ -590,7 +692,7 @@ The following datablocks are to be included in the `data` field:
 | MUST, if asset unlocking is being used | `unlock_queries`      |
 | MAY                                    | `response_statistics` |
 
-### 4.5.1. `implementation` Structure
+### 5.5.1. `implementation` Structure
 
 Every `implementation` object MUST have the following structure:
 
@@ -611,7 +713,7 @@ The following datablocks are to be included in the `data` field:
 | ----------------- | ---------- |
 | SHOULD            | `text`     |
 
-### 4.5.2. `component` Structure
+### 5.5.2. `component` Structure
 
 Every `component` object MUST have the following structure:
 
@@ -634,7 +736,7 @@ The following datablocks are to be included in the `data` field:
 
 
 
-## 4.6. Unlocking Endpoint
+## 5.6. Unlocking Endpoint
 
 | Field  | Format                 | Requirement | Description               |
 | ------ | ---------------------- | ----------- | ------------------------- |
@@ -648,7 +750,7 @@ The URI and parameters for this endpoint are communicated through the `unlock_qu
 This endpoint currently does not use any datablocks.
 Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
 
-## 4.7. Unlocked Data Endpoint
+## 5.7. Unlocked Data Endpoint
 
 | Field  | Format                 | Requirement | Description                     |
 | ------ | ---------------------- | ----------- | ------------------------------- |
@@ -665,7 +767,7 @@ The following datablocks are to be included in the `data` field:
 | MUST              | `fetch.download` |
 
 
-## 4.8. Connection Status Endpoint
+## 5.8. Connection Status Endpoint
 
 | Field  | Format                 | Requirement | Description                         |
 | ------ | ---------------------- | ----------- | ----------------------------------- |
@@ -690,9 +792,9 @@ The following datablocks are to be included in the `data` field:
 
 
 
-# 5. Datablocks
+# 6. Datablocks
 
-## 5.1. Datablock names
+## 6.1. Datablock names
 
 The name of a datablock MUST be a string composed of small alphanumerical characters, underscores and dots.
 Datablock names MUST contain either 0 or 1 instance of the dot (`.`) character which indicates that a datablock has multiple variations.
@@ -700,12 +802,12 @@ One resource MUST NOT have two datablocks that share the same string *before* th
 
 The resulting regular expression from these rules is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
 
-## 5.2. Datablock value templates
+## 6.2. Datablock value templates
 This section describes additional data types that can be used within other datablocks.
 They exist to eliminate the need to re-specify the same data structure in two different datablock definitions.
 *The templates can not be used directly as datablocks under their template name, though some datablock completely inherit their structure under a new name.*
 
-### 5.2.1. `variable_query`
+### 6.2.1. `variable_query`
 This template describes an HTTP query whose parameters are controllable by the user.
 See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more details.
 
@@ -715,7 +817,7 @@ See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more detail
 | `method`     | string               | MUST        | One of `get`, `post`                        |
 | `parameters` | array of `parameter` | MUST        | The configurable parameters for this query. |
 
-#### 5.2.1.1. `parameter` Structure
+#### 6.2.1.1. `parameter` Structure
 A parameter describes the attributes of one parameter for the query and how the client can present this to its user.
 
 | Field     | Format            | Requirement                    | Description                                                                                                                                                                                                          |
@@ -726,7 +828,7 @@ A parameter describes the attributes of one parameter for the query and how the 
 | `default` | string            | MAY                            | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
 | `choices` | array of `choice` | MUST, if `select` type is used | This field contains all possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
 
-#### 5.2.1.2. `choice` Structure
+#### 6.2.1.2. `choice` Structure
 A single choice for a `select` type parameter.
 
 | Field   | Format | Requirement | Description                                                                                   |
@@ -734,7 +836,7 @@ A single choice for a `select` type parameter.
 | `value` | string | MUST        | The value that the client MUST use in its HTTP response if the user has selected this choice. |
 | `title` | string | MUST        | The title that the client SHOULD display to the user to represent this choice.                |
 
-### 5.2.2. `fixed_query`
+### 6.2.2. `fixed_query`
 This template describes a fixed query that can be sent by the client to the provider without additional user input or configuration.
 See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more details.
 
@@ -753,7 +855,7 @@ See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more detail
 
 
 
-# 6. Datablock Index
+# 7. Datablock Index
 
 This section displays all datablocks that are currently part of the standard.
 
@@ -762,9 +864,9 @@ To aid with reading this list, exclamation marks and question marks are used to 
 A star (*) is used to indicate that there are special rules for when/if this datablock is to be used.
 
 
-## 6.1. Configuration and authentication-related datablocks
+## 7.1. Configuration and authentication-related datablocks
 
-### 6.1.1. `provider_configuration`
+### 7.1.1. `provider_configuration`
 Headers that the provider expects to receive from the client on every subsequent request.
 
 This datablock has the following structure:
@@ -777,7 +879,7 @@ This datablock has the following structure:
 | `header_acquisition_uri_title` | string            | MAY         | Title for the `acquisition_uri`.                                                                                  |
 
 
-#### 6.1.1.1. `header` structure
+#### 7.1.1.1. `header` structure
 
 | Field          | Format  | Required             | Description                                                                                                                                                                |
 | -------------- | ------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -790,7 +892,7 @@ This datablock has the following structure:
 | `title`        | string  | MAY                  | Title that the client SHOULD display to the user.                                                                                                                          |
 | `encoding`     | string  | MAY, default=`plain` | The encoding that the client MUST apply to the header value and the prefix/suffix. MUST be one of `plain` or `base64`.                                                     |
 
-### 6.1.2. `provider_reconfiguration`
+### 7.1.2. `provider_reconfiguration`
 
 This datablock allows the provider to communicate to the client that a new set of headers that it MUST sent along with every request instead of those entered by the user until a new initialization is performed.
 The client MUST fully replace the values defined using the requirements from the original `provider_configuration` datablock with the new values defined in this datablock.
@@ -805,7 +907,7 @@ Providers SHOULD therefore only use this datablock for purposes that are strictl
 Clients MAY require the user to confirm the new header values before starting to send them.
 
 
-### 6.1.3. `user`
+### 7.1.3. `user`
 
 This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
 
@@ -815,24 +917,24 @@ This datablock allows the provider to transmit information about the user to the
 | `display_tier`     | string | MAY         | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.                 |
 | `display_icon_uri` | string | MAY         | URI to an image with an aspect ratio of 1:1, for example a profile picture or icon representing the subscription tier. |
 
-## 6.2. Browsing-related datablocks
+## 7.2. Browsing-related datablocks
 
 These datablocks all relate to the process of browsing for assets or implementations.
 
-### 6.2.1. `asset_list_query`
+### 7.2.1. `asset_list_query`
 Describes the variable query for fetching the list of available assets from a provider.
 It follows the `variable_query` template.
 
-### 6.2.2. `implementation_list_query`
+### 7.2.2. `implementation_list_query`
 Describes the variable query for fetching the list of available implementations for an asset from a provider.
 It follows the `variable_query` template.
 
-### 6.2.3. `next_query`
+### 7.2.3. `next_query`
 Describes a fixed query to fetch more results using the same parameters as the current query.
 The response to this query from the provider MUST be of the same `kind` as the query in which this datablock is contained.
 Follows the `fixed_query` template.
 
-### 6.2.4. `response_statistics`
+### 7.2.4. `response_statistics`
 
 This datablock contains statistics about the current response.
 It can be used to communicate the total number of results in a query where not all results can be communicated in one response and are instead deferred using `next_query`.
@@ -842,9 +944,9 @@ It can be used to communicate the total number of results in a query where not a
 | `result_count_total` | int    | MUST        | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
 
 
-## 6.3. Handling-related datablocks
+## 7.3. Handling-related datablocks
 
-### 6.3.1. `handle.file`
+### 7.3.1. `handle.file`
 
 This datablock indicates how this file should be handled during the import process.
 The full description of component handling can be found in the [component handling section](#933-handling-component-files).
@@ -858,12 +960,12 @@ This datablock contains information about any kind of file.
 | `is_passive`      | boolean | MUST        | Indicates whether this file should be treated as a passive component. TODO add reference |
 | `local_file_path` | string  | MUST        | Local (sub-)path where the file MUST be placed by the client.                            |
 
-#### 6.3.1.1. `format` rules
+#### 7.3.1.1. `format` rules
 
 The `format` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
 SHOULD include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
 
-#### 6.3.1.2. `local_file_path` rules
+#### 7.3.1.2. `local_file_path` rules
 
 The `local_file_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash".
 It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
@@ -872,7 +974,7 @@ It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
 `/example.txt`, `./example.txt` or `/sub/dir/example.txt` would be incorrect.
 
-### 6.3.2. `handle.archive`
+### 7.3.2. `handle.archive`
 
 This datablock indicates how this file should be handled during the import process.
 The full description of component handling can be found in the [component handling section](#933-handling-component-files).
@@ -886,12 +988,12 @@ This datablock contains information about any kind of file.
 | `unpack_fully`         | boolean | MUST                         | Indicates whether or not the entire archive should be extracted into the local implementation directory. TODO add reference |
 | `local_directory_path` | string  | MUST, if `unpack_fully=true` | Local (sub-)path where the file MUST be placed by the client.                                                               |
 
-#### 6.3.2.1. `format` rules
+#### 7.3.2.1. `format` rules
 
 The `format` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
 SHOULD include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
 
-#### 6.3.2.2. `local_directory_path` rules
+#### 7.3.2.2. `local_directory_path` rules
 
 The `local_directory_path` MUST end with a slash ("trailing slash") and MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`).
 It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
@@ -900,9 +1002,9 @@ It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
 `contents`,`./contents/`,`./contents`,`my/../../contents` or `../contents` would all be incorrect.
 
-## 6.4. Fetching-related datablocks
+## 7.4. Fetching-related datablocks
 
-### 6.4.1. `fetch.download`
+### 7.4.1. `fetch.download`
 
 This datablock indicates that this is a file which can be downloaded directly using the provided query.
 
@@ -910,7 +1012,7 @@ The full description of component handling can be found in the [component handli
 
 The structure of this datablock follows the `fixed_query` template.
 
-### 6.4.2. `fetch.download_post_unlock`
+### 7.4.2. `fetch.download_post_unlock`
 
 This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
 It indicates that when the referenced unlock query has been completed, the *real* `fetch.download` datablock can be received by performing the fixed query in `unlocked_data_query`
@@ -921,7 +1023,7 @@ It indicates that when the referenced unlock query has been completed, the *real
 | `unlocked_data_query` | `fixed_query` | yes      | The query to fetch the previously withheld `fetch.download` datablock for this component if the unlocking was successful.                                                                                                                      |
 
 
-### 6.4.3. `fetch.from_archive`
+### 7.4.3. `fetch.from_archive`
 This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
 More about the handling in the [import and handling section](#9-implementation-analysis-and-handling).
 
@@ -930,11 +1032,11 @@ More about the handling in the [import and handling section](#9-implementation-a
 | `archive_component_id` | string | yes      | The id of the component representing the archive that this component is contained in.                                                                                                                                                                                                              |
 | `component_path`       | string | yes      | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`). |
 
-## 6.5. Display related datablocks
+## 7.5. Display related datablocks
 
 These datablocks relate to how assets and their details are displayed to the user.
 
-### 6.5.1. `text`
+### 7.5.1. `text`
 General text information to be displayed to the user.
 
 | Field         | Format | Required | Description                                    |
@@ -943,7 +1045,7 @@ General text information to be displayed to the user.
 | `description` | string | no       | A description text for the datablocks subject. |
 
 
-### 6.5.2. `web_references`
+### 7.5.2. `web_references`
 References to external websites for documentation or support.
 
 An array of objects each of which MUST follow this format:
@@ -954,7 +1056,7 @@ An array of objects each of which MUST follow this format:
 | `uri`      | string | yes      | The URL to be opened in the users browser.                                                                    |
 | `icon_uri` | string | yes      | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
-### 6.5.3. `branding`
+### 7.5.3. `branding`
 Brand information about the provider.
 
 | Field             | Format | Required | Description                                                                                                                   |
@@ -964,7 +1066,7 @@ Brand information about the provider.
 | `logo_wide_uri`   | string | no       | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD be transparent.                    |
 | `banner_uri`      | string | no       | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent. |
 
-### 6.5.4. `license`
+### 7.5.4. `license`
 Contains license information.
 When attached to an asset, it means that the license information only applies to that asset, when applied to a provider, it means that the license information applies to all assets offered through that provider.
 
@@ -973,7 +1075,7 @@ When attached to an asset, it means that the license information only applies to
 | `license_spdx` | string | no       | MUST be an [SPDX license identifier](https://spdx.org/licenses/) or be left unset/null if not applicable. |
 | `license_uri`  | string | no       | URI which the client SHOULD offer to open in the user's web browser to learn more about the license.      |
 
-### 6.5.5. `authors`
+### 7.5.5. `authors`
 
 This datablock can be used to communicate the author(s) of a particular asset.
 
@@ -985,7 +1087,7 @@ Array of objects that MUST have this structure:
 | `uri`  | string | no       | A URI for this author, for example a profile link.              |
 | `role` | string | no       | The role that the author has had in the creation of this asset. |
 
-### 6.5.6. `dimensions.3d`
+### 7.5.6. `dimensions.3d`
 Contains general information about the physical dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh data.
 
 An object that MUST conform to this format:
@@ -996,7 +1098,7 @@ An object that MUST conform to this format:
 | `height_m` | float  | yes      | Height of the referenced asset |
 | `depth_m`  | float  | yes      | Depth of the referenced asset  |
 
-### 6.5.7. `dimensions.2d`
+### 7.5.7. `dimensions.2d`
 Contains general information about the physical dimensions of a two-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh-,texture-, or uv data.
 
 An object that MUST conform to this format:
@@ -1006,7 +1108,7 @@ An object that MUST conform to this format:
 | `width_m`  | float  | yes      | Width of the referenced asset  |
 | `height_m` | float  | yes      | Height of the referenced asset |
 
-### 6.5.8. `preview_image_supplemental`
+### 7.5.8. `preview_image_supplemental`
 Contains a list of preview images with `uri`s and `alt`-Strings associated to the asset.
 
 An array where every field must conform to the following structure:
@@ -1016,7 +1118,7 @@ An array where every field must conform to the following structure:
 | `alt` | string | no       | An "alt" String for the image.                                                                                |
 | `uri` | string | yes      | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
-### 6.5.9. `preview_image_thumbnail`
+### 7.5.9. `preview_image_thumbnail`
 Contains information about a thumbnail for an asset. The thumbnail can be provided in multiple resolutions.
 
 An object that MUST conform to this format:
@@ -1026,7 +1128,7 @@ An object that MUST conform to this format:
 | `alt`  | string | no       | An "alt" String for the image. |
 | `uris` | object | yes      | See structure described below. |
 
-#### 6.5.9.1. `uris` Structure
+#### 7.5.9.1. `uris` Structure
 
 The `uris` field MUST be an object whose keys are strings containing an integer and whose values are strings.
 The object MUST have at least one member.
@@ -1036,12 +1138,12 @@ If the image is not a square, its key SHOULD be set based on the pixel count of 
 The image's media type SHOULD be one of `image/png` or `image/jpeg`.
 If the provider does not have insight into the dimensions of the thumbnail that it is referring the client to, it SHOULD use use the key `0` for the thumbnail url.
 
-## 6.6. File handling and relationship datablocks
+## 7.6. File handling and relationship datablocks
 
 These datablocks describe how files relate to each other.
 In many cases the relationships can be represented purely by placing component files adjacently in one directory and making only some of them "active", but in some cases it is necessary to declare relationships explicitly in AssetFetch.
 
-### 6.6.1. `loose_environment`
+### 7.6.1. `loose_environment`
 The presence of this datablock on a component indicates that it is an environment map.
 This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR), not if the environment is already wrapped in another format with native support.
 An object that MUST conform to this format:
@@ -1050,7 +1152,7 @@ An object that MUST conform to this format:
 | ------------ | ------ | -------- | --------------------------------------- |
 | `projection` | string | yes      | One of `equirectangular`, `mirror_ball` |
 
-### 6.6.2. `loose_material.define`
+### 7.6.2. `loose_material.define`
 
 This datablock is applied to a component that is part of a loose material, most likely a material map.
 It indicates which role the component should play in this material.
@@ -1061,7 +1163,7 @@ It indicates which role the component should play in this material.
 | `map`           | string | yes      | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
 | `colorspace`    | string | no       | One of `srgb`, `linear`                                                                                                                   |
 
-### 6.6.3. `loose_material.apply`
+### 7.6.3. `loose_material.apply`
 
 When applied to a component, it indicates that this component uses one or multiple materials defined using `loose_material.define` datablocks.
 
@@ -1072,7 +1174,7 @@ The datablock is an **array of objects** with this structure:
 | `material_name`        | string | yes      | Name of the material used in the definition datablocks                                                                                |
 | `apply_selectively_to` | string | no       | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
 
-### 6.6.4. `mtlx_apply`
+### 7.6.4. `mtlx_apply`
 When applied to a component, it indicates that this component makes use of a material defined in mtlx document represented by another component.
 
 | Field                  | Format | Required | Description                                                                                                                           |
@@ -1081,11 +1183,11 @@ When applied to a component, it indicates that this component makes use of a mat
 | `mtlx_material`        | string | no       | Optional reference for which material to use from the mtlx file, if it contains multiple.                                             |
 | `apply_selectively_to` | string | no       | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
 
-## 6.7. File-format specific datablocks
+## 7.7. File-format specific datablocks
 
 These datablocks relate to one specific file format.
 
-### 6.7.1. `format.blend`
+### 7.7.1. `format.blend`
 Information about files with the extension `.blend`.
 This information is intended to help the client understand the file.
 
@@ -1095,21 +1197,21 @@ This information is intended to help the client understand the file.
 | `is_asset` | boolean           | no       | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
 | `targets`  | array of `target` | no       | Array containing the blender structures inside the file that are relevant to the asset.                           |
 
-#### 6.7.1.1. `target` Structure
+#### 7.7.1.1. `target` Structure
 
 | Field   | Format            | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | ------- | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `kind`  | `string`          | yes      | One of `actions`, `armatures`, `brushes`, `cache_files`, `cameras`, `collections`, `curves`, `fonts`, `grease_pencils`, `hair_curves`, `images`, `lattices`, `lightprobes`, `lights`, `linestyles`, `masks`, `materials`, `meshes`, `metaballs`, `movieclips`, `node_groups`, `objects`, `paint_curves`, `palettes`, `particles`, `pointclouds`, `scenes`, `screens`, `simulations`, `sounds`, `speakers`, `texts`, `textures`, `volumes`, `workspaces`, `worlds` |
 | `names` | Array of `string` | yes      | List of the names of the resources to import.                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
-### 6.7.2. `format.usd`
+### 7.7.2. `format.usd`
 Information about files with the extension `.usd`.
 
 | Field      | Format  | Required | Description                                                                |
 | ---------- | ------- | -------- | -------------------------------------------------------------------------- |
 | `is_crate` | boolean | no       | Indicates whether this file is a "crate" (like .usdc) or not (like .usda). |
 
-### 6.7.3. `format.obj`
+### 7.7.3. `format.obj`
 Information about files with the extension `.obj`.
 
 | Field     | Format | Required | Description                                                        |
@@ -1117,13 +1219,13 @@ Information about files with the extension `.obj`.
 | `up_axis` | string | yes      | Indicates which axis should be treated as up. MUST be `+y` or `+z` |
 
 
-## 6.8. Unlocking-related datablocks
+## 7.8. Unlocking-related datablocks
 
 These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch.
 
 *Note that the `fetch.download_post_unlock` datablock is also related to the unlocking system but is [grouped with the other `fetch.*` datablocks](#83-file-related-datablocks).* 
 
-### 6.8.1. `unlock_balance`
+### 7.8.1. `unlock_balance`
 Information about the user's current account balance.
 
 | Field                | Format | Required | Description                                                                                                 |
@@ -1132,13 +1234,13 @@ Information about the user's current account balance.
 | `balance_unit`       | string | yes      | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
 | `balance_refill_uri` | string | yes      | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form.    |
 
-### 6.8.2. `unlock_queries`
+### 7.8.2. `unlock_queries`
 
 This datablock contains the query or queries required to unlock all or some of the components in this implementation list.
 
 This datablock is **an array** consisting of `unlock_query` objects.
 
-#### 6.8.2.1. `unlock_query` structure
+#### 7.8.2.1. `unlock_query` structure
 
 | Field                | Format            | Required                 | Description                                                                                                                                                                                    |
 | -------------------- | ----------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1154,25 +1256,25 @@ This datablock is **an array** consisting of `unlock_query` objects.
 
 
 
-# 7. Authentication architectures
+# 8. Authentication architectures
 
-## 7.1. Static tokens
+## 8.1. Static tokens
 
-## 7.2. Session tokens
-
-
+## 8.2. Session tokens
 
 
 
 
 
 
-# 8. Asset unlocking architectures
+
+
+# 9. Asset unlocking architectures
 
 Providers wanting to make use of asset unlocking usually have an established model for how assets can be unlocked/purchased.
 This section outlines examples for how implementation components can be linked with unlocking queries to illustrate possible architectures that can be modeled within AssetFetch.
 
-## 8.1. Asset-level unlocking
+## 9.1. Asset-level unlocking
 A common architecture in asset stores is to sell *assets* and give users the freedom to download *any implementation* of the purchased asset that is available, regardless of resolution, poly-count or file format.
 One purchase unlocks everything.
 
@@ -1205,7 +1307,7 @@ graph RL;
 	CompB2 --- Query1
 ```
 
-## 8.2. Tiered unlocking 
+## 9.2. Tiered unlocking 
 
 Another approach many providers like to take is to sell multiple quality levels (in terms of texture resolution or level-of-detail) of one asset separately, but still allow for free file format selection after purchase.
 
@@ -1256,7 +1358,7 @@ graph RL;
 	CompB2l --- Query2
 ```
 
-## 8.3. Component-level unlocking
+## 9.3. Component-level unlocking
 
 Providers that have opted for an even more granular purchasing structure can create individual queries for every component.
 An example would be a texturing website that sells every PBR map of a material individually:
@@ -1309,7 +1411,7 @@ graph RL;
 
 ```
 
-## 8.4. Unlocking query inclusion
+## 9.4. Unlocking query inclusion
 
 In some cases it is desirable to also convey the relationship between several unlocking queries in the AssetFetch data.
 For example, if one unlocking query which grants access to high quality/resolution implementations of an asset, then it is common practice to also grant access to the lower quality/resolution implementations which would have been another purchase otherwise.
@@ -1324,9 +1426,9 @@ This kind of "inclusion" between unlocking queries is handled via a `child_queri
 
 
 
-# 9. Asset implementation architectures
+# 10. Asset implementation architectures
 
-## 9.1. Overview
+## 10.1. Overview
 
 The definitions and data structures relating to asset implementations have already been described are described in TODO add reference.
 
@@ -1345,7 +1447,7 @@ This section describes high-level rules for defining asset implementations with 
 It outlines how assets can be described through multiple implementations in order to achieve the highest possible level of compatibility with the widest array of clients and host applications possible.
 An overview of how clients should parse implementations is given in TODO add reference.
 
-## 9.2. Component types
+## 10.2. Component types
 
 Every component in an implementation represents either a *singular file* or an *archive*.
 This difference is indicated by the `handle.file` and `handle.archive` datablock.
@@ -1358,7 +1460,7 @@ Archives are only used for transmitting files and are unpacked by the client aft
 In the event that an archive file is meant to be read by the client (and its host application) directly,  then it is necessary to mark the component as a normal file, rather than an archive.
 >This can occur if an application represents its projects/scenes as archives which it reads in one go when opening them.
 
-## 9.3. Passive components
+## 10.3. Passive components
 
 The `is_passive` flag in the `handle.file` datablock is used to indicate that a file is only of supplementary nature, meaning that it is referenced by another component and should not be processed individually.
 
@@ -1366,7 +1468,7 @@ The `is_passive` flag in the `handle.file` datablock is used to indicate that a 
 >Since the texture map will get loaded automatically by a host application as the "main" model file is loaded, any explicit action on the texture map component by the AssetFetch client would likely be counterproductive.
 
 
-## 9.4. Local path collisions
+## 10.4. Local path collisions
 
 Both `handle.*` datablocks allow setting a local path that indicates where the file(s) associated with this component should be placed.
 These definitions can collide in some circumstances, which leads to the following situations:
@@ -1389,21 +1491,21 @@ If an implementation assigns the same or an overlapping `local_directory_path` t
 
 Clients MUST reject this implementation, providers MUST NOT use configurations that include this situation.
 
-## 9.5. Materials
+## 10.5. Materials
 
 Materials can be handled in several different ways, which are outlined in this section.
 
-### 9.5.1. Using native formats and passive components
+### 10.5.1. Using native formats and passive components
 Many file formats for 3D content - both vendor-specific as well as open - offer native support for referencing external texture files.
 Providers SHOULD use these "native" material formats whenever possible.
 When materials are used alongside a 3D model file with proper support, the material map components SHOULD be marked with the behavior `is_passive_true`,
 since they will be referenced by the host application's native importer automatically.
 
-#### 9.5.1.1. MTLX
+#### 10.5.1.1. MTLX
 The `mtlx_apply` datablock allows references from a component representing a mesh to a component representing an MaterialX (MTLX) file.
 This allows the use of `.mtlx` files with mesh file formats that do not have the native ability to reference MTLX files.
 
-### 9.5.2. Using loose material declarations
+### 10.5.2. Using loose material declarations
 The workflow outlined in the previous sections is not always easily achievable since not all file 3D file formats offer up-to-date (or any) support for defining materials.
 Provider may also have their own practical reasons for not offering their material definitions in a widely recognized machine-readable format.
 
@@ -1414,7 +1516,7 @@ They make it possible to define basic PBR materials through datablocks on the in
 
 Providers SHOULD make use of this notation if, and only if, other more native representations of the material are unavailable of severely insufficient.
 
-## 9.6. Environments
+## 10.6. Environments
 HDRI environments or skyboxes face a similar situation as materials:
 They can be represented using native formats, but a common practice is to provide them as a singular image file whose projection must be manually inferred by the artist.
 The `loose_environment` datablock works similar to the `loose_material.*` datablocks and allows the provider to communicate that a component should be treated as an environment and what projection should be used.
@@ -1434,9 +1536,9 @@ The `loose_environment` datablock works similar to the `loose_material.*` databl
 
 
 
-# 10. Parsing and working with asset implementations
+# 11. Parsing and working with asset implementations
 
-## 10.1. Overview
+## 11.1. Overview
 
 During typical AssetFetch operation, there are three tasks for which the data of an individual asset implementation needs to be parsed in detail:
 - During implementation negotiation, when the client guesses which of the implementations offered by the provider it will be able to process properly.
@@ -1450,7 +1552,7 @@ However, this section will outline a general structure for how both the AssetFet
 Every client SHOULD follow these interpretations as much as possible within the constraints of its host application and general computing environment in order to make AssetFetch's definitions as portable between applications as reasonably possible.
 
 
-## 10.2. Implementation analysis
+## 11.2. Implementation analysis
 
 Implementation analysis happens after a provider has sent the client a set of implementation metadata via the [implementation list endpoint](#54-implementation-list) so that the client can decide, which of the implementations it thinks it is able to parse.
 
@@ -1461,11 +1563,11 @@ In order to request an implementation that it will actually be able to handle du
 > For example, the client can use this datablock to detect that this file uses a format that it generally supports, but not with the specific format version used for *this* file.
 - `loose_material.*` and `loose_environment`: If the client does not support the import of materials or environments defined through these datablocks, then it SHOULD reject implementations that make use of these features.
 
-## 10.3. Component fetching
+## 11.3. Component fetching
 
 This section describes how the process by which a client fetches an asset implementation from a provider generally works.
 
-### 10.3.1. Choosing/creating an implementation directory
+### 11.3.1. Choosing/creating an implementation directory
 
 For handling the implementation of an asset offered by the provider the client SHOULD choose a dedicated directory into which all the files described by all the components can be arranged.
 The directory SHOULD be empty at the start of the component handling process.
@@ -1477,20 +1579,20 @@ The location and exact structure of this directory is not strictly specified and
 The base directory MAY be fixed for all uses of the client, but it MAY also be dependent on the context in which the client currently runs, for example a subfolder relative to the currently opened project in a 3D suite.
 
 
-### 10.3.2. Performing unlock queries
+### 11.3.2. Performing unlock queries
 
 If the implementation contains components with a `fetch.download_post_unlock` datablock,
 then the client MUST perform the unlock query referenced in that datablock before it can proceed.
 Otherwise the resources may not be fully unlocked and the provider will likely refuse to hand over the files.
 
-### 10.3.3. Fetching and arranging
+### 11.3.3. Fetching and arranging
 
-#### 10.3.3.1. Procedure for `fetch.download`
+#### 11.3.3.1. Procedure for `fetch.download`
 
 This datablock indicates that the file is available for immediate download.
 If a component which the client intends to use carries this datablock then the client can immediately proceed to download the file using the provided HTTP-query and handle it according to its `handle.*` datablock (as discussed in the following sections). 
 
-#### 10.3.3.2. Procedure for `fetch.download_post_unlock`
+#### 11.3.3.2. Procedure for `fetch.download_post_unlock`
 
 This datablock indicates that the download will only be available after it has been unlocked.
 In this case, the client:
@@ -1500,35 +1602,35 @@ In this case, the client:
 
 The client MUST proceed as described for `fetch.download` in the previous section.
 
-#### 10.3.3.3. Procedure for `fetch.from_archive`
+#### 11.3.3.3. Procedure for `fetch.from_archive`
 
 This datablock indicates that the component file in question is contained in an archive described by another component, referenced via the `archive_component_id`.
 
 TODO explain more
 
-### 10.3.4. Arranging
+### 11.3.4. Arranging
 
-#### 10.3.4.1. Arranging files (`handle.file`)
+#### 11.3.4.1. Arranging files (`handle.file`)
 The client SHOULD arrange the files it fetched as described by the provider in the `local_file_path` field in the `handle.file` datablock of the component metadata to ensure that relative links between files remain intact.
 
-#### 10.3.4.2. Arranging archive contents (`handle.archive`)
+#### 11.3.4.2. Arranging archive contents (`handle.archive`)
 If an archive component carries the value `unpack_fully=true`, then the client MUST unpack all contents of this archive into the `local_directory_path`.
 Otherwise, only components that reference the archive using a `fetch.from_archive` datablock must be unpacked based on that components `local_file_path.
 
-## 10.4. Implementation handling / importing
+## 11.4. Implementation handling / importing
 
 After all files have been downloaded and arranged into their storage locations, the client can perform the actual import.
 
 With all archives unpacked and all component files placed into the implementation directory, the client MUST now only consider consider components with a `handle.file` datablock, as archives are no longer relevant after they have been unpacked.
 
-### 10.4.1. Interpreting the `is_passive` value
+### 11.4.1. Interpreting the `is_passive` value
 
 A key value in the `handle.file` datablock is the boolean field `is_passive`.
 It declares whether or not the client should attempt to perform any direct action on the component file.
 
 If a component file is marked as `is_passive=true`, then the client SHOULD ignore this file until it is referenced either by the host application's native importing code or through AssetFetch references.
 
-### 10.4.2. Generic component handling
+### 11.4.2. Generic component handling
 
 When handling a component file which is not passive (`is_passive=false`), the client SHOULD consider the information in the following datablocks to formulate an appropriate action for the component file:
 
@@ -1543,101 +1645,6 @@ When handling a component file which is not passive (`is_passive=false`), the cl
 
 
 
-
-# 11. HTTP Communication
-
-## 11.1. HTTP vs. HTTPS
-This section describes general instructions for all HTTP communication described in this specification. The term "HTTP query/communication/..." also always includes the HTTP*S* counterpart.
-AssetFetch generally allows all queries to happen via both plain HTTP and HTTPS, but clients MAY choose to limit themselves to either one and/or display additional messages/warnings to users when communicating via plain HTTP, as is common practice in modern web browsers.
-
-## 11.2. Request payloads
-
-The payload of all HTTP requests from a client to a provider MUST be encoded as [`application/x-www-form-urlencoded`](https://url.spec.whatwg.org/#application/x-www-form-urlencoded), the same format that is used by standard HTML forms.
-
-Examples for a valid query payload are shown below. 
-```
-q=wood,old&min_resolution=512
-lod=0
-query=&category=marble
-```
-
-This encoding for request data is already extremely widespread and can therefore usually be handled using standard libraries, both on the provider- and on the client-side.
-
-## 11.3. Response payloads
-
-The payload of all HTTP responses from a provider MUST be valid [JSON](https://www.json.org/) and SHOULD use the `Content-Type` header `application/json`.
-The exact structure of the data for individual endpoints and other API resources is specified in the [Endpoint section](#5-endpoints).
-
-## 11.4. User-Agent
-
-The client SHOULD send an appropriate user-agent header as defined in [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#field.user-agent).
-
-If the client is embedded in a host application, for example as an addon inside a 3D suite, it SHOULD set its first `product` and `product-version` identifier based on the host application and then describe the product and version of the client plugin itself afterwards.
-
-```
-# Examples for plugins/addons:
-cinema4d/2024.2 MyAssetFetchPlugin/1.2.3
-3dsmax/2023u1 AssetFetchFor3dsMax/0.5.7
-blender/4.0.3 BlenderAssetFetch/v17
-
-# Example for a standalone client:
-standaloneAssetFetchClient/1.4.2.7
-```
-
-## 11.5. Variable and Fixed Queries
-
-In AssetFetch, there are several instances where the provider needs to describe a possible HTTP request that a client can make to perform a certain action or obtain data, such as browsing for assets, unlocking components or downloading files.
-In this context, the specification differentiates between "variable" and "fixed" queries.
-
-### 11.5.1. Variable Query
-
-A **variable query** is an HTTP request defined by its URI, method and a payload _that has been (partly) configured by the user_ which is sent by the client to the provider in order to receive data in response.
-For this purpose, the provider sends the client a list of parameter values that the client MUST use to construct the actual HTTP query to the provider.
-For the client, handling a variable query usually involves drawing a GUI and asking the user to provide the values to be sent to the provider.
-
-A simple example for a variable query is a query for listing assets that allows the user to specify a list of keywords before the request is sent to the provider.
-
-#### 11.5.1.1. Variable Query Parameters
-
-The full field list of a variable query object can be found in the [`variable_query` datablock template](#721-variable_query).
-
-A variable query is composed of its URI, HTTP method and optionally one or multiple parameter definitions that are used to determine the payload of the HTTP request.
-
-Every parameter has a `title` property which the client SHOULD use to communicate the functionality of the given parameter to the user.
-The `id` property on the parameter dictates the actual key value that the client MUST use when composing the HTTP request.
-
-The nature of the final value of the parameter is dictated by its `type`.
-If the provider offers one or multiple adjustable parameters, it MUST choose one of the following parameter types for each parameter:
-
-- `text`: A string of text with no line breaks (`\r` and/or `\n`). When utilizing a GUI the client SHOULD use a one-line text input field to represent this parameter. The client MUST allow the use of an empty string.
-- `boolean`: A binary choice with `true` being represented by the value `1` and `false` with the value `0`. The client MUST NOT send any other response value for this parameter. When utilizing a GUI the client SHOULD use a tick-box or similar kind of menu item to represent this parameter.
-- `select`: A list of possible choices, each represented by a `value` which is the actual parameter value that the client MUST include in its HTTP request if the user chooses the choice in question and a `title` which the client SHOULD use to represent the choice to the user. When utilizing a GUI the client SHOULD use a drop-down or similar kind of menu to represent this parameter.
-- `fixed`: A fixed value that the client MUST include in its request verbatim. The client MAY reveal this value to the user, but MUST NOT allow any changes to this value.
-
-### 11.5.2. Fixed Query
-
-The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#722-fixed_query).
-
-A **fixed query** is an HTTP(S) request defined by its URI, method and a payload _that is not configurable by the user_  which is sent by the client to the provider in order to receive data in response.
-
-In this case the provider only transmits the description of the query to the client whose only decision is whether or not to actually send the query with the given parameters to the provider.
-
-A typical example for a fixed query is a download option for a file where the client only has the choice to invoke or not invoke the download.
-
-## 11.6. HTTP Codes and Error Handling
-
-Every response sent from an AssetFetch provider MUST use HTTP Status codes appropriately.
-
-In concrete terms, this means:
-
-- If a provider managed to successfully process the query then the response code SHOULD be `200 - OK`. Even if the query sent by the client leads to zero results in the context of a search with potentially zero to infinitely many results, the response code SHOULD still be `200 - OK`.
-- If a provider receives a query that references a specific resource which does not exist, such as a query for implementations of an asset that the provider does not recognize, it SHOULD respond with code `404 - Not Found`.
-- If the provider can not parse the query data sent by the client properly, it SHOULD respond with code `400 - Bad Request`.
-- If a provider receives a query an any other endpoint than the initialization endpoint without one of the headers it defined as required during the initialization it SHOULD send status code `401 - Unauthorized`. This indicates that the client is unaware of required headers and SHOULD cause the client to contact the initialization endpoint for that provider again in order to receive updated information about required headers.
-- If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to perform a download that has not been unlocked, the provider MAY respond with code `402 - Payment Required` instead.
-
-If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
-This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#511-the-meta-template), if they have content.
 
 
 
