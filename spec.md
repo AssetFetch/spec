@@ -105,7 +105,8 @@ Tonemapping the EXR image into a JPG image yields a new implementation of the sa
 - When working with archives, the archive itself as well as its contents are considered components.
 A ZIP archive with the chair model as an FBX file and its textures as PNG files is represented as one component for the ZIP archive and then one component for each file in it (with some exceptions when using specific archive unpacking configurations).
 
-### 2.7.1. Component "activeness"
+<!--
+## 2.7 Component "activeness"
 
 TODO: This will likely go entirely...
 
@@ -118,6 +119,8 @@ The references made inside OBJ-file will prompt the application to handle the MT
 In both of the given examples, only one file would need to be "actively" handled by the user (or by a client trying to automate the user's work) with the remaining work getting delegated to the host application.
 
 When a client instructs its host to load a component and this component causes multiple other components to be loaded (for example a mesh file referencing two textures) then the first component would be called "active" (because from the client's perspective it needed active handling) whereas the components referenced by it are called "passive" (because the AssetFetch client did not need to handle them directly).
+
+-->
 
 ## 2.8. Datablock
 > A piece of metadata of a certain type and structure that can be attached to most other datastructures defined by AssetFetch.
