@@ -141,7 +141,7 @@ To accommodate this, providers are able to define additional procedures to "unlo
 
 In this context, the act of "unlocking" refers to an action that happens in the provider's backend which causes previously not downloadable resources to become downloadable, usually with some side-effect on the provider's back-end, such as a reduction in account balance (i.e. a "purchase") or decrementing a counter for remaining free daily downloads.
 
-**AssetFetch does not handle the actual payment itself, users still need to perform any required account- and payment setup with the provider through external means, usually the provider's website.**
+**AssetFetch does not concern itself with the actual transaction itself, users still need to perform any required account- and payment setup with the provider through external means, usually the provider's website.**
 
 
 
