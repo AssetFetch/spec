@@ -288,11 +288,11 @@ This component-level linking gives providers flexibility in how they structure t
 
 TODO add reference to later chapter
 
-### 3.6.1. Downloading
+## 3.7. Downloading
 After choosing a suitable implementation and unlocking all of its datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
 At this point the client can - either by itself or through calls to its host application - handle the files that it obtained.
 
-### 3.6.2. Handling
+## 3.8. Handling
 
 The AssetFetch data does not encode a fixed, imperative series of steps for handling an asset.
 Instead, it describes properties of and relationships between components which the client uses to generate an appropriate series of steps for handling the file inside its environment.
@@ -301,10 +301,10 @@ The processing is aided by the metadata in the datablocks of every component sen
 
 TODO add reference to later section
 
-## 3.7. Sequence Diagrams
+## 3.9. Sequence Diagrams
 The following diagrams illustrate the general flow of information between the user, the client software and the provider as well as the most important actions taken by each party.
 
-### 3.7.1. Simple Version
+### 3.9.1. Simple Version
 This diagram shows a simple implementation without any ability for dynamic filtering or dynamically generated implementations and without requiring any authentication or unlocking.
 All assets are freely available for everyone who can make an HTTP connection to the provider.
 
@@ -345,7 +345,7 @@ sequenceDiagram
 	note left of User: User can now utilize<br>the asset in their project.
 ```
 
-### 3.7.2. Complete Version
+### 3.9.2. Complete Version
 
 This diagram shows a more complete interaction, including authentication and asset unlocking.
 It also illustrates how the provider can utilize ephemeral download links hosted on a different platform, like a CDN ("Content Delivery Network") service.
@@ -531,8 +531,6 @@ This message SHOULD contain the contents of the `message` and `id` field in the 
 # 5. Endpoints
 
 This section outlines general information about the HTTP-endpoints required for AssetFetch along with the specific structural requirements for the JSON-response on every endpoint.
-
-TODO add reference to HTTP section.
 
 ## 5.1. About Endpoints
 
@@ -1218,15 +1216,11 @@ It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
 ## 7.8. Processing-related datablocks
 
-### 7.8.1. `process.default`
-This datablock indicates how this file should be handled during the import process.
+### 7.8.1. `role.native`
+This datablock indicates that this file should be handled by the host application's native import functionality.
 The full description of component handling can be found in the [component handling section](#933-handling-component-files).
 
-This datablock contains information about any kind of file.
-
-| Field        | Format  | Requirement | Description                                                                              |
-| ------------ | ------- | ----------- | ---------------------------------------------------------------------------------------- |
-| `is_passive` | boolean | MUST        | Indicates whether this file should be treated as a passive component. TODO add reference |
+This datablock contains no fields and MUST be represented by the empty object `{}`.
 
 ### 7.8.2. `process.loose_environment`
 The presence of this datablock on a component indicates that it is an environment map.
