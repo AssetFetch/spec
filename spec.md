@@ -797,13 +797,18 @@ The following datablocks are to be included in the `data` field:
 
 # 6. Datablocks
 
+TODO some info on datablocks
+
 ## 6.1. Datablock names
 
-The name of a datablock MUST be a string composed of small alphanumerical characters, underscores and dots.
-Datablock names MUST contain either 0 or 1 instance of the dot (`.`) character which indicates that a datablock has multiple variations.
-One resource MUST NOT have two datablocks that share the same string *before* the dot separator.
+Every datablock outlined in this specification has a name that identifies its structure.
+The name is a string composed of lowercase alphanumerical characters, underscores and dots.
 
-The resulting regular expression from these rules is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
+Datablock names contain either 0 or 1 instances of the dot (`.`) character which is used to indicate that a datablock has multiple variations.
+In this case the part before the dot separator is considered the "base name" of the datablock and the part after it the "variation name".
+A resource MUST NOT carry two datablocks that share the same base name.
+
+The resulting regular expression for valid datablock names is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
 
 ## 6.2. Datablock value templates
 This section describes additional data types that can be used within other datablocks.
