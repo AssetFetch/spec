@@ -1128,10 +1128,10 @@ Information about files with the extension `.usd`.
 ### 7.5.4. `format.obj`
 Information about files with the extension `.obj`.
 
-| Field     | Format | Required | Description                                                        |
-| --------- | ------ | -------- | ------------------------------------------------------------------ |
-| `up_axis` | string | no      | Indicates which axis should be treated as up. MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`. |
-| `front_axis` | string | no | Indicates which axis should be treated as the front. MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`. |
+| Field        | Format | Required | Description                                                                                        |
+| ------------ | ------ | -------- | -------------------------------------------------------------------------------------------------- |
+| `up_axis`    | string | no       | Indicates which axis should be treated as up. MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`.        |
+| `front_axis` | string | no       | Indicates which axis should be treated as the front. MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`. |
 
 
 
