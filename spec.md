@@ -610,7 +610,7 @@ The example below illustrates a datablock collection called `data` whose structu
 }
 ```
 
-## 5.3. Endpoint: Initialization 
+## 5.3. Endpoint: Initialization (`initialization`)
 
 Its URI is initially entered by the user into a client and this endpoint is the first point of contact between a client and a provider.
 It is used to communicate key details about the provider as well as how the interaction between client and provider should proceed.
@@ -632,7 +632,7 @@ The following datablocks are to be included in the `data` field:
 | MAY                             | `branding`, `authors`, `license`, `web_references` |
 | MUST, if authentication is used | `provider_configuration`                           |
 
-## 5.4. Asset List
+## 5.4. Endpoint: Asset List (`asset_list`)
 
 The URI and available HTTP parameters for this endpoint are communicated by the server to the client using the `asset_list_query` datablock on the initialization endpoint.
 
@@ -675,7 +675,7 @@ The following datablocks are to be included in the `data` field:
 | MAY         | `preview_image_supplemental`, `license`, `authors`, `dimensions.*`,`web_references` |
 
 
-## 5.5. Implementation List
+## 5.5. Endpoint: Implementation List (`implementation_list`)
 
 This endpoint returns one or several implementations for one specific asset.
 The URI and available parameters for this endpoint are communicated by the server to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
@@ -737,7 +737,7 @@ The following datablocks are to be included in the `data` field:
 
 
 
-## 5.6. Unlocking Endpoint
+## 5.6. Endpoint: Unlocking (`unlock`)
 
 | Field  | Format                 | Requirement | Description               |
 | ------ | ---------------------- | ----------- | ------------------------- |
@@ -751,7 +751,7 @@ The URI and parameters for this endpoint are communicated through the `unlock_qu
 This endpoint currently does not use any datablocks.
 Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
 
-## 5.7. Unlocked Data Endpoint
+## 5.7. Endpoint: Unlocked Data (`unlocked_data`)
 
 | Field  | Format                 | Requirement | Description                     |
 | ------ | ---------------------- | ----------- | ------------------------------- |
@@ -768,7 +768,7 @@ The following datablocks are to be included in the `data` field:
 | MUST              | `fetch.download` |
 
 
-## 5.8. Connection Status Endpoint
+## 5.8. Endpoint: Connection Status (`connection_status`)
 
 | Field  | Format                 | Requirement | Description                         |
 | ------ | ---------------------- | ----------- | ----------------------------------- |
@@ -806,7 +806,7 @@ Datablock names contain either 0 or 1 instances of the dot (`.`) character which
 In this case the part before the dot separator is considered the "base name" of the datablock and the part after it the "variation name".
 A resource MUST NOT carry two datablocks that share the same base name.
 
-The resulting regular expression for valid datablock names is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
+The resulting regular expression for all datablock names is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
 
 ## 6.2. Datablock value templates
 This section describes additional data types that can be used within other datablocks.
