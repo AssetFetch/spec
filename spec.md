@@ -1136,7 +1136,7 @@ Information about files with the extension `.usd`.
 
 -->
 
-### 7.5.4. `format.obj`
+### 7.5.3. `format.obj`
 Information about files with the extension `.obj`.
 
 | Field        | Format | Requirement | Description                                                                                          |
@@ -1284,27 +1284,29 @@ When applied to a component, it indicates that this component makes use of a mat
 
 
 
-
+<!--
 
 # 8. Authentication architectures
+
+TODO: Explain static and session-based auth.
 
 ## 8.1. Static tokens
 
 ## 8.2. Session tokens
 
+-->
 
 
 
 
 
 
-
-# 9. Asset unlocking architectures
+# 8. Asset unlocking architectures
 
 Providers wanting to make use of asset unlocking usually have an established model for how assets can be unlocked/purchased.
 This section outlines examples for how implementation components can be linked with unlocking queries to illustrate possible architectures that can be modeled within AssetFetch.
 
-## 9.1. Asset-level unlocking
+## 8.1. Asset-level unlocking
 A common architecture in asset stores is to sell *assets* and give users the freedom to download *any implementation* of the purchased asset that is available, regardless of resolution, poly-count or file format.
 One purchase unlocks everything.
 
@@ -1337,7 +1339,7 @@ graph RL;
 	CompB2 --- Query1
 ```
 
-## 9.2. Tiered unlocking 
+## 8.2. Tiered unlocking 
 
 Another approach many providers like to take is to sell multiple quality levels (in terms of texture resolution or level-of-detail) of one asset separately, but still allow for free file format selection after purchase.
 
@@ -1388,7 +1390,7 @@ graph RL;
 	CompB2l --- Query2
 ```
 
-## 9.3. Component-level unlocking
+## 8.3. Component-level unlocking
 
 Providers that have opted for an even more granular purchasing structure can create individual queries for every component.
 An example would be a texturing website that sells every PBR map of a material individually:
@@ -1441,7 +1443,7 @@ graph RL;
 
 ```
 
-## 9.4. Unlocking query inclusion
+## 8.4. Unlocking query inclusion
 
 In some cases it is desirable to also convey the relationship between several unlocking queries in the AssetFetch data.
 For example, if one unlocking query which grants access to high quality/resolution implementations of an asset, then it is common practice to also grant access to the lower quality/resolution implementations which would have been another purchase otherwise.
@@ -1456,9 +1458,9 @@ This kind of "inclusion" between unlocking queries is handled via a `child_queri
 
 
 
-# 10. Asset implementation architectures
+# 9. Asset implementation architectures
 
-## 10.1. Overview
+## 9.1. Overview
 
 The definitions and data structures relating to asset implementations have already been described are described in TODO add reference.
 
@@ -1477,7 +1479,7 @@ This section describes high-level rules for defining asset implementations with 
 It outlines how assets can be described through multiple implementations in order to achieve the highest possible level of compatibility with the widest array of clients and host applications possible.
 An overview of how clients should parse implementations is given in TODO add reference.
 
-## 10.2. Component types
+## 9.2. Component types
 
 Every component in an implementation represents either a *singular file* or an *archive*.
 This difference is indicated by the `handle.file` and `handle.archive` datablock.
@@ -1490,7 +1492,7 @@ Archives are only used for transmitting files and are unpacked by the client aft
 In the event that an archive file is meant to be read by the client (and its host application) directly,  then it is necessary to mark the component as a normal file, rather than an archive.
 >This can occur if an application represents its projects/scenes as archives which it reads in one go when opening them.
 
-## 10.3. Passive components
+## 9.3. Passive components
 
 The `is_passive` flag in the `handle.file` datablock is used to indicate that a file is only of supplementary nature, meaning that it is referenced by another component and should not be processed individually.
 
@@ -1498,7 +1500,7 @@ The `is_passive` flag in the `handle.file` datablock is used to indicate that a 
 >Since the texture map will get loaded automatically by a host application as the "main" model file is loaded, any explicit action on the texture map component by the AssetFetch client would likely be counterproductive.
 
 
-## 10.4. Local path collisions
+## 9.4. Local path collisions
 
 Both `handle.*` datablocks allow setting a local path that indicates where the file(s) associated with this component should be placed.
 These definitions can collide in some circumstances, which leads to the following situations:
@@ -1521,21 +1523,21 @@ If an implementation assigns the same or an overlapping `local_directory_path` t
 
 Clients MUST reject this implementation, providers MUST NOT use configurations that include this situation.
 
-## 10.5. Materials
+## 9.5. Materials
 
 Materials can be handled in several different ways, which are outlined in this section.
 
-### 10.5.1. Using native formats and passive components
+### 9.5.1. Using native formats and passive components
 Many file formats for 3D content - both vendor-specific as well as open - offer native support for referencing external texture files.
 Providers SHOULD use these "native" material formats whenever possible.
 When materials are used alongside a 3D model file with proper support, the material map components SHOULD be marked with the behavior `is_passive_true`,
 since they will be referenced by the host application's native importer automatically.
 
-#### 10.5.1.1. MTLX
+#### 9.5.1.1. MTLX
 The `mtlx_apply` datablock allows references from a component representing a mesh to a component representing an MaterialX (MTLX) file.
 This allows the use of `.mtlx` files with mesh file formats that do not have the native ability to reference MTLX files.
 
-### 10.5.2. Using loose material declarations
+### 9.5.2. Using loose material declarations
 The workflow outlined in the previous sections is not always easily achievable since not all file 3D file formats offer up-to-date (or any) support for defining materials.
 Provider may also have their own practical reasons for not offering their material definitions in a widely recognized machine-readable format.
 
@@ -1546,7 +1548,7 @@ They make it possible to define basic PBR materials through datablocks on the in
 
 Providers SHOULD make use of this notation if, and only if, other more native representations of the material are unavailable of severely insufficient.
 
-## 10.6. Environments
+## 9.6. Environments
 HDRI environments or skyboxes face a similar situation as materials:
 They can be represented using native formats, but a common practice is to provide them as a singular image file whose projection must be manually inferred by the artist.
 The `loose_environment` datablock works similar to the `loose_material.*` datablocks and allows the provider to communicate that a component should be treated as an environment and what projection should be used.
@@ -1566,9 +1568,9 @@ The `loose_environment` datablock works similar to the `loose_material.*` databl
 
 
 
-# 11. Parsing and processing asset implementations
+# 10. Parsing and processing asset implementations
 
-## 11.1. Overview
+## 10.1. Overview
 
 During typical AssetFetch operation, there are three tasks for which the data of an individual asset implementation needs to be parsed in detail:
 - During implementation negotiation, when the client guesses which of the implementations offered by the provider it will be able to process properly.
@@ -1582,7 +1584,7 @@ However, this section will outline a general structure for how both the AssetFet
 Every client SHOULD follow these interpretations as much as possible within the constraints of its host application and general computing environment in order to make AssetFetch's definitions as portable between applications as reasonably possible.
 
 
-## 11.2. Implementation analysis
+## 10.2. Implementation analysis
 
 Implementation analysis happens after a provider has sent the client a set of implementation metadata via the [implementation list endpoint](#54-implementation-list) so that the client can decide, which of the implementations it thinks it is able to parse.
 
@@ -1593,11 +1595,11 @@ In order to request an implementation that it will actually be able to handle du
 > For example, the client can use this datablock to detect that this file uses a format that it generally supports, but not with the specific format version used for *this* file.
 - `loose_material.*` and `loose_environment`: If the client does not support the import of materials or environments defined through these datablocks, then it SHOULD reject implementations that make use of these features.
 
-## 11.3. Component fetching
+## 10.3. Component fetching
 
 This section describes how the process by which a client fetches an asset implementation from a provider generally works.
 
-### 11.3.1. Choosing/creating an implementation directory
+### 10.3.1. Choosing/creating an implementation directory
 
 For handling the implementation of an asset offered by the provider the client SHOULD choose a dedicated directory into which all the files described by all the components can be arranged.
 The directory SHOULD be empty at the start of the component handling process.
@@ -1609,20 +1611,20 @@ The location and exact structure of this directory is not strictly specified and
 The base directory MAY be fixed for all uses of the client, but it MAY also be dependent on the context in which the client currently runs, for example a subfolder relative to the currently opened project in a 3D suite.
 
 
-### 11.3.2. Performing unlock queries
+### 10.3.2. Performing unlock queries
 
 If the implementation contains components with a `fetch.download_post_unlock` datablock,
 then the client MUST perform the unlock query referenced in that datablock before it can proceed.
 Otherwise the resources may not be fully unlocked and the provider will likely refuse to hand over the files.
 
-### 11.3.3. Fetching and arranging
+### 10.3.3. Fetching and arranging
 
-#### 11.3.3.1. Procedure for `fetch.download`
+#### 10.3.3.1. Procedure for `fetch.download`
 
 This datablock indicates that the file is available for immediate download.
 If a component which the client intends to use carries this datablock then the client can immediately proceed to download the file using the provided HTTP-query and handle it according to its `handle.*` datablock (as discussed in the following sections). 
 
-#### 11.3.3.2. Procedure for `fetch.download_post_unlock`
+#### 10.3.3.2. Procedure for `fetch.download_post_unlock`
 
 This datablock indicates that the download will only be available after it has been unlocked.
 In this case, the client:
@@ -1632,35 +1634,35 @@ In this case, the client:
 
 The client MUST proceed as described for `fetch.download` in the previous section.
 
-#### 11.3.3.3. Procedure for `fetch.from_archive`
+#### 10.3.3.3. Procedure for `fetch.from_archive`
 
 This datablock indicates that the component file in question is contained in an archive described by another component, referenced via the `archive_component_id`.
 
 TODO explain more
 
-### 11.3.4. Arranging
+### 10.3.4. Arranging
 
-#### 11.3.4.1. Arranging files (`handle.file`)
+#### 10.3.4.1. Arranging files (`handle.file`)
 The client SHOULD arrange the files it fetched as described by the provider in the `local_file_path` field in the `handle.file` datablock of the component metadata to ensure that relative links between files remain intact.
 
-#### 11.3.4.2. Arranging archive contents (`handle.archive`)
+#### 10.3.4.2. Arranging archive contents (`handle.archive`)
 If an archive component carries the value `unpack_fully=true`, then the client MUST unpack all contents of this archive into the `local_directory_path`.
 Otherwise, only components that reference the archive using a `fetch.from_archive` datablock must be unpacked based on that components `local_file_path.
 
-## 11.4. Implementation handling / importing
+## 10.4. Implementation handling / importing
 
 After all files have been downloaded and arranged into their storage locations, the client can perform the actual import.
 
 With all archives unpacked and all component files placed into the implementation directory, the client MUST now only consider consider components with a `handle.file` datablock, as archives are no longer relevant after they have been unpacked.
 
-### 11.4.1. Interpreting the `is_passive` value
+### 10.4.1. Interpreting the `is_passive` value
 
 A key value in the `handle.file` datablock is the boolean field `is_passive`.
 It declares whether or not the client should attempt to perform any direct action on the component file.
 
 If a component file is marked as `is_passive=true`, then the client SHOULD ignore this file until it is referenced either by the host application's native importing code or through AssetFetch references.
 
-### 11.4.2. Generic component handling
+### 10.4.2. Generic component handling
 
 When handling a component file which is not passive (`is_passive=false`), the client SHOULD consider the information in the following datablocks to formulate an appropriate action for the component file:
 
@@ -1686,16 +1688,16 @@ TODO Update names
 
 
 
-# 12. Security Considerations
+# 11. Security Considerations
 
 This section describes security considerations for implementing AssetFetch.
 
-## 12.1. Storing sensitive headers
+## 11.1. Storing sensitive headers
 During the initialization step providers can mark headers as sensitive.
 Clients MUST find an appropriate solution for storing these sensitive headers.
 They SHOULD consider storing secret headers through native operation system APIs for credential management.
 
-## 12.2. Avoiding Relative Paths in `local_path`
+## 11.2. Avoiding Relative Paths in `local_path`
 Datablocks of the `fetch.*` family specify a local sub-path for every component that needs to be appended to a local path chosen by the client in order to assemble the correct file structure for this asset.
 As specified in the [datablock requirements](#83-file-related-datablocks) the `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
 Clients MUST take cate to ensure that components with references like `./` or `../` in their local path are rejected.
