@@ -803,7 +803,8 @@ Every datablock outlined in this specification has a name that identifies its st
 The name is a string composed of lowercase alphanumerical characters, underscores and dots.
 
 Datablock names contain either 0 or 1 instances of the dot (`.`) character which is used to indicate that a datablock has multiple variations.
-In this case the part before the dot separator is considered the "base name" of the datablock and the part after it the "variation name".
+The part before the dot separator is considered the "base name" of the datablock and the part after it (if it exists) the "variation name".
+
 A resource MUST NOT carry two datablocks that share the same base name.
 
 The resulting regular expression for all datablock names is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
@@ -1088,51 +1089,60 @@ This datablock is **an array** consisting of `unlock_query` objects.
 ## 7.5. Format-related datablocks
 
 
-### 7.5.1. `format.default`
+### 7.5.1. `format`
 This is the default format datablock for all file formats that do not have their own dedicated `format.*` datablock in AssetFetch.
 
-| Field       | Format | Required | Description         |
-| ----------- | ------ | -------- | ------------------- |
-| `extension` | string | yes      | The file extension. |
+| Field       | Format | Requirement | Description                                       |
+| ----------- | ------ | ----------- | ------------------------------------------------- |
+| `extension` | string | MUST        | The file extension.                               |
+| `mediatype` | string | MAY         | The mediatype string for this file, if available. |
 
 #### 7.5.1.1. `extension` rules
 
 The `extension` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
 SHOULD include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
 
+#### 7.5.1.2. `mediatype` rules
+
+TODO
+
 
 ### 7.5.2. `format.blend`
 Information about files with the extension `.blend`.
 This information is intended to help the client understand the file.
 
-| Field      | Format            | Required | Description                                                                                                       |
-| ---------- | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `version`  | string            | no       | Blender Version in the format `Major.Minor.Patch` or `Major.Minor` or `Major`                                     |
-| `is_asset` | boolean           | no       | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
-| `targets`  | array of `target` | no       | Array containing the blender structures inside the file that are relevant to the asset.                           |
+| Field      | Format            | Requirement | Description                                                                                                       |
+| ---------- | ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| `version`  | string            | MAY         | Blender Version in the format `Major.Minor.Patch` or `Major.Minor` or `Major`                                     |
+| `is_asset` | boolean           | MAY         | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
+| `targets`  | array of `target` | MAY         | Array containing the blender structures inside the file that are relevant to the asset.                           |
 
 #### 7.5.2.1. `target` Structure
 
-| Field   | Format            | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------- | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `kind`  | `string`          | yes      | One of `actions`, `armatures`, `brushes`, `cache_files`, `cameras`, `collections`, `curves`, `fonts`, `grease_pencils`, `hair_curves`, `images`, `lattices`, `lightprobes`, `lights`, `linestyles`, `masks`, `materials`, `meshes`, `metaballs`, `movieclips`, `node_groups`, `objects`, `paint_curves`, `palettes`, `particles`, `pointclouds`, `scenes`, `screens`, `simulations`, `sounds`, `speakers`, `texts`, `textures`, `volumes`, `workspaces`, `worlds` |
-| `names` | Array of `string` | yes      | List of the names of the resources to import.                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Field   | Format            | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------- | ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kind`  | `string`          | MUST        | One of `actions`, `armatures`, `brushes`, `cache_files`, `cameras`, `collections`, `curves`, `fonts`, `grease_pencils`, `hair_curves`, `images`, `lattices`, `lightprobes`, `lights`, `linestyles`, `masks`, `materials`, `meshes`, `metaballs`, `movieclips`, `node_groups`, `objects`, `paint_curves`, `palettes`, `particles`, `pointclouds`, `scenes`, `screens`, `simulations`, `sounds`, `speakers`, `texts`, `textures`, `volumes`, `workspaces`, `worlds` |
+| `names` | Array of `string` | MUST        | List of the names of the resources to import.                                                                                                                                                                                                                                                                                                                                                                                                                     |
+
+<!-- 
 
 ### 7.5.3. `format.usd`
+
 Information about files with the extension `.usd`.
 
-| Field      | Format  | Required | Description                                                                |
-| ---------- | ------- | -------- | -------------------------------------------------------------------------- |
-| `is_crate` | boolean | no       | Indicates whether this file is a "crate" (like .usdc) or not (like .usda). |
+| Field      | Format  | Requirement | Description                                                                |
+| ---------- | ------- | ----------- | -------------------------------------------------------------------------- |
+| `is_crate` | boolean | MUST        | Indicates whether this file is a "crate" (like .usdc) or not (like .usda). |
+
+-->
 
 ### 7.5.4. `format.obj`
 Information about files with the extension `.obj`.
 
-| Field        | Format | Required | Description                                                                                        |
-| ------------ | ------ | -------- | -------------------------------------------------------------------------------------------------- |
-| `up_axis`    | string | no       | Indicates which axis should be treated as up. MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`.        |
-| `front_axis` | string | no       | Indicates which axis should be treated as the front. MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`. |
-
+| Field        | Format | Requirement | Description                                                                                          |
+| ------------ | ------ | ----------- | ---------------------------------------------------------------------------------------------------- |
+| `up_axis`    | string | SHOULD      | Indicates which axis should be treated as "up". MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`.        |
+| `front_axis` | string | MAY         | Indicates which axis should be treated as the "front". MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`. |
 
 
 ## 7.6. Fetching-related datablocks
@@ -1144,31 +1154,32 @@ These datablocks describe how a client can gain access to a component file.
 This datablock indicates that this is a file which can be downloaded directly using the provided query.
 
 The full description of component handling can be found in the [component handling section](#933-handling-component-files).
+TODO update reference
 
-| Field | Format        | Required | Description                                 |
-| ----- | ------------- | -------- | ------------------------------------------- |
-| query | `fixed_query` | yes      | The query to use.                           |
-| sha1  | string        | no       | A sha1-hash to allow for data verification. |
+| Field | Format        | Requirement | Description                                 |
+| ----- | ------------- | ----------- | ------------------------------------------- |
+| query | `fixed_query` | MUST        | The query to use.                           |
+| sha1  | string        | MAY         | A sha1-hash to allow for data verification. |
 
 ### 7.6.2. `fetch.download_post_unlock`
 
 This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
 It indicates that when the referenced unlock query has been completed, the *real* `fetch.download` datablock can be received by performing the fixed query in `unlocked_data_query`
 
-| Field                 | Format        | Required | Description                                                                                                                                                                                                                                    |
-| --------------------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `unlock_query_id`     | string        | yes      | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_data_query`. |
-| `unlocked_data_query` | `fixed_query` | yes      | The query to fetch the previously withheld `fetch.download` datablock for this component if the unlocking was successful.                                                                                                                      |
+| Field                 | Format        | Requirement | Description                                                                                                                                                                                                                                    |
+| --------------------- | ------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `unlock_query_id`     | string        | MUST        | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_data_query`. |
+| `unlocked_data_query` | `fixed_query` | MUST        | The query to fetch the previously withheld `fetch.download` datablock for this component if the unlocking was successful.                                                                                                                      |
 
 
 ### 7.6.3. `fetch.from_archive`
 This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
 More about the handling in the [import and handling section](#9-implementation-analysis-and-handling).
 
-| Field                  | Format | Required | Description                                                                                                                                                                                                                                                                                        |
-| ---------------------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `archive_component_id` | string | yes      | The id of the component representing the archive that this component is contained in.                                                                                                                                                                                                              |
-| `component_path`       | string | yes      | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`). |
+| Field                  | Format | Requirement | Description                                                                                                                                                                                                                                                                                        |
+| ---------------------- | ------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `archive_component_id` | string | MUST        | The id of the component representing the archive that this component is contained in.                                                                                                                                                                                                              |
+| `component_path`       | string | MUST        | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`). |
 
 ## 7.7. Storage-related datablocks
 
@@ -1176,66 +1187,76 @@ These datablocks describe the arrangement that the component files should take i
 
 ### 7.7.1. `store.file`
 
-| Field             | Format  | Requirement | Description                                                   |
-| ----------------- | ------- | ----------- | ------------------------------------------------------------- |
-| `length`          | integer | MAY         | The length of the file in bytes.                              |
-| `local_file_path` | string  | MUST        | Local (sub-)path where the file MUST be placed by the client. |
+| Field             | Format  | Requirement | Description                                     |
+| ----------------- | ------- | ----------- | ----------------------------------------------- |
+| `bytes`           | integer | MAY         | The length of the file in bytes.                |
+| `local_file_path` | string  | MUST        | Local sub-path in the implementation directory. |
 
 #### 7.7.1.1. `local_file_path` rules
 
-The `local_file_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash".
+The `local_file_path` MUST include the full name that the file should take in the destination.
+It MUST NOT start with a "leading slash".
 It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
-`example.txt` or `sub/dir/example.txt` would be correct.
+**Examples:**
 
-`/example.txt`, `./example.txt` or `/sub/dir/example.txt` would be incorrect.
+`example.jpg` and `sub/dir/example.jpg` are valid local file paths.
+
+`/example.jpg`, `./example.jpg`, `sub/dir/` and `/sub/dir/example.jpg` are NOT valid local file paths.
 
 
 ### 7.7.2. `store.archive`
 
-| Field                  | Format  | Requirement                       | Description                                                                                                                 |
-| ---------------------- | ------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `length_compressed`    | integer | MAY                               | The length of the archive in bytes.                                                                                         |
-| `length_extracted`     | integer | MAY                               | The length of the archive in bytes (uncompressed).                                                                          |
-| `unpack_fully`         | boolean | MUST                              | Indicates whether or not the entire archive should be extracted into the local implementation directory. TODO add reference |
-| `local_directory_path` | string  | MUST, only if `unpack_fully=true` | Local (sub-)path where the file MUST be placed by the client.                                                               |
+| Field                  | Format  | Requirement                       | Description                                                                                                                       |
+| ---------------------- | ------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `bytes_compressed`     | integer | MAY                               | The length of the archive in bytes.                                                                                               |
+| `bytes_extracted`      | integer | MAY                               | The length of the archive in bytes (uncompressed).                                                                                |
+| `extract_fully`        | boolean | MUST                              | Indicates whether or not the entire archive should be fully extracted into the local implementation directory. TODO add reference |
+| `local_directory_path` | string  | MUST, only if `unpack_fully=true` | Local (sub-)path where the file MUST be placed by the client.                                                                     |
 
 #### 7.7.2.1. `local_directory_path` rules
 
-The `local_directory_path` MUST end with a slash ("trailing slash") and MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`).
+The `local_directory_path` MUST end with a slash ("trailing slash") and MUST NOT start with a slash 
+(unless it targets the root of the implementation directory in which case the `local_path` is simply `/`).
 It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
-`/`, `contents/` or `my/contents/` would be correct.
+**Examples:**
 
-`contents`,`./contents/`,`./contents`,`my/../../contents` or `../contents` would all be incorrect.
+`/`, `contents/` and `my/contents/` are valid local directory paths.
 
-## 7.8. Processing-related datablocks
+`contents`,`./contents/`,`./contents`,`my/../../contents` and `../contents` are NOT valid local directory paths.
+
+## 7.8. Role/Processing-related datablocks
+
+These datablocks describe which "role" a specific component should play in the asset implementation.
 
 ### 7.8.1. `role.native`
 This datablock indicates that this file should be handled by the host application's native import functionality.
 The full description of component handling can be found in the [component handling section](#933-handling-component-files).
 
-This datablock contains no fields and MUST be represented by the empty object `{}`.
+This datablock contains no fields is therefore represented by the empty object `{}`.
 
-### 7.8.2. `process.loose_environment`
+### 7.8.2. `role.loose_environment_map`
 The presence of this datablock on a component indicates that it is an environment map.
-This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR), not if the environment is already wrapped in another format with native support.
+This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR).
 An object that MUST conform to this format:
 
-| Field        | Format | Required | Description                             |
-| ------------ | ------ | -------- | --------------------------------------- |
-| `projection` | string | yes      | One of `equirectangular`, `mirror_ball` |
+| Field        | Format | Requirement                       | Description                             |
+| ------------ | ------ | --------------------------------- | --------------------------------------- |
+| `projection` | string | SHOULD, default=`equirectangular` | One of `equirectangular`, `mirror_ball` |
 
-### 7.8.3. `process.loose_material`
+### 7.8.3. `role.loose_material_map`
 
 This datablock is applied to a component that is part of a loose material as a material map.
 It indicates which role the component should play in the material.
 
-| Field           | Format | Required | Description                                                                                                                               |
-| --------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `material_name` | string | yes      |                                                                                                                                           |
-| `map`           | string | yes      | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
-| `colorspace`    | string | no       | One of `srgb`, `linear`                                                                                                                   |
+| Field           | Format | Requirement | Description                                                                                                                               |
+| --------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `material_name` | string | MUST        |                                                                                                                                           |
+| `map`           | string | MUST        | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
+| `colorspace`    | string | MAY         | One of `srgb`, `linear`                                                                                                                   |
+
+TODO info about normal+y/normal-y
 
 ## 7.9. Linking-related datablocks
 
@@ -1243,11 +1264,9 @@ It indicates which role the component should play in the material.
 
 When applied to a component, it indicates that this component uses one or multiple materials defined using `process.loose_material` datablocks.
 
-The datablock is an **array of objects** with this structure:
-
-| Field           | Format | Required | Description                                            |
-| --------------- | ------ | -------- | ------------------------------------------------------ |
-| `material_name` | string | yes      | Name of the material used in the definition datablocks |
+| Field           | Format | Requirement | Description                                            |
+| --------------- | ------ | ----------- | ------------------------------------------------------ |
+| `material_name` | string | MUST        | Name of the material used in the definition datablocks |
 
 ### 7.9.2. `link.mtlx_material`
 When applied to a component, it indicates that this component makes use of a material defined in mtlx document represented by another component.
