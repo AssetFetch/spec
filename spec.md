@@ -31,7 +31,7 @@ These are the goals of the AssetFetch specification, outlined in this document:
 
 - Describe a flexible, extensible way of discovering, filtering and previewing assets.
 - Facilitate the *one-time and one-directional transfer* of an asset with all its files from a provider to a client.
-- Allow providers to describe the structure of their assets (i.e. how the files they provide should work together) in a machine-readable way that allows for semi- or fully-automated handling of assets on the client-side with the smallest possible amount of manual adjustments. 
+- Allow providers to describe the structure of their assets (i.e. how the files they provide should work together) in a machine-readable way that allows for semi- or fully-automated handling of assets on the client-side with the smallest possible amount of manual adjustments.
 <br><br>
 - Work without custom code that is specific for one vendor-application combination.
 - Make offering assets a low-threshold process for implementors on the provider side.
@@ -48,8 +48,12 @@ In order to maintain focus and make the implementation achievable with a reasona
 
 This section describes several key terms that will be used throughout this document.
 
-## 2.1. User
->The human who uses an AssetFetch client.
+## 2.1. Provider
+>The actor that offers assets by hosting an AssetFetch-compliant HTTP(S)-Endpoint.
+
+This provider can be a commercial platform that is offering 3D assets for sale or an open repository providing content for free.
+The provider hosts the AssetFetch API as an HTTP(s)-based service.
+
 
 ## 2.2. Provider
 >The actor that offers assets by hosting an AssetFetch-compliant HTTP-Endpoint.
@@ -66,6 +70,10 @@ The provider offers the AssetFetch API as an HTTP-based service.
 A client can be a standalone application but in most implementation scenarios it will likely be integrated into another host application, like a 3D suite or other DCC application, in the form of a plugin/addon.
 The crucial difference to existing provider-specific plugins/addons is that only one implementation needs to be developed and maintained per application, instead of one per provider-application pairing.
 In reality there may of course still be multiple client plugins developed for the same application, but the choice for one of them should have less of an impact.
+
+## 2.4. User
+>The human who uses an AssetFetch client.
+
 
 ## 2.5. Asset
 >A reusable *logical* media element in the context of a digital project.
@@ -92,7 +100,6 @@ This exact choice - or rather the collection of files with metadata that is a re
 
 - An OBJ file containing the LOD1 mesh of a chair along with a set of TIFF texture maps measuring 512x512 pixels each is considered one implementation of the chair asset. Using the LOD0 version instead would be considered a *new implementation* of the *same chair asset*.
 - An EXR image with a resolution of 8192x4096 pixels in an equirectangular projection is considered one implementation of an HDRI environment.
-Tonemapping the EXR image into a JPG image yields a new implementation of the same asset.
 - A BLEND file containing a character model, its rig and all its textures (again with a specific resolution) all packed into it is considered one implementation.
 - A UASSET file containing the same character set up for Unreal Engine instead of Blender is considered a different implementation of the same character asset.
 
@@ -105,11 +112,8 @@ Tonemapping the EXR image into a JPG image yields a new implementation of the sa
 - When working with archives, the archive itself as well as its contents are considered components.
 A ZIP archive with the chair model as an FBX file and its textures as PNG files is represented as one component for the ZIP archive and then one component for each file in it (with some exceptions when using specific archive unpacking configurations).
 
-<!--
-## 2.7 Component "activeness"
-
-TODO: This will likely go entirely...
-
+<!-- TODO: Activeness will likely go in a future update. -->
+### 2.7.1. Component "activeness"
 Not all components of an implementation must be actively processed by the client in order to use them and are instead handled implicitly by the host application.
 
 - When trying to import an implementation consisting of an OBJ-file, an MTL-file and several material maps into a DCC application, then it is generally sufficient to invoke the application's native OBJ import functionality with the OBJ-file as the target.
@@ -119,8 +123,6 @@ The references made inside OBJ-file will prompt the application to handle the MT
 In both of the given examples, only one file would need to be "actively" handled by the user (or by a client trying to automate the user's work) with the remaining work getting delegated to the host application.
 
 When a client instructs its host to load a component and this component causes multiple other components to be loaded (for example a mesh file referencing two textures) then the first component would be called "active" (because from the client's perspective it needed active handling) whereas the components referenced by it are called "passive" (because the AssetFetch client did not need to handle them directly).
-
--->
 
 ## 2.8. Datablock
 > A piece of metadata of a certain type and structure that can be attached to most other datastructures defined by AssetFetch.
@@ -133,7 +135,6 @@ Datablocks are flexible and sometimes reusable pieces of metadata that enable th
 
 ## 2.9. Asset unlocking 
 > Performing a query from the client to the provider to indicate that the user requests access to a specific asset or implementation. The provider acknowledges the query and then grants access to the requested resource, often along with a side-effect in the provider's back-end systems, such as a purchase.
-
 The standard operating mode of an AssetFetch provider is to freely distribute the files for any asset implementation that the client.
 
 However, the provider MAY choose to employ more granular access limitations to component resources to require payment, impose usage quotas, make use of dynamically generated temporary download links from external storage providers, or add other limitations to control asset distribution.
