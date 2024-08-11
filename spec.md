@@ -14,7 +14,7 @@ This vastly improves the user experience of browsing, downloading and importing 
 
 However, these solutions are usually implemented using addons/plugins and are hard-coded to work with one 3D suite and one vendor, which creates a new set of issues:
 
-Vendors wanting to offer this improved user experience for their customers find themselves needing to build and maintain multiple pieces of software with limited opportunities for code reuse as every new plugin must be built within the language, framework and constraints presented by the target host application.
+Vendors wanting to offer this improved user experience for their customers find themselves needing to build and maintain multiple pieces of software with limited opportunities for code reuse as every new plugin must be built within the language, framework and constraints presented by the host application.
 
 In light of this, many vendors choose to only offer a native integration for one or two applications or no native integrations at all.
 This may be because they don't have the resources and skills required or because development of such systems is not justifiable from a business perspective.
@@ -31,7 +31,7 @@ These are the goals of the AssetFetch specification, outlined in this document:
 
 - Describe a flexible, extensible way of discovering, filtering and previewing assets.
 - Facilitate the *one-time and one-directional transfer* of an asset with all its files from a provider to a client.
-- Allow providers to describe the structure of their assets (i.e. how the files they provide should work together) in a machine-readable way that allows for semi- or fully-automated handling of assets on the client-side with the smallest amount of manual adjustments that is achievable. 
+- Allow providers to describe the structure of their assets (i.e. how the files they provide should work together) in a machine-readable way that allows for semi- or fully-automated handling of assets on the client-side with the smallest possible amount of manual adjustments.
 <br><br>
 - Work without custom code that is specific for one vendor-application combination.
 - Make offering assets a low-threshold process for implementors on the provider side.
@@ -48,8 +48,12 @@ In order to maintain focus and make the implementation achievable with a reasona
 
 This section describes several key terms that will be used throughout this document.
 
-## 2.1. User
->The human who uses an AssetFetch client.
+## 2.1. Provider
+>The actor that offers assets by hosting an AssetFetch-compliant HTTP(S)-Endpoint.
+
+This provider can be a commercial platform that is offering 3D assets for sale or an open repository providing content for free.
+The provider hosts the AssetFetch API as an HTTP(s)-based service.
+
 
 ## 2.2. Client
 >A piece of software built to interact with the AssetFetch-API of a provider in order to receive resources from it.
@@ -61,11 +65,9 @@ A client can be a standalone application but in most implementation scenarios it
 The crucial difference to existing provider-specific plugins/addons is that only one implementation needs to be developed and maintained per application, instead of one per provider-application pairing.
 In reality there may of course still be multiple client plugins developed for the same application, but the choice for one of them should have less of an impact.
 
-## 2.4. Provider
->The actor that offers assets by hosting an AssetFetch-compliant HTTP(S)-Endpoint.
+## 2.4. User
+>The human who uses an AssetFetch client.
 
-This provider can be a commercial platform that is offering 3D assets for sale or an open repository providing content for free.
-The provider hosts the AssetFetch API as an HTTP(s)-based service.
 
 ## 2.5. Asset
 >A reusable *logical* media element in the context of a digital project.
@@ -90,21 +92,21 @@ These variations may be:
 Some vendors allow their users to control these parameters with great precision so that they only need to download the asset in exactly the format and quality that is desired.
 This exact choice - or rather the collection of files with metadata that is a result of it - is considered an  "**implementation** of an asset".
 
-- An OBJ file containing the LOD1 mesh of a chair along with a set of TIFF texture maps measuring 512x512 pixels each is considered one implementation of the chair asset. Using the LOD0 version instead yields a new implementation of the same chair asset.
-- An EXR image with a resolution of 8192x4096 pixels in an equirectangular projection is considered one implementation.
-Tonemapping the EXR image into a JPG image yields a new implementation of the same asset.
+- An OBJ file containing the LOD1 mesh of a chair along with a set of TIFF texture maps measuring 512x512 pixels each is considered one implementation of the chair asset. Using the LOD0 version instead would be considered a *new implementation* of the *same chair asset*.
+- An EXR image with a resolution of 8192x4096 pixels in an equirectangular projection is considered one implementation of an HDRI environment.
 - A BLEND file containing a character model, its rig and all its textures (again with a specific resolution) all packed into it is considered one implementation.
-- A UASSET file containing the same character set up for Unreal Engine instead of Blender is considered a different implementation (of the same asset, since the logical element is still the same character).
+- A UASSET file containing the same character set up for Unreal Engine instead of Blender is considered a different implementation of the same character asset.
 
 ## 2.7. (Implementation-)Component
 > A piece of digital information, generally a file, that is part of an asset implementation.
 
-- The 512px .TIFF roughness map of the aforementioned chair implementation is one component.
+- The 512px TIFF roughness map of the aforementioned chair implementation is one component.
 - The EXR file containing the panoramic environment is a component. It happens to be the only component in the implementation of that environment.
 - The BLEND file with the character model and textures packed into it is also considered one component since the BLEND file is a black box for any program except Blender.
 - When working with archives, the archive itself as well as its contents are considered components.
 A ZIP archive with the chair model as an FBX file and its textures as PNG files is represented as one component for the ZIP archive and then one component for each file in it (with some exceptions when using specific archive unpacking configurations).
 
+<!-- TODO: Activeness will likely go in a future update. -->
 ### 2.7.1. Component "activeness"
 Not all components of an implementation must be actively processed by the client in order to use them and are instead handled implicitly by the host application.
 
@@ -119,7 +121,7 @@ When a client instructs its host to load a component and this component causes m
 ## 2.8. Datablock
 > A piece of metadata of a certain type and structure that can be attached to most other datastructures defined by AssetFetch.
 
-Datablocks are extremely flexible and sometimes reusable pieces of metadata that enable the communication a broad range of metadata:
+Datablocks are flexible and sometimes reusable pieces of metadata that enable the communication a broad range of metadata:
 
 - Attributes of providers, assets, implementations or other resources
 - Instructions for parsing or otherwise handling specific data
