@@ -147,268 +147,155 @@ In this context, the act of "unlocking" refers to an action that happens in the 
 
 
 
-# 3. General Operation
+# 3. General operation
 
-This section describes the general mechanisms by which AssetFetch operates.
+This section describes the steps by which AssetFetch operates in general terms.
+The following sections will then describe the exact implementation by defining the exact HTTP parameters and (JSON-) datastructures.
 
 ## 3.1. Overview
 
-These are the key steps that are necessary to successfully browse for and download an asset from a provider.
-The full definition of the mentioned endpoints are covered in the [endpoints section](#5-endpoints).
+AssetFetch models interactions between a provider and a client (controlled by a user).
+Generally, the following interactions are modeled:
 
-### 3.1.1. Initialization
-The client makes an initial connection to the provider by making a call to an initialization endpoint communicated by the provider to the user through external channels.
-This initialization endpoint is freely accessible via HTTP(s) GET without any authentication and communicates key information for further usage of the provider's interface, such as:
+- **Initialization:** Client and provider exchange metadata to communicate basic properties and establish that an interaction can occur.
+- **Connection checking (optional):** If the provider requires authentication from the client, then an additional step is performed to confirm that the connection has been established and that the user has been logged in successfully.
+- **Browsing assets:** The client receives a list of available assets from the provider and displays it to the user. This list can be influenced using  parameters to implement common filtering techniques, such as keyword- or category-based searching. The user chooses an asset they with to obtain.
+- **Implementation negotiation:** The client receives a list of available implementations for the chosen asset. This list can again be controlled using parameters to implement common per-asset choices like resolution or level-of-detail. The client then determines based on the metadata which of the implementations offered by the provider are viable for its environment/host application and chooses one implementation, possibly with manual support of the user.
+- **Asset unlocking (optional):** If the provider requires asset unlocking, then relevant unlocking information was already included in the implementation metadata. The client uses this data to make the required unlocking queries to the provider which will then give it access to the "true" download information for the implementation components. If asset unlocking is not used then this data is included directly in the implementation data and this step can be skipped.
+- **Downloading and arranging**: The client uses the download information it obtained (directly with the implementation or via the unlocking queries) together with the other implementation metadata to download the component files and arrange them in a local file system directory or similar storage location.
+- **Local handling**: Finally, the client "handles" the files it downloaded along with aid from the implementation metadata. This "handling" can vary between clients developed for different host applications, but it usually involves importing the downloaded resources into the currently open project/scene or placing the data in a local repository, such as an application's proprietary asset management solution.
 
-- The name and other metadata about the provider itself.
+The order in which the actions are described here is the order in which they occur in regular use, though certain actions MAY be skipped (as denoted) or repeated.
+
+## 3.2. Initialization
+
+The first point of contact between a client and a provider is the initialization URI which the user enters into the client, comparable to the URI of an RSS feed.
+This URI is communicated from the provider to the user via external channels, such as the provider's website.
+
+The client establishes an initial connection to the provider by making an HTTP query to the initialization endpoint.
+This initialization endpoint MUST be accessible via HTTP GET without any prior communication between client and provider.
+It and communicates key information for further usage of the provider's AssetFetch interface, such as:
+
+- The provider's name and other general metadata.
 - Whether the provider requires the client to authenticate itself through additional HTTP headers.
-- The URI through which assets can be queried.
-- What parameters can be used to query for assets.
+- The endpoint through which assets can be queried and its parameters.
 
-### 3.1.2. Authentication (optional)
-The provider MAY require custom authentication headers, in which case the client MUST send these headers along with every request it performs to that provider, unless the request is directed at the initialization endpoint.
-The names of these headers, if any, MUST be declared by the provider during the initialization.
-The client obtains the required header values, such as passwords or randomly generated access tokens, from the user through a GUI, from a cache or other mechanism.
+## 3.3. Authentication & Connection status (optional)
+As mentioned in the previous section, the provider MAY require custom authentication headers, in which case the client MUST send these headers along with every request it performs to that provider, unless the request is directed at the initialization endpoint.
+
+Which headers the client needs to send is communicated by the provider in the initialization data.
+
+The client obtains the required header values, such as passwords or randomly generated access tokens, from the user through a GUI, from a cache or through other mechanisms.
 See [Security considerations](#10-security-considerations) for more details about credential handling.
 
-### 3.1.3. Connection Status (optional)
-If the provider uses authentication, then it MUST offer a connection status endpoint whose URI is communicated during initialization and which the client SHOULD contact at least once after initialization to verify the correctness of the authentication values entered by the user.
+If the provider uses authentication, then it MUST offer a connection status endpoint in the initialization data.
+Before attempting to perform any other actions using the credentials entered by the user, the client SHOULD contact the connection status endpoint at least once after initialization to verify the correctness of the values entered by the user.
 
 The connection status endpoint has two primary uses:
 
-- The provider SHOULD respond with user-specific metadata, such as a username or other account details which the client MAY display to the user to verify to them that they are properly connected to the provider.
-- If the provider wants to charge users for downloading assets using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance.
+- If available, the provider SHOULD respond with user-specific metadata, such as a username or account details which the client SHOULD display to the user to confirm that they are properly connected to the provider.
+- If the provider implements asset unlocking using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance.
 
-After the initial call the client SHOULD periodically call the connection status endpoint again to receive updated user data or account balance information.
+See [8.7](#87-unlocking-related-datablocks).
 
-### 3.1.4. Browsing assets
-After successful initialization (and possibly authentication) the user enters search parameters which form an asset query.
-These parameters were defined by the provider during the initialization step and come in different formats, such as simple text strings or selections from a set of options.
-The client then loads a list of available assets from the provider.
-This list includes general metadata about every asset, such as a name, a thumbnail image, license and other information.
-It also MUST include information on how to query the provider for implementations of that asset.
-The user chooses one of the assets they wish to receive.
+## 3.4. Browsing assets
+After successful initialization (and possibly authentication) the client is ready to browse assets.
 
-### 3.1.5. Choosing an implementation
-In order to load an asset a specific implementation of that asset needs to be chosen.
-The first step of this process involves receiving a list of possible implementations from the provider using the information on how to request it sent by the provider along with the other asset metadata.
-The provider MAY request additional parameters for querying implementations in order to filter for asset-specific data like texture resolution, level of detail, etc.
-The exact parameters are defined by the provider.
-After getting the parameters from the user (if applicable) the client requests the list of available implementations for this asset. 
-The provider responds with a list of possible implementations available for this asset and the parameters, such as resolution or other quality metrics, chosen by the user.
+### 3.4.1. Asset filtering
+The provider might send a static, unchanging list of available assets, but it MAY also require specific parameters for generating a dynamic asset list.
+In that case, the names and kinds of parameters were defined by the provider during the initialization step.
+Parameters can come in different formats, such as simple text strings or selections from a set of options, similar to what can be represented with a `<form>` tag in HTML.
+Possible examples for parameters for this query are:
+
+- A general keyword-based search field
+- A type- or category selection
+- Sorting options
+- Binary choices, such as limiting the selection to already purchased assets
+
+### 3.4.2. Asset selection
+After the user enters appropriate parameter values the client can request a list of available assets from the provider and display it to the user.
+What data is communicated is up to the provider, supported fields include:
+
+- Asset name and description,
+- Thumbnail image URI
+- Asset license
+- Author information
+- ...
+
+Every asset MUST also include information on how to query the provider for implementations of the asset.
+
+## 3.5. Implementation negotiation
+
+In order to actually download an asset, one of its implementations (assuming the provider offers multiple) needs to be chosen.
+This choice is ultimately the result of a "negotiation" process between provider, client and (depending on the client implementation) potentially also the user.
+
+### 3.5.1. Implementation filtering
+
+Similarly to how browsing for asset operates, the provider MAY require specific parameters for choosing an implementation.
+These parameters are included in the metadata for each asset during the previous step.
+Examples for parameters for this query are:
+
+- Texture resolution & format
+  - possibly including variable resolutions and format choices for each map of a PBR material
+- Level-of-Detail selection
+- Small semantic choices, such as a selection of color variations
+
+After getting the parameters from the user (if necessary) the client requests the list of available implementations for this asset.
+
+### 3.5.2. Implementation selection
+
+The provider responds with a list of possible implementations available for the selected asset and implementation parameters chosen by the user.
+Every entry in this list represents one implementation that matches the user's parameter choices.
+
+At this point, the differences between the offered implementations SHOULD only be of technical nature, such as different encodings or file format representations of the same resource with roughly the same quality.
 The implementations each consist of a list of components, each of which have metadata attached to them, including information about file formats, relationships and downloads.
-The client analyzes the metadata declarations of each component in every proposed implementation in order to test it for compatibility.
+The actual component files are not transmitted at this stage, only their metadata.
+
+The client analyzes the metadata of each component in every proposed implementation in order to test it for compatibility.
+
+During this check, the client SHOULD at least consider the following aspects:
+- File format compatibility: Are all files in the implementation using a file format that the client/host application is capable of parsing?
+- AssetFetch features: Does the proposed implementation only use AssetFetch features which the client/host application is able to support?
+
 If at least one implementation turns out to be compatible with the client and its host application, the process can proceed.
-If more than one implementation is valid for the given client and its host application, it SHOULD ask the user to make the final choice.
-This whole process is comparable to the rarely used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
+If more than one implementation is valid for the given client and its host application, the client MAY ask the user to make the final choice or employ an internal decision mechanism to select an implementation.
 
-### 3.1.6. Asset unlocking (optional)
+Overall, this process is comparable to the less commonly used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
 
-#### 3.1.6.1. Asset unlocking overview
-The standard operating mode of AssetFetch is to freely distribute the download links (and therefore the files) for any asset implementation, leading to a download workflow that follows a simple structure:
-
-- Client parses component data received from the provider
-- Client finds download information in component data
-- Client performs HTTP(s) download
-
-The download is either publicly accessible via HTTP without any limitations or only accessible with the right authentication headers, as outlined in [the authentication](#312-authentication-optional) section.
-
-However, the provider MAY choose to employ more granular access limitations to component resources to require payment, impose usage quotas, make use of dynamically generated temporary download links, or add other limitations to control asset distribution.
-To accommodate this, providers are able to define an additional "unlocking" procedure, requiring further deliberate action by the client and user to access the files associated with components.
-
-In this context, the act of "unlocking" refers to an action that happens in the provider's backend which causes previously not downloadable resources to become downloadable, usually with some side-effect on the provider's backend, such as a reduction in account balance (i.e. a "purchase") or incrementing a counter for free daily downloads.
+## 3.6. Asset unlocking (optional)
 
 The unlocking system in AssetFetch works by linking individual components to an "unlocking query".
-When responding with the implementation list the provider initially withholds the download information that would normally be sent.
-If it does that, then it MUST instead provide a list of possible unlocking queries, the mapping between components and unlocking queries and queries to receive the previously withheld download information for every component after the unlocking has happened.
+
+When operating *without* asset unlocking, the provider includes download information for every component in every implementation into its original list of suggested implementations.
+
+When operating *with* asset unlocking, the provider initially withholds the download information that would normally be sent for one or all of the components in one or all of the implementations.
+If it does that with at least one component, it then MUST instead provide:
+- A description of one or multiple unlocking queries
+- A mapping between components and unlocking queries
+- A query to receive the previously withheld download information for every locked component component which the client can execute after the unlocking has happened.
 
 The client SHOULD then present the required unlocking queries (along with the accompanying charges, if any, that the provider has declared will happen to) to the user.
-If the user agrees, the client first performs the unlocking query (or queries) required to unlock all components it wants to download and then queries the provider for the previously withheld real download links, which may be ephemeral or otherwise personalized to the user.
-
-**AssetFetch does not handle the actual payment itself, users still need to perform any required account- and payment setup with the provider through external means, usually the provider's website.**
-
-Comparing this workflow with the unrestricted example outlined at the start of this section, the workflow for downloading a component file is extended by several steps:
-
-- Client parses component data received from the provider
-- Client finds unlocking query in component data
-- Client asks user for confirmation, possibly displaying pricing info sent by the provider
-- User confirms the unlocking action 
-- Client performs the unlocking query
-- Provider registers that the user is now allowed to perform the download
-- Client requests the actual download information from the provider
-- Provider responds with the (possibly temporary or personalized) download information
-- Client parses newly received download information
-- Client performs HTTP(s) download
+If the user agrees, the client first performs the unlocking query (or queries) required to unlock all components it wants to download and then queries the provider for the previously withheld real download links, which MAY be ephemeral or otherwise personalized to the user.
 
 This component-level linking gives providers flexibility in how they structure the unlocking process.
-The following section outlines examples to illustrate the kinds of relationships that can be modeled using unlocking queries.
 
-#### 3.1.6.2. Asset unlocking architectures
-
-Providers wanting to make use of asset unlocking usually have an established model for how assets can be unlocked/purchased.
-This section outlines examples for how implementation components can be linked with unlocking queries to illustrate possible architectures that can be modeled within AssetFetch.
-
-##### 3.1.6.2.1. Asset-level unlocking
-A common architecture in asset stores is to sell *assets* and give users the freedom to download *any implementation* of the purchased asset that is available, regardless of resolution, poly-count or file format.
-One purchase unlocks everything.
-
-In AssetFetch this is modeled by having only one "master" unlocking query that all components in all implementations of that specific asset reference.
-Once this unlocking query has been made once, download information for all linked components can immediately be requested from the provider.
-
-In this example, two implementations of the same asset - one as a .OBJ file and one as a .USDC file - are linked to the same unlocking query, indicating that purchasing the asset gives the user access to all implementations:
-
-```mermaid
-graph RL;
-
-    subgraph Implementation A
-    CompA1["fa:fa-cube .OBJ model"] 
-    CompA2["fa:fa-image .TIFF texture"] 
-    CompA3["fa:fa-file-code .MTL file"]
-    end
-
-	subgraph Implementation B
-    CompB1["fa:fa-box-archive .USDC model"] 
-    CompB2["fa:fa-note-sticky .TIFF texture"] 
-    end
-
-    Query1["fa:fa-unlock Main Unlocking Query "]
-
-	CompA1 --- Query1
-	CompA2 --- Query1
-	CompA3 --- Query1
-
-	CompB1 --- Query1
-	CompB2 --- Query1
-```
-
-##### 3.1.6.2.2. Tiered unlocking 
-
-Another approach many providers like to take is to sell multiple quality levels (in terms of texture resolution or level-of-detail) of one asset separately, but still allow for free file format selection after purchase.
-
-In this case there are several possible unlocking queries, one for each quality level to which all the respective components are linked:
-
-```mermaid
-graph RL;
-
-    subgraph HIGH-RES Implementation A
-    CompA1h["fa:fa-cube .OBJ model (High-Poly)"] 
-    CompA2h["fa:fa-image .TIFF texture (High-Resolution)"] 
-    CompA3h["fa:fa-file-code .MTL file"]
-    end
-
-	subgraph HIGH-RES Implementation B
-    CompB1h["fa:fa-box-archive .USDC model (High-Poly)"] 
-    CompB2h["fa:fa-note-sticky .TIFF texture (High-Resolution)"] 
-    end
-
-	subgraph LOW-RES Implementation A
-    CompA1l["fa:fa-cube .OBJ model (Low-Poly)"] 
-    CompA2l["fa:fa-image .JPG texture (Low-Resolution)"] 
-    CompA3l["fa:fa-file-code .MTL file"]
-    end
-
-	subgraph LOW-RES Implementation B
-    CompB1l["fa:fa-box-archive .USDC model (Low-Poly)"] 
-    CompB2l["fa:fa-note-sticky .JPG texture (Low-Resolution)"] 
-    end
-
-    Query1["fa:fa-unlock Unlocking Query (HIGH-RES)"]
-	Query2["fa:fa-unlock Unlocking Query (LOW-RES)"]
-	
-
-	CompA1h --- Query1
-	CompA2h --- Query1
-	CompA3h --- Query1
-
-	CompB1h --- Query1
-	CompB2h --- Query1
-
-
-	CompA1l --- Query2
-	CompA2l --- Query2
-	CompA3l --- Query2
-
-	CompB1l --- Query2
-	CompB2l --- Query2
-```
-
-##### 3.1.6.2.3. Component-level unlocking
-
-Providers that have opted for an even more granular purchasing structure can create individual queries for every component.
-An example would be a texturing website that sells every PBR map of a material individually:
-
-
-```mermaid
-graph RL;
-
-    subgraph 4K implementation
-    Comp4KCOL["fa:fa-image 4K color map"] 
-    Comp4KRGH["fa:fa-image 4K roughness map"] 
-    Comp4KNRM["fa:fa-image 4K normal map"]
-    end
-	
-    Query4KCOL["fa:fa-unlock Unlocking Query (4K color)"]
-	Query4KRGH["fa:fa-unlock Unlocking Query (4K roughness)"]
-	Query4KNRM["fa:fa-unlock Unlocking Query (4K normal)"]
-
-	Comp4KCOL --- Query4KCOL
-	Comp4KRGH --- Query4KRGH
-	Comp4KNRM --- Query4KNRM
-
-	subgraph 2K implementation
-    Comp2KCOL["fa:fa-image 2K color map"] 
-    Comp2KRGH["fa:fa-image 2K roughness map"] 
-    Comp2KNRM["fa:fa-image 2K normal map"]
-    end
-	
-    Query2KCOL["fa:fa-unlock Unlocking Query (2K color)"]
-	Query2KRGH["fa:fa-unlock Unlocking Query (2K roughness)"]
-	Query2KNRM["fa:fa-unlock Unlocking Query (2K normal)"]
-
-	Comp2KCOL --- Query2KCOL
-	Comp2KRGH --- Query2KRGH
-	Comp2KNRM --- Query2KNRM
-
-	subgraph 1K implementation
-    Comp1KCOL["fa:fa-image 1K color map"] 
-    Comp1KRGH["fa:fa-image 1K roughness map"] 
-    Comp1KNRM["fa:fa-image 1K normal map"]
-    end
-	
-    Query1KCOL["fa:fa-unlock Unlocking Query (1K color)"]
-	Query1KRGH["fa:fa-unlock Unlocking Query (1K roughness)"]
-	Query1KNRM["fa:fa-unlock Unlocking Query (1K normal)"]
-
-	Comp1KCOL --- Query1KCOL
-	Comp1KRGH --- Query1KRGH
-	Comp1KNRM --- Query1KNRM
-
-```
-
-#### 3.1.6.3. Unlocking query inclusion
-
-In some cases it is desirable to also convey the relationship between several unlocking queries in the AssetFetch data.
-For example, if one unlocking query which grants access to high quality/resolution implementations of an asset, then it is common practice to also grant access to the lower quality/resolution implementations which would have been another purchase otherwise.
-This kind of "inclusion" between unlocking queries is handled via a `child_queries` field which lists the other unlocking queries a client can also consider to be unlocked after executing one query. See [the `unlock_query` structure description](#8721-unlock_query-structure).
-
-### 3.1.7. Downloading and Handling
-After choosing a suitable implementation and unlocking all of it's datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
-The choice about where this directory should be created is made between the client and user through configuration and is not part of the specification.
-
-Inside this directory the client SHOULD arrange the files as described by the provider in the implementation metadata to ensure that relative links between files remain intact.
-
+## 3.7. Downloading
+After choosing a suitable implementation and unlocking all of its datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
 At this point the client can - either by itself or through calls to its host application - handle the files that it obtained.
-In the context of a 3D suite this "handling" usually involves importing the data into the current scene or a software-specific repository of local assets.
-This processing is aided by the metadata in the datablocks of every component sent by the provider which describes relevant attributes, recommended vendor- or format-specific configurations or relationships between components.
 
-At this point the interaction is complete and the user can start a new query for assets.
+## 3.8. Handling
 
-## 3.2. Sequence Diagram
+The AssetFetch data does not encode a fixed, imperative series of steps for handling an asset.
+Instead, it describes properties of and relationships between components which the client uses to generate an appropriate series of steps for handling the file inside its environment.
+This usually entails multiple steps, such as importing resources into the currently opened project or scene or importing resources into a central repository, like a software-specific local asset library. 
+The processing is aided by the metadata in the datablocks of every component sent by the provider which describes relevant attributes, recommended vendor- or format-specific configurations or relationships between components.
+
+## 3.9. Sequence Diagram
 The following diagrams illustrate the general flow of information between the user, the client software and the provider as well as the most important actions taken by each party.
 
-### 3.2.1. Simple Version
-This diagram shows a simple implementation without any ability for dynamic filtering or dynamically generated implementations and without requiring authentication or unlocking.
-All assets are freely available for everyone.
+### 3.9.1. Simple Version
+This diagram shows a simple implementation without any ability for dynamic filtering or dynamically generated implementations and without requiring any authentication or unlocking.
+All assets are freely available for everyone who can make an HTTP connection to the provider.
 
 ```mermaid
 sequenceDiagram
@@ -447,9 +334,10 @@ sequenceDiagram
 	note left of User: User can now utilize<br>the asset in their project.
 ```
 
-### 3.2.2. Complete Version
+### 3.9.2. Complete Version
 
 This diagram shows a more complete interaction, including authentication and asset unlocking.
+It also illustrates how the provider can utilize ephemeral download links hosted on a different platform, like a CDN ("Content Delivery Network") service.
 
 ```mermaid
 sequenceDiagram
@@ -458,8 +346,9 @@ sequenceDiagram
 		participant User
 		participant Client
 	end
-	box Remote Server
+	box Remote Server(s)
 		participant Provider
+		participant CDN-Service
 	end
 
     User->>Client: Requests connection to paid.example.com/init
@@ -502,12 +391,14 @@ sequenceDiagram
 
 	loop For every component that <br>had its download-related datablocks withheld
 		Client->>Provider: Query: paid.example.com/downloads?asset=<asset id>&component=<component id>
-		Provider->>Client: Responds with actual download information<br>(possibly temporarily generated)
+		Provider->> CDN-Service: Query: storage-api.example.com/generate-temp-dl-link?file=<example.obj>
+		CDN-Service->>Provider: Responds with<br>temporary download link
+		Provider->>Client: Responds with actual download information<br>(temporarily generated)
 	end
 
 	loop For every component
-		Client->>Provider: Initiates HTTP download of component file
-		Provider->>Client: Transmits file
+		Client->>CDN-Service: Initiates HTTP download of component file
+		CDN-Service->>Client: Responds with file
 	end
 
 	Client->>Client: Processes files locally based<br>on implementation metadata<br>(usually by importing them<br>into the current project)
