@@ -127,6 +127,17 @@ Datablocks are flexible and sometimes reusable pieces of metadata that enable th
 - Instructions for parsing or otherwise handling specific data
 - Relationships between resources
 
+## 2.9. Asset unlocking 
+> Performing a query from the client to the provider to indicate that the user requests access to a specific asset or implementation. The provider acknowledges the query and then grants access to the requested resource, often along with a side-effect in the provider's back-end systems, such as a purchase.
+The standard operating mode of an AssetFetch provider is to freely distribute the files for any asset implementation that the client.
+
+However, the provider MAY choose to employ more granular access limitations to component resources to require payment, impose usage quotas, make use of dynamically generated temporary download links from external storage providers, or add other limitations to control asset distribution.
+To accommodate this, providers are able to define additional procedures to "unlock" assets and their download information, requiring further deliberate action by the client and user to access the files associated with components.
+
+In this context, the act of "unlocking" refers to an action that happens in the provider's backend which causes previously not downloadable resources to become downloadable, usually with some side-effect on the provider's back-end, such as a reduction in account balance (i.e. a "purchase") or decrementing a counter for remaining free daily downloads.
+
+**AssetFetch does not concern itself with the actual transaction itself, users still need to perform any required account- and payment setup with the provider through external means, usually the provider's website.**
+
 
 
 
