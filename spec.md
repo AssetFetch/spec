@@ -788,55 +788,59 @@ The following datablocks are to be included in the `data` field:
 
 ## 6.1. Datablock names
 
-The name of a datablock MUST be a string composed of small alphanumerical characters, underscores and dots.
-Datablock names MUST contain either 0 or 1 instance of the dot (`.`) character which indicates that a datablock has multiple variations.
-One resource MUST NOT have two datablocks that share the same string *before* the dot separator.
+Every datablock outlined in this specification has a name that identifies its structure.
+The name is a string composed of lowercase alphanumerical characters, underscores and dots.
 
-The resulting regular expression from these rules is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
+Datablock names contain either 0 or 1 instances of the dot (`.`) character which is used to indicate that a datablock has multiple variations.
+The part before the dot separator is considered the "base name" of the datablock and the part after it (if it exists) the "variation name".
+
+A resource MUST NOT carry two datablocks that share the same base name.
+
+The resulting regular expression for all datablock names is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
 
 ## 6.2. Datablock value templates
 This section describes additional data types that can be used within other datablocks.
 They exist to eliminate the need to re-specify the same data structure in two different datablock definitions.
-*The templates can not be used directly as datablocks under their template name, though some datablock completely inherit their structure under a new name.*
+<!-- TODO: Do any DBs use foly a template? *The templates can not be used directly as datablocks under their template name* though some datablock completely inherit their structure under a new name.*-->
 
 ### 6.2.1. `variable_query`
 This template describes an HTTP query whose parameters are controllable by the user.
 See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more details.
 
-| Field        | Format               | Required | Description                                 |
-| ------------ | -------------------- | -------- | ------------------------------------------- |
-| `uri`        | string               | yes      | The URI to send the request to.             |
-| `method`     | string               | yes      | One of `get`, `post`                        |
-| `parameters` | array of `parameter` | yes      | The configurable parameters for this query. |
+| Field        | Format               | Requirement | Description                                 |
+| ------------ | -------------------- | ----------- | ------------------------------------------- |
+| `uri`        | string               | MUST        | The URI to send the request to.             |
+| `method`     | string               | MUST        | One of `get`, `post`                        |
+| `parameters` | array of `parameter` | MUST        | The configurable parameters for this query. |
 
 #### 6.2.1.1. `parameter` Structure
 A parameter describes the attributes of one parameter for the query and how the client can present this to its user.
 
-| Field     | Format            | Required                      | Description                                                                                                                                                                                                          |
-| --------- | ----------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`    | string            | yes                           | One of `text`, `boolean`, `select`, `fixed`                                                                                                                                                                          |
-| `id`      | string            | yes                           | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key when sending a response using this parameter.                                |
-| `title`   | string            | no                            | The title that the client SHOULD display to the user to represent this parameter.                                                                                                                                    |
-| `default` | string            | no                            | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
-| `choices` | array of `choice` | yes, if `select` type is used | This field contains all possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
+| Field     | Format            | Requirement                    | Description                                                                                                                                                                                                          |
+| --------- | ----------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`    | string            | MUST                           | One of `text`, `boolean`, `select`, `fixed`                                                                                                                                                                          |
+| `id`      | string            | MUST                           | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key when sending a response using this parameter.                                |
+| `title`   | string            | MAY                            | The title that the client SHOULD display to the user to represent this parameter.                                                                                                                                    |
+| `default` | string            | MAY                            | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
+| `choices` | array of `choice` | MUST, if `select` type is used | This field contains all possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
 
 #### 6.2.1.2. `choice` Structure
 A single choice for a `select` type parameter.
 
-| Field   | Format | Required | Description                                                                                   |
-| ------- | ------ | -------- | --------------------------------------------------------------------------------------------- |
-| `value` | string | yes      | The value that the client MUST use in its HTTP response if the user has selected this choice. |
-| `title` | string | yes      | The title that the client SHOULD display to the user to represent this choice.                |
+| Field   | Format | Requirement | Description                                                                                   |
+| ------- | ------ | ----------- | --------------------------------------------------------------------------------------------- |
+| `value` | string | MUST        | The value that the client MUST use in its HTTP response if the user has selected this choice. |
+| `title` | string | MUST        | The title that the client SHOULD display to the user to represent this choice.                |
 
 ### 6.2.2. `fixed_query`
 This template describes a fixed query that can be sent by the client to the provider without additional user input or configuration.
 See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more details.
 
-| Field     | Format                        | Required | Description                                         |
-| --------- | ----------------------------- | -------- | --------------------------------------------------- |
-| `uri`     | string                        | yes      | The URI to contact for getting more results.        |
-| `method`  | string                        | yes      | MUST be one of `get` or `post`                      |
-| `payload` | object with string properties | no       | The keys and values for the payload of the request. |
+| Field     | Format                        | Requirement | Description                                         |
+| --------- | ----------------------------- | ----------- | --------------------------------------------------- |
+| `uri`     | string                        | MUST        | The URI to contact for getting more results.        |
+| `method`  | string                        | MUST        | MUST be one of `get` or `post`                      |
+| `payload` | object with string properties | MAY         | The keys and values for the payload of the request. |
 
 
 
