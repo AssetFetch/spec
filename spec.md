@@ -521,7 +521,7 @@ This message SHOULD contain the contents of the `message` and `id` field in the 
 
 # 5. Endpoints
 
-This section outlines general information about AssetFetch endpoints along with the specific structural requirements for every endpoint.
+This section outlines general information about the HTTP-endpoints required for AssetFetch along with the specific structural requirements for the JSON-response on every endpoint.
 
 ## 5.1. About Endpoints
 
@@ -531,24 +531,33 @@ The interaction model described in the [General Operation](#3-general-operation)
 - An endpoint for querying assets
 - An endpoint for querying implementations of one specific asset
 
-Depending on which features it wants to use, the provider MUST implement:
-- A connection status endpoint if it wants to use custom headers for authentication
-- An endpoint for unlocking resources
-- An endpoint for obtaining previously withheld datablocks if it wants to support asset unlocking (i.e. purchases)
+Depending on which features it wants to use, the provider MAY implement:
+- An endpoint for performing a connection status check (MUST be implemented if the provider wants to use user authentication)
+- An endpoint for unlocking resources (MUST be implemented if the provider wants to use asset unlocking)
+- An endpoint for obtaining previously withheld datablocks (MUST be implemented if it wants to use asset unlocking)
 
-The URI for the initialization endpoint is communicated by the provider to the user through external means (such as listing it on the provider's website).
-The URIs and parameters for all subsequent endpoints are not defined explicitly by the specification and are communicated from the provider to the client.
-This gives the provider great flexibility in how to structure its data and backend implementation.
+*The specific URIs or sub-paths for these endpoint are not prescribed by AssetFetch.*
+The URI and parameters for every endpoint besides the initialization endpoint are communicated by the provider to the client in the response data to a previously made request.
 
-### 5.1.1. The `meta` template
+## 5.2. Response data templates
+
+This section describes data structures that are used in responses from several or even all endpoints.
+These templates are later referenced during the description of the individual endpoints.
+
+### 5.2.1. The `meta` template
 All provider responses on all endpoints MUST carry the `meta` field to communicate key information about the current response.
 
-| Field         | Format | Required | Description                                                                                                                               |
-| ------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `response_id` | string | no       | An ID for this specific response from the provider.                                                                                       |
-| `version`     | string | yes      | The version of AssetFetch that this response is intended for.                                                                             |
-| `kind`        | string | yes      | The kind of data that is being transmitted with this response. The exact value of this field is specified individually for each endpoint. |
-| `message`     | string | no       | An arbitrary message to attach to this response.                                                                                          |
+All instances of this template MUST have the following structure:
+
+| Field         | Format | Requirement                 | Description                                                                                                                               |
+| ------------- | ------ | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `response_id` | string | MAY                         | An ID for this specific response from the provider.                                                                                       |
+| `version`     | string | MUST                        | The version of AssetFetch that this response is intended for.                                                                             |
+| `kind`        | string | MUST                        | The kind of data that is being transmitted with this response. The exact value of this field is specified individually for each endpoint. |
+| `message`     | string | SHOULD, if an error occurs. | An arbitrary message to attach to this response.                                                                                          |
+
+The `version` field MUST contain the AssetFetch version that this response is modeled after.
+The string MUST have the format `<Major>.<Minor>`, for example `0.4`.
 
 The `response_id` field is designed to aid with logging and troubleshooting, should the need arise.
 The provider MAY set this field, in which case they SHOULD keep a log of the responses and their ids, especially in the case of an error.
@@ -557,18 +566,24 @@ If a request fails, the provider SHOULD use the `message` field to communicate m
 
 Clients SHOULD display the `response_id` and `message` fields to the user if a query was unsuccessful, as indicated by the HTTP status code.
 
-### 5.1.2. The `datablock_collection` template
-This object contains most of the relevant information for any resource and always has the same general structure, described in this section.
+### 5.2.2. The `datablock_collection` template
 
-| Field                                | Format          | Required | Description                                                                |
-| ------------------------------------ | --------------- | -------- | -------------------------------------------------------------------------- |
-| \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
-| \<string-key\>                       | object or array | yes      | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
+Nearly every piece of information in AssetFetch is communicated through a datablock, which has a name and a clearly defined structure.
+The datablock collection is a JSON object that uses the datablock's name as a key and its structure as the value.
+
+All instances of this template MUST have the following structure:
+
+| Field                                | Format          | Description                                                                |
+| ------------------------------------ | --------------- | -------------------------------------------------------------------------- |
+| \<string-key\>                       | object or array | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
+| \<string-key\>                       | object or array | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
 | ... (arbitrary number of datablocks) |
 
 Every key of this data object is the identifier for the datablock stored in that key's field.
 
-The example below illustrates an object called `data` whose structure follows the `datablock_collection` template with two datablocks (`block_type_1` and `block_type_2`) which have a varying structure.
+#### 5.2.2.1. Example
+
+The example below illustrates a datablock collection called `data` whose structure follows the `datablock_collection` template with two datablocks (`block_type_1` and `block_type_2`) which have a varying structure.
 
 ```
 {
@@ -586,59 +601,57 @@ The example below illustrates an object called `data` whose structure follows th
 }
 ```
 
-## 5.2. Initialization 
+## 5.3. Endpoint: Initialization (`initialization`)
 
-This endpoint is the first point of contact between a client and a provider.
-The provider MUST NOT require any kind of authentication for interaction with it.
-It's URI is initially typed or copy-pasted by the user into a client and is used to communicate key details about the provider as well as how the interaction between client and provider should proceed.
-
-The response on this endpoint MUST have the following structure:
-
-| Field  | Format                 | Required | Description                                                                                                                                                                                                       |
-| ------ | ---------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `meta` | `meta`                 | yes      | Metadata, kind: `initialization`.                                                                                                                                                                                 |
-| `id`   | string                 | yes      | An id that identifies this provider. It MUST match the regular expression `[a-z0-9-\.]`. Providers SHOULD use a domain name (e.g. `example.com` or `sub.example.com`) as the ID, if applicable in their use-case. |
-| `data` | `datablock_collection` | yes      |                                                                                                                                                                                                                   |
-
-The following datablocks are to be included in the `data` field:
-
-| Requirement Level                    | Datablocks                                         |
-| ------------------------------------ | -------------------------------------------------- |
-| MUST                                 | `asset_list_query`                                 |
-| SHOULD                               | `text`                                             |
-| MAY                                  | `branding`, `authors`, `license`, `web_references` |
-| MUST, only if authentication is used | `provider_configuration`                           |
-
-
-## 5.3. Asset List
-
-The URI and available parameters for this endpoint are communicated by the server to the client using the `asset_list_query` datablock on the initialization endpoint.
+Its URI is initially entered by the user into a client and this endpoint is the first point of contact between a client and a provider.
+It is used to communicate key details about the provider as well as how the interaction between client and provider should proceed.
 
 The response on this endpoint MUST have the following structure:
 
-| Field    | Format                 | Required | Description                   |
-| -------- | ---------------------- | -------- | ----------------------------- |
-| `meta`   | `meta`                 | yes      | Metadata, kind: `asset_list`. |
-| `data`   | `datablock_collection` | yes      |                               |
-| `assets` | Array of `asset`       | yes      |                               |
+| Field  | Format                 | Requirement | Description                                                                                                                                                                                                       |
+| ------ | ---------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `meta` | `meta`                 | MUST        | Metadata, kind: `initialization`.                                                                                                                                                                                 |
+| `id`   | string                 | MUST        | An id that identifies this provider. It MUST match the regular expression `[a-z0-9-\.]`. Providers SHOULD use a domain name (e.g. `example.com` or `sub.example.com`) as the ID, if applicable in their use-case. |
+| `data` | `datablock_collection` | MUST        |                                                                                                                                                                                                                   |
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level | Datablocks                                        |
-| ----------------- | ------------------------------------------------- |
-| MAY               | Any or all of `next_query`, `response_statistics` |
+| Requirement                     | Datablocks                                         |
+| ------------------------------- | -------------------------------------------------- |
+| MUST                            | `asset_list_query`                                 |
+| SHOULD                          | `text`                                             |
+| MAY                             | `branding`, `authors`, `license`, `web_references` |
+| MUST, if authentication is used | `provider_configuration`                           |
+
+## 5.4. Endpoint: Asset List (`asset_list`)
+
+The URI and available HTTP parameters for this endpoint are communicated by the server to the client using the `asset_list_query` datablock on the initialization endpoint.
+
+The response on this endpoint MUST have the following structure:
+
+| Field    | Format                 | Requirement | Description                   |
+| -------- | ---------------------- | ----------- | ----------------------------- |
+| `meta`   | `meta`                 | MUST        | Metadata, kind: `asset_list`. |
+| `data`   | `datablock_collection` | MUST        |                               |
+| `assets` | Array of `asset`       | MUST        |                               |
+
+The following datablocks are to be included in the `data` field:
+
+| Requirement | Datablocks                          |
+| ----------- | ----------------------------------- |
+| MAY         | `next_query`, `response_statistics` |
 
 The `assets` field MUST NOT contain more than 100 items for one response.
-If the provider finds more assets than 100 assets which match the query it MAY use the `next_query` datablock to define a fixed query that the client can use to fetch more results.
+If the provider finds more assets than 100 assets which match the query it SHOULD use the `next_query` datablock to define a fixed query that the client can use to fetch more results.
 
-### 5.3.1. `asset` Structure
+### 5.4.1. `asset` Structure
 
 Every `asset` object MUST have the following structure:
 
-| Field  | Format                 | Required | Description                                                                 |
-| ------ | ---------------------- | -------- | --------------------------------------------------------------------------- |
-| `id`   | string                 | yes      | Unique id for this asset. Must match the regular expression `[a-z0-9_-\.]+` |
-| `data` | `datablock_collection` | yes      |                                                                             |
+| Field  | Format                 | Requirement | Description                                                                 |
+| ------ | ---------------------- | ----------- | --------------------------------------------------------------------------- |
+| `id`   | string                 | MUST        | Unique id for this asset. Must match the regular expression `[a-z0-9_-\.]+` |
+| `data` | `datablock_collection` | MUST        |                                                                             |
 
 The `id` field MUST be unique among all assets for this provider.
 Clients MAY use this id when storing and organizing files on disk.
@@ -646,40 +659,40 @@ Clients MAY use the id as a display title, but SHOULD prefer the `title` field i
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level | Datablocks                                                                          |
-| ----------------- | ----------------------------------------------------------------------------------- |
-| MUST              | `implementation_list_query`                                                         |
-| SHOULD            | `preview_image_thumbnail`, `text`                                                   |
-| MAY               | `preview_image_supplemental`, `license`, `authors`, `dimensions.*`,`web_references` |
+| Requirement | Datablocks                                                                          |
+| ----------- | ----------------------------------------------------------------------------------- |
+| MUST        | `implementation_list_query`                                                         |
+| SHOULD      | `preview_image_thumbnail`, `text`                                                   |
+| MAY         | `preview_image_supplemental`, `license`, `authors`, `dimensions.*`,`web_references` |
 
 
-## 5.4. Implementation List
+## 5.5. Endpoint: Implementation List (`implementation_list`)
 
 This endpoint returns one or several implementations for one specific asset.
 The URI and available parameters for this endpoint are communicated by the server to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
 
-| Field             | Format                    | Required | Description                                              |
-| ----------------- | ------------------------- | -------- | -------------------------------------------------------- |
-| `meta`            | `meta`                    | yes      | Metadata, kind: `implementation_list`.                   |
-| `data`            | `datablock_collection`    | yes      | Datablocks that apply to the entire implementation list. |
-| `implementations` | Array of `implementation` | yes      |                                                          |
+| Field             | Format                    | Requirement | Description                                              |
+| ----------------- | ------------------------- | ----------- | -------------------------------------------------------- |
+| `meta`            | `meta`                    | MUST        | Metadata, kind: `implementation_list`.                   |
+| `data`            | `datablock_collection`    | MUST        | Datablocks that apply to the entire implementation list. |
+| `implementations` | Array of `implementation` | MUST        |                                                          |
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level                           | Datablocks            |
-| ------------------------------------------- | --------------------- |
-| MUST, only if asset unlocking is being used | `unlock_queries`      |
-| MAY                                         | `response_statistics` |
+| Requirement Level                      | Datablocks            |
+| -------------------------------------- | --------------------- |
+| MUST, if asset unlocking is being used | `unlock_queries`      |
+| MAY                                    | `response_statistics` |
 
-### 5.4.1. `implementation` Structure
+### 5.5.1. `implementation` Structure
 
 Every `implementation` object MUST have the following structure:
 
-| Field        | Format                 | Required | Description                                                                             |
-| ------------ | ---------------------- | -------- | --------------------------------------------------------------------------------------- |
-| `id`         | string                 | yes      | A unique id for this implementation. Must match the regular expression `[a-z0-9_-\.]+`. |
-| `data`       | `datablock_collection` | yes      | Datablocks that apply to this specific implementation.                                  |
-| `components` | Array of `component`   | yes      |                                                                                         |
+| Field        | Format                 | Requirement | Description                                                                             |
+| ------------ | ---------------------- | ----------- | --------------------------------------------------------------------------------------- |
+| `id`         | string                 | MUST        | A unique id for this implementation. Must match the regular expression `[a-z0-9_-\.]+`. |
+| `data`       | `datablock_collection` | MUST        | Datablocks that apply to this specific implementation.                                  |
+| `components` | Array of `component`   | MUST        |                                                                                         |
 
 The `id` field MUST be unique among all possible implementations the provider can offer for this asset, *even if not all of them are included in the returned implementation list*.
 The id may be reused for an implementation of a *different* asset.
@@ -692,14 +705,14 @@ The following datablocks are to be included in the `data` field:
 | ----------------- | ---------- |
 | SHOULD            | `text`     |
 
-### 5.4.2. `component` Structure
+### 5.5.2. `component` Structure
 
 Every `component` object MUST have the following structure:
 
-| Field  | Format     | Required | Description                                                                        |
-| ------ | ---------- | -------- | ---------------------------------------------------------------------------------- |
-| `id`   | string     | yes      | A unique id for this component. Must match the regular expression `[a-z0-9_-\.]+`. |
-| `data` | datablocks | yes      | Datablocks for this specific component.                                            |
+| Field  | Format     | Requirement | Description                                                                        |
+| ------ | ---------- | ----------- | ---------------------------------------------------------------------------------- |
+| `id`   | string     | MUST        | A unique id for this component. Must match the regular expression `[a-z0-9_-\.]+`. |
+| `data` | datablocks | MUST        | Datablocks for this specific component.                                            |
 
 The `id` field MUST be unique among all components inside one implementation, but MAY be reused for a component in a different implementation.
 Clients MAY use this id when storing and organizing files on disk.
@@ -709,51 +722,49 @@ The following datablocks are to be included in the `data` field:
 
 | Requirement Level | Datablocks                                                 |
 | ----------------- | ---------------------------------------------------------- |
-| MUST              | `file_info`,`file_handle`, `file_fetch.*`                  |
+| MUST              | `file_info`,`file_handle`, `fetch.*`                       |
 | MAY               | `environment_map`, `loose_material.*`, `mtlx_apply`,`text` |
 
-# 6. Additional Endpoints
-
-Additional endpoint types can be used to perform certain actions or retrieve additional information.
 
 
-## 6.1. Unlocking Endpoint
 
-| Field  | Format                 | Required | Description               |
-| ------ | ---------------------- | -------- | ------------------------- |
-| `meta` | `meta`                 | yes      | Metadata, kind: `unlock`. |
-| `data` | `datablock_collection` | no       | Datablocks.               |
+## 5.6. Endpoint: Unlocking (`unlock`)
+
+| Field  | Format                 | Requirement | Description               |
+| ------ | ---------------------- | ----------- | ------------------------- |
+| `meta` | `meta`                 | MUST        | Metadata, kind: `unlock`. |
+| `data` | `datablock_collection` | MAY         | Datablocks.               |
 
 This endpoint is invoked to perform an "unlocking" (usually meaning a "purchase") of a resource.
-After calling it the client can expect to resolve all previously withheld downloads using the endpoint for unlocked data specified in the `file_fetch.download_post_unlock` datablock.
+After calling it the client can expect to resolve all previously withheld downloads using the endpoint for unlocked data specified in the `fetch.download_post_unlock` datablock.
 The URI and parameters for this endpoint are communicated through the `unlock_queries` datablock.
 
 This endpoint currently does not use any datablocks.
 Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
 
-## 6.2. Unlocked Data Endpoint
+## 5.7. Endpoint: Unlocked Data (`unlocked_data`)
 
-| Field  | Format                 | Required | Description                     |
-| ------ | ---------------------- | -------- | ------------------------------- |
-| `meta` | `meta`                 | yes      | Metadata, kind:`unlocked_data`. |
-| `data` | `datablock_collection` | yes      | Datablocks.                     |
+| Field  | Format                 | Requirement | Description                     |
+| ------ | ---------------------- | ----------- | ------------------------------- |
+| `meta` | `meta`                 | MUST        | Metadata, kind:`unlocked_data`. |
+| `data` | `datablock_collection` | MUST        | Datablocks.                     |
 
 This endpoint type responds with the previously withheld data for one component, assuming that the client has made all the necessary calls to the unlocking endpoint(s).
-It gets called by the client for every component that had an `file_fetch.download_post_unlock` datablock assigned to it and returns the "real" `file_fetch.download` datablock (which may be temporarily generated).
+It gets called by the client for every component that had an `fetch.download_post_unlock` datablock assigned to it and returns the "real" `fetch.download` datablock (which may be temporarily generated).
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level | Datablocks            |
-| ----------------- | --------------------- |
-| MUST              | `file_fetch.download` |
+| Requirement Level | Datablocks       |
+| ----------------- | ---------------- |
+| MUST              | `fetch.download` |
 
 
-## 6.3. Connection Status Endpoint
+## 5.8. Endpoint: Connection Status (`connection_status`)
 
-| Field  | Format                 | Required | Description                         |
-| ------ | ---------------------- | -------- | ----------------------------------- |
-| `meta` | `meta`                 | yes      | Metadata, kind: `connection_status` |
-| `data` | `datablock_collection` | yes      | Datablocks.                         |
+| Field  | Format                 | Requirement | Description                         |
+| ------ | ---------------------- | ----------- | ----------------------------------- |
+| `meta` | `meta`                 | MUST        | Metadata, kind: `connection_status` |
+| `data` | `datablock_collection` | MUST        | Datablocks.                         |
 
 The URI and parameters for the balance endpoint are communicated by the provider to the client through the `provider_configuration` datablock.
 
@@ -773,9 +784,9 @@ The following datablocks are to be included in the `data` field:
 
 
 
-# 7. Datablocks
+# 6. Datablocks
 
-## 7.1. Datablock names
+## 6.1. Datablock names
 
 The name of a datablock MUST be a string composed of small alphanumerical characters, underscores and dots.
 Datablock names MUST contain either 0 or 1 instance of the dot (`.`) character which indicates that a datablock has multiple variations.
@@ -783,12 +794,12 @@ One resource MUST NOT have two datablocks that share the same string *before* th
 
 The resulting regular expression from these rules is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
 
-## 7.2. Datablock value templates
+## 6.2. Datablock value templates
 This section describes additional data types that can be used within other datablocks.
 They exist to eliminate the need to re-specify the same data structure in two different datablock definitions.
 *The templates can not be used directly as datablocks under their template name, though some datablock completely inherit their structure under a new name.*
 
-### 7.2.1. `variable_query`
+### 6.2.1. `variable_query`
 This template describes an HTTP query whose parameters are controllable by the user.
 See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more details.
 
@@ -798,7 +809,7 @@ See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more detail
 | `method`     | string               | yes      | One of `get`, `post`                        |
 | `parameters` | array of `parameter` | yes      | The configurable parameters for this query. |
 
-#### 7.2.1.1. `parameter` Structure
+#### 6.2.1.1. `parameter` Structure
 A parameter describes the attributes of one parameter for the query and how the client can present this to its user.
 
 | Field     | Format            | Required                      | Description                                                                                                                                                                                                          |
@@ -809,7 +820,7 @@ A parameter describes the attributes of one parameter for the query and how the 
 | `default` | string            | no                            | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
 | `choices` | array of `choice` | yes, if `select` type is used | This field contains all possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
 
-#### 7.2.1.2. `choice` Structure
+#### 6.2.1.2. `choice` Structure
 A single choice for a `select` type parameter.
 
 | Field   | Format | Required | Description                                                                                   |
@@ -817,7 +828,7 @@ A single choice for a `select` type parameter.
 | `value` | string | yes      | The value that the client MUST use in its HTTP response if the user has selected this choice. |
 | `title` | string | yes      | The title that the client SHOULD display to the user to represent this choice.                |
 
-### 7.2.2. `fixed_query`
+### 6.2.2. `fixed_query`
 This template describes a fixed query that can be sent by the client to the provider without additional user input or configuration.
 See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more details.
 
@@ -836,7 +847,7 @@ See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more detail
 
 
 
-# 8. Datablock Index
+# 7. Datablock Index
 
 This section displays all datablocks that are currently part of the standard.
 
@@ -845,9 +856,9 @@ To aid with reading this list, exclamation marks and question marks are used to 
 A star (*) is used to indicate that there are special rules for when/if this datablock is to be used.
 
 
-## 8.1. Configuration and authentication-related datablocks
+## 7.1. Configuration and authentication-related datablocks
 
-### 8.1.1. `provider_configuration`
+### 7.1.1. `provider_configuration`
 Headers that the provider expects to receive from the client on every subsequent request.
 
 This datablock has the following structure:
@@ -860,7 +871,7 @@ This datablock has the following structure:
 | `header_acquisition_uri_title` | string            | no       | Title for the `acquisition_uri`.                                                                                  |
 
 
-#### 8.1.1.1. `header` structure
+#### 7.1.1.1. `header` structure
 
 | Field          | Format  | Required            | Description                                                                                                                                                                |
 | -------------- | ------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -873,7 +884,7 @@ This datablock has the following structure:
 | `title`        | string  | no                  | Title that the client SHOULD display to the user.                                                                                                                          |
 | `encoding`     | string  | no, default=`plain` | The encoding that the client MUST apply to the header value and the prefix/suffix. MUST be one of `plain` or `base64`.                                                     |
 
-### 8.1.2. `provider_reconfiguration`
+### 7.1.2. `provider_reconfiguration`
 
 This datablock allows the provider to communicate to the client that a new set of headers that it MUST sent along with every request instead of those entered by the user until a new initialization is performed.
 The client MUST fully replace the values defined using the requirements from the original `provider_configuration` datablock with the new values defined in this datablock.
@@ -888,7 +899,7 @@ Providers SHOULD therefore only use this datablock for purposes that are strictl
 Clients MAY require the user to confirm the new header values before starting to send them.
 
 
-### 8.1.3. `user`
+### 7.1.3. `user`
 
 This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
 
@@ -898,24 +909,24 @@ This datablock allows the provider to transmit information about the user to the
 | `display_tier`     | string | no       | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.                 |
 | `display_icon_uri` | string | no       | URI to an image with an aspect ratio of 1:1, for example a profile picture or icon representing the subscription tier. |
 
-## 8.2. Browsing-related datablocks
+## 7.2. Browsing-related datablocks
 
 These datablocks all relate to the process of browsing for assets or implementations.
 
-### 8.2.1. `asset_list_query`
+### 7.2.1. `asset_list_query`
 Describes the variable query for fetching the list of available assets from a provider.
 It follows the `variable_query` template.
 
-### 8.2.2. `implementation_list_query`
+### 7.2.2. `implementation_list_query`
 Describes the variable query for fetching the list of available implementations for an asset from a provider.
 It follows the `variable_query` template.
 
-### 8.2.3. `next_query`
+### 7.2.3. `next_query`
 Describes a fixed query to fetch more results using the same parameters as the current query.
 The response to this query from the provider MUST be of the same `kind` as the query in which this datablock is contained.
 Follows the `fixed_query` template.
 
-### 8.2.4. `response_statistics`
+### 7.2.4. `response_statistics`
 
 This datablock contains statistics about the current response.
 It can be used to communicate the total number of results in a query where not all results can be communicated in one response and are instead deferred using `next_query`.
@@ -925,9 +936,9 @@ It can be used to communicate the total number of results in a query where not a
 | `result_count_total` | int    | yes      | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
 
 
-## 8.3. File-related datablocks
+## 7.3. File-related datablocks
 
-### 8.3.1. `file_info`
+### 7.3.1. `file_info`
 
 This datablock contains information about any kind of file.
 
@@ -939,7 +950,7 @@ This datablock contains information about any kind of file.
 The `extension` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
 MUST include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
 
-### 8.3.2. `file_handle`
+### 7.3.2. `file_handle`
 
 This datablock indicates how this file should behave during the import process.
 The full description of component handling can be found in the [component handling section](#933-handling-component-files).
@@ -965,7 +976,7 @@ It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 `/`, `contents/` or `my/contents/` would be correct.
 `contents`,`./contents/`,`./contents`,`my/../../contents` or `../contents` would all be incorrect.
 
-### 8.3.3. `file_fetch.download`
+### 7.3.3. `file_fetch.download`
 
 This datablock indicates that this is a file which can be downloaded directly using the provided query.
 
@@ -973,7 +984,7 @@ The full description of component handling can be found in the [component handli
 
 The structure of this datablock follows the `fixed_query` template.
 
-### 8.3.4. `file_fetch.download_post_unlock`
+### 7.3.4. `file_fetch.download_post_unlock`
 
 This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
 It indicates that when the referenced unlock query has been completed, the *real* `file_fetch.download` datablock can be received by performing the fixed query in `unlocked_data_query`
@@ -984,7 +995,7 @@ It indicates that when the referenced unlock query has been completed, the *real
 | `unlocked_data_query` | `fixed_query` | yes      | The query to fetch the previously withheld `file_fetch.download` datablock for this component if the unlocking was successful.                                                                                                                 |
 
 
-### 8.3.5. `file_fetch.from_archive`
+### 7.3.5. `file_fetch.from_archive`
 This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
 More about the handling in the [import and handling section](#9-implementation-analysis-and-handling).
 
@@ -993,11 +1004,11 @@ More about the handling in the [import and handling section](#9-implementation-a
 | `archive_component_id` | string | yes                                                                                                                                                                                                                                                                                                | The id of the component representing the archive that this component is contained in. |
 | `component_path`       | string | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`). |
 
-## 8.4. Display related datablocks
+## 7.4. Display related datablocks
 
 These datablocks relate to how assets and their details are displayed to the user.
 
-### 8.4.1. `text`
+### 7.4.1. `text`
 General text information to be displayed to the user.
 
 | Field         | Format | Required | Description                                    |
@@ -1006,7 +1017,7 @@ General text information to be displayed to the user.
 | `description` | string | no       | A description text for the datablocks subject. |
 
 
-### 8.4.2. `web_references`
+### 7.4.2. `web_references`
 References to external websites for documentation or support.
 
 An array of objects each of which MUST follow this format:
@@ -1017,7 +1028,7 @@ An array of objects each of which MUST follow this format:
 | `uri`      | string | yes      | The URL to be opened in the users browser.                                                                    |
 | `icon_uri` | string | yes      | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
-### 8.4.3. `branding`
+### 7.4.3. `branding`
 Brand information about the provider.
 
 | Field             | Format | Required | Description                                                                                                                   |
@@ -1027,7 +1038,7 @@ Brand information about the provider.
 | `logo_wide_uri`   | string | no       | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD be transparent.                    |
 | `banner_uri`      | string | no       | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent. |
 
-### 8.4.4. `license`
+### 7.4.4. `license`
 Contains license information.
 When attached to an asset, it means that the license information only applies to that asset, when applied to a provider, it means that the license information applies to all assets offered through that provider.
 
@@ -1036,7 +1047,7 @@ When attached to an asset, it means that the license information only applies to
 | `license_spdx` | string | no       | MUST be an [SPDX license identifier](https://spdx.org/licenses/) or be left unset/null if not applicable. |
 | `license_uri`  | string | no       | URI which the client SHOULD offer to open in the user's web browser to learn more about the license.      |
 
-### 8.4.5. `authors`
+### 7.4.5. `authors`
 
 This datablock can be used to communicate the author(s) of a particular asset.
 
@@ -1048,7 +1059,7 @@ Array of objects that MUST have this structure:
 | `uri`  | string | no       | A URI for this author, for example a profile link.              |
 | `role` | string | no       | The role that the author has had in the creation of this asset. |
 
-### 8.4.6. `dimensions.3d`
+### 7.4.6. `dimensions.3d`
 Contains general information about the physical dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh data.
 
 An object that MUST conform to this format:
@@ -1059,7 +1070,7 @@ An object that MUST conform to this format:
 | `height_m` | float  | yes      | Height of the referenced asset |
 | `depth_m`  | float  | yes      | Depth of the referenced asset  |
 
-### 8.4.7. `dimensions.2d`
+### 7.4.7. `dimensions.2d`
 Contains general information about the physical dimensions of a two-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh-,texture-, or uv data.
 
 An object that MUST conform to this format:
@@ -1069,7 +1080,7 @@ An object that MUST conform to this format:
 | `width_m`  | float  | yes      | Width of the referenced asset  |
 | `height_m` | float  | yes      | Height of the referenced asset |
 
-### 8.4.8. `preview_image_supplemental`
+### 7.4.8. `preview_image_supplemental`
 Contains a list of preview images with `uri`s and `alt`-Strings associated to the asset.
 
 An array where every field must conform to the following structure:
@@ -1079,7 +1090,7 @@ An array where every field must conform to the following structure:
 | `alt` | string | no       | An "alt" String for the image.                                                                                |
 | `uri` | string | yes      | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
-### 8.4.9. `preview_image_thumbnail`
+### 7.4.9. `preview_image_thumbnail`
 Contains information about a thumbnail for an asset. The thumbnail can be provided in multiple resolutions.
 
 An object that MUST conform to this format:
@@ -1089,7 +1100,7 @@ An object that MUST conform to this format:
 | `alt`  | string | no       | An "alt" String for the image. |
 | `uris` | object | yes      | See structure described below. |
 
-#### 8.4.9.1. `uris` Structure
+#### 7.4.9.1. `uris` Structure
 
 The `uris` field MUST be an object whose keys are strings containing an integer and whose values are strings.
 The object MUST have at least one member.
@@ -1099,12 +1110,12 @@ If the image is not a square, its key SHOULD be set based on the pixel count of 
 The image's media type SHOULD be one of `image/png` or `image/jpeg`.
 If the provider does not have insight into the dimensions of the thumbnail that it is referring the client to, it SHOULD use use the key `0` for the thumbnail url.
 
-## 8.5. File handling and relationship datablocks
+## 7.5. File handling and relationship datablocks
 
 These datablocks describe how files relate to each other.
 In many cases the relationships can be represented purely by placing component files adjacently in one directory and making only some of them "active", but in some cases it is necessary to declare relationships explicitly in AssetFetch.
 
-### 8.5.1. `loose_environment`
+### 7.5.1. `loose_environment`
 The presence of this datablock on a component indicates that it is an environment map.
 This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR), not if the environment is already wrapped in another format with native support.
 An object that MUST conform to this format:
@@ -1113,7 +1124,7 @@ An object that MUST conform to this format:
 | ------------ | ------ | -------- | --------------------------------------- |
 | `projection` | string | yes      | One of `equirectangular`, `mirror_ball` |
 
-### 8.5.2. `loose_material.define`
+### 7.5.2. `loose_material.define`
 
 This datablock is applied to a component that is part of a loose material, most likely a material map.
 It indicates which role the component should play in this material.
@@ -1124,7 +1135,7 @@ It indicates which role the component should play in this material.
 | `map`           | string | yes      | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
 | `colorspace`    | string | no       | One of `srgb`, `linear`                                                                                                                   |
 
-### 8.5.3. `loose_material.apply`
+### 7.5.3. `loose_material.apply`
 
 When applied to a component, it indicates that this component uses one or multiple materials defined using `loose_material.define` datablocks.
 
@@ -1135,7 +1146,7 @@ The datablock is an **array of objects** with this structure:
 | `material_name`        | string | yes      | Name of the material used in the definition datablocks                                                                                |
 | `apply_selectively_to` | string | no       | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
 
-### 8.5.4. `mtlx_apply`
+### 7.5.4. `mtlx_apply`
 When applied to a component, it indicates that this component makes use of a material defined in mtlx document represented by another component.
 
 | Field                  | Format | Required | Description                                                                                                                           |
@@ -1144,11 +1155,11 @@ When applied to a component, it indicates that this component makes use of a mat
 | `mtlx_material`        | string | no       | Optional reference for which material to use from the mtlx file, if it contains multiple.                                             |
 | `apply_selectively_to` | string | no       | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
 
-## 8.6. File-format specific datablocks
+## 7.6. File-format specific datablocks
 
 These datablocks relate to one specific file format.
 
-### 8.6.1. `format.blend`
+### 7.6.1. `format.blend`
 Information about files with the extension `.blend`.
 This information is intended to help the client understand the file.
 
@@ -1158,21 +1169,21 @@ This information is intended to help the client understand the file.
 | `is_asset` | boolean           | no       | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
 | `targets`  | array of `target` | no       | Array containing the blender structures inside the file that are relevant to the asset.                           |
 
-#### 8.6.1.1. `target` Structure
+#### 7.6.1.1. `target` Structure
 
 | Field   | Format            | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | ------- | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `kind`  | `string`          | yes      | One of `actions`, `armatures`, `brushes`, `cache_files`, `cameras`, `collections`, `curves`, `fonts`, `grease_pencils`, `hair_curves`, `images`, `lattices`, `lightprobes`, `lights`, `linestyles`, `masks`, `materials`, `meshes`, `metaballs`, `movieclips`, `node_groups`, `objects`, `paint_curves`, `palettes`, `particles`, `pointclouds`, `scenes`, `screens`, `simulations`, `sounds`, `speakers`, `texts`, `textures`, `volumes`, `workspaces`, `worlds` |
 | `names` | Array of `string` | yes      | List of the names of the resources to import.                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
-### 8.6.2. `format.usd`
+### 7.6.2. `format.usd`
 Information about files with the extension `.usd`.
 
 | Field      | Format  | Required | Description                                                                |
 | ---------- | ------- | -------- | -------------------------------------------------------------------------- |
 | `is_crate` | boolean | no       | Indicates whether this file is a "crate" (like .usdc) or not (like .usda). |
 
-### 8.6.3. `format.obj`
+### 7.6.3. `format.obj`
 Information about files with the extension `.obj`.
 
 | Field     | Format | Required | Description                                                        |
@@ -1180,13 +1191,13 @@ Information about files with the extension `.obj`.
 | `up_axis` | string | yes      | Indicates which axis should be treated as up. MUST be `+y` or `+z` |
 
 
-## 8.7. Unlocking-related datablocks
+## 7.7. Unlocking-related datablocks
 
 These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch.
 
 *Note that the `file_fetch.download_post_unlock` datablock is also related to the unlocking system but is [grouped with the other `file_fetch.*` datablocks](#83-file-related-datablocks).* 
 
-### 8.7.1. `unlock_balance`
+### 7.7.1. `unlock_balance`
 Information about the user's current account balance.
 
 | Field                | Format | Required | Description                                                                                                 |
@@ -1195,13 +1206,13 @@ Information about the user's current account balance.
 | `balance_unit`       | string | yes      | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
 | `balance_refill_uri` | string | yes      | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form.    |
 
-### 8.7.2. `unlock_queries`
+### 7.7.2. `unlock_queries`
 
 This datablock contains the query or queries required to unlock all or some of the components in this implementation list.
 
 This datablock is **an array** consisting of `unlock_query` objects.
 
-#### 8.7.2.1. `unlock_query` structure
+#### 7.7.2.1. `unlock_query` structure
 
 | Field                | Format            | Required                 | Description                                                                                                                                                                                    |
 | -------------------- | ----------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1222,9 +1233,9 @@ This datablock is **an array** consisting of `unlock_query` objects.
 
 
 
-# 9. Implementation analysis and handling
+# 8. Implementation analysis and handling
 
-## 9.1. Overview
+## 8.1. Overview
 
 This specification generally does not focus heavily on the exact handling of assets implementations and their associated files on the client side, as it may vary greatly between different applications/clients.
 It only outlines a general structure that the client SHOULD follow in order to make its asset definitions as portable between applications as reasonably possible.
@@ -1242,7 +1253,7 @@ When receiving several implementations for the same asset from a provider, the c
 Client implementors SHOULD consider whether these steps are fitting to their environment and make deviations, if necessary.
 The client MAY choose create an intermediary plan to allow the user to preview the import process (steps taken, files downloaded, etc.) before it is performed.
 
-## 9.2. Implementation analysis
+## 8.2. Implementation analysis
 
 When analyzing a set of implementation sent from the provider via the [implementation list endpoint](#54-implementation-list),
 the client SHOULD decide for every implementation whether it is "readable".
@@ -1254,33 +1265,33 @@ Possible factors for this decision are:
 - The use of more advanced AssetFetch features such as archive handling or asset unlocking.
 - Format-specific indicators in the `format.*` datablock which indicate that the given file is incompatible with the client/host application. 
 
-## 9.3. Implementation import
+## 8.3. Implementation import
 
 If at least one of the implementations offered by the provider has been deemed readable, the client can proceed and make an actual import attempt.
 This usually involves interaction with the host application which means that client implementors SHOULD consider the steps outlined in this section only as a rough indicator for how to perform the import.
 
-### 9.3.1. The implementation directory
+### 8.3.1. The implementation directory
 
 For handling the implementation of an asset offered by the provider the client SHOULD make a dedicated directory into which all the files described by all the components can be arranged.
 For this purpose it MAY use the `id` values transmitted on the provider-, asset- and implementation queries.
 The directory SHOULD be empty at the start of the component handling process.
 
-### 9.3.2. Performing unlock queries
+### 8.3.2. Performing unlock queries
 
 If the implementation contains components with a `file_fetch.download_post_unlock` datablock,
 then the client MUST perform the unlock query referenced in that datablock before it can proceed.
 Otherwise the resources may not be fully unlocked and the provider will likely refuse to hand over the files.
 
-### 9.3.3. Handling component files
+### 8.3.3. Handling component files
 
 The behavior of a component is dictated by the value of the `behavior` field in the `file_handle` datablock.
 
-#### 9.3.3.1. Handling for `single_active`
+#### 8.3.3.1. Handling for `single_active`
 
 Fetch the file using the instructions in the `file_fetch.*` datablock and place it in the `local_path` listed in the `file_handle` datablock.
 Next, make an attempt to load this file directly, for example through the host application's native import functionality.
 
-#### 9.3.3.2. Handling for `single_passive`
+#### 8.3.3.2. Handling for `single_passive`
 
 Fetch the file using the instructions in the `file_fetch.*` datablock and place it in the `local_path` listed in the `file_handle` datablock.
 
@@ -1288,20 +1299,20 @@ The client SHOULD NOT make a direct attempt to load this file and only process i
 This can be either through a native reference in the component file itself (in which ase the host application's native import functionality will handle the references by itself)
 or through a reference in the AssetFetch data (like the `loose_material.apply` datablock), in which case the client needs to take additional action to handle the file.
 
-#### 9.3.3.3. Handling for `archive_unpack_fully`
+#### 8.3.3.3. Handling for `archive_unpack_fully`
 
 Fetch the file using the instructions in the `file_fetch.*` datablock and place it in a temporary location.
 
 The client MUST unpack the full contents of the archive root into the implementation directory using the `local_path` in the `file_handle` datablock as the sub-path inside the implementation directory.
 
-#### 9.3.3.4. Handling for `archive_unpack_referenced`
+#### 8.3.3.4. Handling for `archive_unpack_referenced`
 
 Fetch the file using the instructions in the `file_fetch.*` datablock and place it in a temporary location.
 
 Then unpack only those files that are referenced by other components in their `file_fetch.from_archive` datablocks.
 Use the `local_path` in the individual component's `file_handle` datablock as the unpacking destination.
 
-#### 9.3.3.5. Collisions in the implementation directory
+#### 8.3.3.5. Collisions in the implementation directory
 
 In general, if an implementation assigns the same `local_path` to two different components, then the client's behavior is undefined.
 Providers MUST avoid configurations that lead to this outcome.
@@ -1312,7 +1323,7 @@ Therefore, the client SHOULD perform all unpacking initiated by archive componen
 
 Conflicts as the result of two archive components with `archive_unpack_fully` behavior have undefined behavior and MUST be avoided by the provider.
 
-## 9.4. Local Storage of Asset Files
+## 8.4. Local Storage of Asset Files
 As described in the previous section, individual asset components/files may have implicit relationships to each other that are not directly visible from any of the datablocks such as relative file paths within project files.
 To ensure that these references are still functional, AssetFetch specifies certain rules regarding how clients arrange downloaded files in the local file system.
 
@@ -1321,21 +1332,21 @@ The location of this directory is not specified and can be fixed for all uses of
 Inside this directory it SHOULD place every file as specified in the `local_path` field of the component's `datablock`.
 When opening any downloaded file it SHOULD happen from this directory to ensure that relative file paths continue to work.
 
-## 9.5. Materials
+## 8.5. Materials
 
 Materials can be handled in several different ways, which are outlined in this section.
 
-### 9.5.1. Using native formats and hidden components
+### 8.5.1. Using native formats and hidden components
 Many file formats for 3D content - both vendor-specific as well as open - offer native support for referencing external texture files.
 Providers SHOULD use these "native" material formats whenever possible.
 When materials are used alongside a 3D model file with proper support, the material map components SHOULD be marked with the behavior `single_passive`,
 since they will be referenced by the host application's native importer automatically.
 
-#### 9.5.1.1. MTLX
+#### 8.5.1.1. MTLX
 The `mtlx_apply` datablock allows references from a component representing a mesh to a component representing an MaterialX (MTLX) file.
 This allows the use of `.mtlx` files with mesh file formats that do not have the native ability to reference MTLX files.
 
-### 9.5.2. Using loose material declarations
+### 8.5.2. Using loose material declarations
 The workflow outlined in the previous sections is not always easily achievable since not all file 3D file formats offer up-to-date (or any) support for defining materials.
 Provider may also have their own practical reasons for not offering their material definitions in a widely recognized machine-readable format.
 
@@ -1346,7 +1357,7 @@ They make it possible to define basic PBR materials through datablocks on the in
 
 Providers SHOULD make use of this notation if, and only if, other more native representations of the material are unavailable of severely insufficient.
 
-## 9.6. Environments
+## 8.6. Environments
 HDRI environments or skyboxes face a similar situation as materials:
 They can be represented using native formats, but a common practice is to provide them as a singular image file whose projection must be manually inferred by the artist.
 The `loose_environment` datablock works similar to the `loose_material.*` datablocks and allows the provider to communicate that a component should be treated as an environment and what projection should be used.
@@ -1359,16 +1370,16 @@ The `loose_environment` datablock works similar to the `loose_material.*` databl
 
 
 
-# 10. Security Considerations
+# 9. Security Considerations
 
 This section describes security considerations for implementing AssetFetch.
 
-## 10.1. Storing sensitive headers
+## 9.1. Storing sensitive headers
 During the initialization step providers can mark headers as sensitive.
 Clients MUST find an appropriate solution for storing these sensitive headers.
 They SHOULD consider storing secret headers through native operation system APIs for credential management.
 
-## 10.2. Avoiding Relative Paths in `local_path`
+## 9.2. Avoiding Relative Paths in `local_path`
 Datablocks of the `fetch.*` family specify a local sub-path for every component that needs to be appended to a local path chosen by the client in order to assemble the correct file structure for this asset.
 As specified in the [datablock requirements](#83-file-related-datablocks) the `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
 Clients MUST take cate to ensure that components with references like `./` or `../` in their local path are rejected.
