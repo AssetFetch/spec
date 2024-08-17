@@ -1041,109 +1041,123 @@ If the image is not a square, its key SHOULD be set based on the pixel count of 
 The image's media type SHOULD be one of `image/png` or `image/jpeg`.
 If the provider does not have insight into the dimensions of the thumbnail that it is referring the client to, it SHOULD use use the key `0` for the thumbnail url.
 
-## 7.5. File handling and relationship datablocks
 
-These datablocks describe how files relate to each other.
-In many cases the relationships can be represented purely by placing component files adjacently in one directory and making only some of them "active", but in some cases it is necessary to declare relationships explicitly in AssetFetch.
-
-### 7.5.1. `loose_environment`
-The presence of this datablock on a component indicates that it is an environment map.
-This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR), not if the environment is already wrapped in another format with native support.
-An object that MUST conform to this format:
-
-| Field        | Format | Required | Description                             |
-| ------------ | ------ | -------- | --------------------------------------- |
-| `projection` | string | yes      | One of `equirectangular`, `mirror_ball` |
-
-### 7.5.2. `loose_material.define`
-
-This datablock is applied to a component that is part of a loose material, most likely a material map.
-It indicates which role the component should play in this material.
-
-| Field           | Format | Required | Description                                                                                                                               |
-| --------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `material_name` | string | yes      |                                                                                                                                           |
-| `map`           | string | yes      | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
-| `colorspace`    | string | no       | One of `srgb`, `linear`                                                                                                                   |
-
-### 7.5.3. `loose_material.apply`
-
-When applied to a component, it indicates that this component uses one or multiple materials defined using `loose_material.define` datablocks.
-
-The datablock is an **array of objects** with this structure:
-
-| Field                  | Format | Required | Description                                                                                                                           |
-| ---------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `material_name`        | string | yes      | Name of the material used in the definition datablocks                                                                                |
-| `apply_selectively_to` | string | no       | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
-
-### 7.5.4. `mtlx_apply`
-When applied to a component, it indicates that this component makes use of a material defined in mtlx document represented by another component.
-
-| Field                  | Format | Required | Description                                                                                                                           |
-| ---------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `mtlx_component_id`    | string | yes      | Id of the component that represents the mtlx file.                                                                                    |
-| `mtlx_material`        | string | no       | Optional reference for which material to use from the mtlx file, if it contains multiple.                                             |
-| `apply_selectively_to` | string | no       | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
-
-## 7.6. File-format specific datablocks
-
-These datablocks relate to one specific file format.
-
-### 7.6.1. `format.blend`
-Information about files with the extension `.blend`.
-This information is intended to help the client understand the file.
-
-| Field      | Format            | Required | Description                                                                                                       |
-| ---------- | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `version`  | string            | no       | Blender Version in the format `Major.Minor.Patch` or `Major.Minor` or `Major`                                     |
-| `is_asset` | boolean           | no       | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
-| `targets`  | array of `target` | no       | Array containing the blender structures inside the file that are relevant to the asset.                           |
-
-#### 7.6.1.1. `target` Structure
-
-| Field   | Format            | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------- | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `kind`  | `string`          | yes      | One of `actions`, `armatures`, `brushes`, `cache_files`, `cameras`, `collections`, `curves`, `fonts`, `grease_pencils`, `hair_curves`, `images`, `lattices`, `lightprobes`, `lights`, `linestyles`, `masks`, `materials`, `meshes`, `metaballs`, `movieclips`, `node_groups`, `objects`, `paint_curves`, `palettes`, `particles`, `pointclouds`, `scenes`, `screens`, `simulations`, `sounds`, `speakers`, `texts`, `textures`, `volumes`, `workspaces`, `worlds` |
-| `names` | Array of `string` | yes      | List of the names of the resources to import.                                                                                                                                                                                                                                                                                                                                                                                                                     |
-
-### 7.6.2. `format.usd`
-Information about files with the extension `.usd`.
-
-| Field      | Format  | Required | Description                                                                |
-| ---------- | ------- | -------- | -------------------------------------------------------------------------- |
-| `is_crate` | boolean | no       | Indicates whether this file is a "crate" (like .usdc) or not (like .usda). |
-
-### 7.6.3. `format.obj`
-Information about files with the extension `.obj`.
-
-| Field     | Format | Required | Description                                                        |
-| --------- | ------ | -------- | ------------------------------------------------------------------ |
-| `up_axis` | string | yes      | Indicates which axis should be treated as up. MUST be `+y` or `+z` |
-
-
-## 7.7. Unlocking-related datablocks
+## 7.4. Unlocking-related datablocks
 
 These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch.
 
-*Note that the `file_fetch.download_post_unlock` datablock is also related to the unlocking system but is [grouped with the other `file_fetch.*` datablocks](#83-file-related-datablocks).* 
+*Note that the `fetch.download_post_unlock` datablock is also related to the unlocking system but is [grouped with the other `fetch.*` datablocks](#83-file-related-datablocks).* 
 
-### 7.7.1. `unlock_balance`
+### 7.4.1. `unlock_balance`
 Information about the user's current account balance.
 
-| Field                | Format | Required | Description                                                                                                 |
-| -------------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------- |
-| `balance`            | number | yes      | Balance.                                                                                                    |
-| `balance_unit`       | string | yes      | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
-| `balance_refill_uri` | string | yes      | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form.    |
+| Field                | Format | Requirement | Description                                                                                                 |
+| -------------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------- |
+| `balance`            | number | MUST        | Balance.                                                                                                    |
+| `balance_unit`       | string | MUST        | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
+| `balance_refill_uri` | string | MAY         | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form.    |
 
-### 7.7.2. `unlock_queries`
+### 7.4.2. `unlock_queries`
 
 This datablock contains the query or queries required to unlock all or some of the components in this implementation list.
 
 This datablock is **an array** consisting of `unlock_query` objects.
 
-#### 7.7.2.1. `unlock_query` structure
+#### 7.4.2.1. `unlock_query` structure
+
+| Field                | Format            | Requirement                    | Description                                                                                                                                                                                    |
+| -------------------- | ----------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                 | string            | MUST                           | This is the id by which `fetch.download_post_unlock` datablocks will reference this query.                                                                                                     |
+| `unlocked`           | boolean           | MUST                           | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
+| `price`              | number            | MUST, only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
+| `query`              | `fixed_query`     | MUST, only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
+| `child_queries`      | Array of `string` | MAY                            | A list containing the ids of other queries that can also be considered "unlocked" if this query has been executed.                                                                             |
+| `query_fallback_uri` | string            | MAY                            | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
+
+
+## 7.5. Format-related datablocks
+
+
+### 7.5.1. `format`
+This is the default format datablock for all file formats that do not have their own dedicated `format.*` datablock in AssetFetch.
+
+| Field       | Format | Requirement | Description                                       |
+| ----------- | ------ | ----------- | ------------------------------------------------- |
+| `extension` | string | MUST        | The file extension.                               |
+| `mediatype` | string | (see below) | The mediatype string for this file, if available. |
+
+#### 7.5.1.1. `extension` rules
+
+The `extension` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
+SHOULD include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
+
+#### 7.5.1.2. `mediatype` rules
+
+The `mediatype` field SHOULD be used if (and only if) an official mediatype definition exists for the file format of the file associated with the component.
+See [the official mediatype list on the IANA website](https://www.iana.org/assignments/media-types/media-types.xhtml).
+
+### 7.5.2. `format.blend`
+Information about files with the extension `.blend`.
+This information is intended to help the client understand the file.
+
+| Field      | Format            | Requirement | Description                                                                                                       |
+| ---------- | ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| `version`  | string            | MAY         | Blender Version in the format `Major.Minor.Patch` or `Major.Minor` or `Major`                                     |
+| `is_asset` | boolean           | MAY         | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
+| `targets`  | array of `target` | MAY         | Array containing the blender structures inside the file that are relevant to the asset.                           |
+
+#### 7.5.2.1. `target` Structure
+
+| Field   | Format            | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------- | ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kind`  | `string`          | MUST        | One of `actions`, `armatures`, `brushes`, `cache_files`, `cameras`, `collections`, `curves`, `fonts`, `grease_pencils`, `hair_curves`, `images`, `lattices`, `lightprobes`, `lights`, `linestyles`, `masks`, `materials`, `meshes`, `metaballs`, `movieclips`, `node_groups`, `objects`, `paint_curves`, `palettes`, `particles`, `pointclouds`, `scenes`, `screens`, `simulations`, `sounds`, `speakers`, `texts`, `textures`, `volumes`, `workspaces`, `worlds` |
+| `names` | Array of `string` | MUST        | List of the names of the resources to import.                                                                                                                                                                                                                                                                                                                                                                                                                     |
+
+### 7.5.3. `format.obj`
+Information about files with the extension `.obj`.
+
+| Field        | Format | Requirement | Description                                                                                          |
+| ------------ | ------ | ----------- | ---------------------------------------------------------------------------------------------------- |
+| `up_axis`    | string | SHOULD      | Indicates which axis should be treated as "up". MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`.        |
+| `front_axis` | string | MAY         | Indicates which axis should be treated as the "front". MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`. |
+
+
+## 7.6. Fetching-related datablocks
+
+These datablocks describe how a client can gain access to a component file.
+
+### 7.6.1. `fetch.download`
+
+This datablock indicates that this is a file which can be downloaded directly using the provided query.
+
+The full description of component handling can be found in the [component handling section](#933-handling-component-files).
+TODO update reference
+
+| Field | Format        | Requirement | Description                                 |
+| ----- | ------------- | ----------- | ------------------------------------------- |
+| query | `fixed_query` | MUST        | The query to use.                           |
+| sha1  | string        | MAY         | A sha1-hash to allow for data verification. |
+
+### 7.6.2. `fetch.download_post_unlock`
+
+This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
+It indicates that when the referenced unlock query has been completed, the *real* `fetch.download` datablock can be received by performing the fixed query in `unlocked_data_query`
+
+| Field                 | Format        | Requirement | Description                                                                                                                                                                                                                                    |
+| --------------------- | ------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `unlock_query_id`     | string        | MUST        | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_data_query`. |
+| `unlocked_data_query` | `fixed_query` | MUST        | The query to fetch the previously withheld `fetch.download` datablock for this component if the unlocking was successful.                                                                                                                      |
+
+
+### 7.6.3. `fetch.from_archive`
+This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
+More about the handling in the [import and handling section](#9-implementation-analysis-and-handling).
+
+| Field                  | Format | Requirement | Description                                                                                                                                                                                                                                                                                        |
+| ---------------------- | ------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `archive_component_id` | string | MUST        | The id of the component representing the archive that this component is contained in.                                                                                                                                                                                                              |
+| `component_path`       | string | MUST        | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`). |
+
 
 | Field                | Format            | Required                 | Description                                                                                                                                                                                    |
 | -------------------- | ----------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
