@@ -11,6 +11,8 @@ It aims to help in creating an artist experience similar to existing native inte
 
 The latest version is *0.3*.
 A draft of version 0.4 can be read in [spec.md](./spec.md).
+Keep in mind that this draft version should not be used for any real implementations.
+Use the [spec published on assetfetch.org](https://assetfetch.org/spec/0.3/) instead.
 
 # Features
 
