@@ -872,16 +872,16 @@ This datablock has the following structure:
 
 #### 7.1.1.1. `header` structure
 
-| Field          | Format  | Requirement          | Description                                                                                                                                                                |
-| -------------- | ------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | string  | MUST                 | Name of the header                                                                                                                                                         |
-| `default`      | string  | MAY                  | Default value as a suggestion to the client.                                                                                                                               |
-| `is_required`  | boolean | MUST                 | Indicates if this header is required.                                                                                                                                      |
+| Field          | Format  | Requirement          | Description                                                                                                                                                               |
+| -------------- | ------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | string  | MUST                 | Name of the header                                                                                                                                                        |
+| `default`      | string  | MAY                  | Default value as a suggestion to the client.                                                                                                                              |
+| `is_required`  | boolean | MUST                 | Indicates if this header is required.                                                                                                                                     |
 | `is_sensitive` | boolean | MUST                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#91-storing-sensitive-headers) |
-| `prefix`       | string  | MAY                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.  |
-| `suffix`       | string  | MAY                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.    |
-| `title`        | string  | MAY                  | Title that the client SHOULD display to the user.                                                                                                                          |
-| `encoding`     | string  | MAY, default=`plain` | The encoding that the client MUST apply to the header value and the prefix/suffix. MUST be one of `plain` or `base64`.                                                     |
+| `prefix`       | string  | MAY                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`. |
+| `suffix`       | string  | MAY                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.   |
+| `title`        | string  | MAY                  | Title that the client SHOULD display to the user.                                                                                                                         |
+| `encoding`     | string  | MAY, default=`plain` | The encoding that the client MUST apply to the header value and the prefix/suffix. MUST be one of `plain` or `base64`.                                                    |
 
 ### 7.1.2. `provider_reconfiguration`
 
