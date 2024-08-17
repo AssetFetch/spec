@@ -935,103 +935,103 @@ It can be used to communicate the total number of results in a query where not a
 | `result_count_total` | int    | MUST        | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
 
 
-## 7.4. Display related datablocks
+## 7.3. Display related datablocks
 
 These datablocks relate to how assets and their details are displayed to the user.
 
-### 7.4.1. `text`
+### 7.3.1. `text`
 General text information to be displayed to the user.
 
-| Field         | Format | Required | Description                                    |
-| ------------- | ------ | -------- | ---------------------------------------------- |
-| `title`       | string | yes      | A title for the datablock's subject.           |
-| `description` | string | no       | A description text for the datablocks subject. |
+| Field         | Format | Requirement | Description                                    |
+| ------------- | ------ | ----------- | ---------------------------------------------- |
+| `title`       | string | MUST        | A title for the datablock's subject.           |
+| `description` | string | MAY         | A description text for the datablocks subject. |
 
 
-### 7.4.2. `web_references`
+### 7.3.2. `web_references`
 References to external websites for documentation or support.
 
 An array of objects each of which MUST follow this format:
 
-| Field      | Format | Required | Description                                                                                                   |
-| ---------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------- |
-| `title`    | string | yes      | The title to display for this web reference.                                                                  |
-| `uri`      | string | yes      | The URL to be opened in the users browser.                                                                    |
-| `icon_uri` | string | yes      | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
+| Field      | Format | Requirement | Description                                                                                                   |
+| ---------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------- |
+| `title`    | string | MUST        | The title to display for this web reference.                                                                  |
+| `uri`      | string | MUST        | The URL to be opened in the users browser.                                                                    |
+| `icon_uri` | string | MAY         | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
-### 7.4.3. `branding`
+### 7.3.3. `branding`
 Brand information about the provider.
 
-| Field             | Format | Required | Description                                                                                                                   |
-| ----------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `color_accent`    | string | no       | Color for the provider, hex string in the format 'abcdef' (no #)                                                              |
-| `logo_square_uri` | string | no       | URI to a square logo. It SHOULD be of the mediatype `image/png` and SHOULD be transparent.                                    |
-| `logo_wide_uri`   | string | no       | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD be transparent.                    |
-| `banner_uri`      | string | no       | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent. |
+| Field             | Format | Requirement | Description                                                                                                                   |
+| ----------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `color_accent`    | string | MAY         | Color for the provider, hex string in the format 'abcdef' (no #)                                                              |
+| `logo_square_uri` | string | MAY         | URI to a square logo. It SHOULD be of the mediatype `image/png` and SHOULD be transparent.                                    |
+| `logo_wide_uri`   | string | MAY         | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD have a transparent background.     |
+| `banner_uri`      | string | MAY         | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent. |
 
-### 7.4.4. `license`
+### 7.3.4. `license`
 Contains license information.
 When attached to an asset, it means that the license information only applies to that asset, when applied to a provider, it means that the license information applies to all assets offered through that provider.
 
-| Field          | Format | Required | Description                                                                                               |
-| -------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------- |
-| `license_spdx` | string | no       | MUST be an [SPDX license identifier](https://spdx.org/licenses/) or be left unset/null if not applicable. |
-| `license_uri`  | string | no       | URI which the client SHOULD offer to open in the user's web browser to learn more about the license.      |
+| Field          | Format | Requirement | Description                                                                                               |
+| -------------- | ------ | ----------- | --------------------------------------------------------------------------------------------------------- |
+| `license_spdx` | string | MAY         | MUST be an [SPDX license identifier](https://spdx.org/licenses/) or be left unset/null if not applicable. |
+| `license_uri`  | string | MAY         | URI which the client SHOULD offer to open in the user's web browser to learn more about the license.      |
 
-### 7.4.5. `authors`
+### 7.3.5. `authors`
 
 This datablock can be used to communicate the author(s) of a particular asset.
 
 Array of objects that MUST have this structure:
 
-| Field  | Format | Required | Description                                                     |
-| ------ | ------ | -------- | --------------------------------------------------------------- |
-| `name` | string | yes      | Name of the author.                                             |
-| `uri`  | string | no       | A URI for this author, for example a profile link.              |
-| `role` | string | no       | The role that the author has had in the creation of this asset. |
+| Field  | Format | Requirement | Description                                                     |
+| ------ | ------ | ----------- | --------------------------------------------------------------- |
+| `name` | string | MUST        | Name of the author.                                             |
+| `uri`  | string | MAY         | A URI for this author, for example a profile link.              |
+| `role` | string | MAY         | The role that the author has had in the creation of this asset. |
 
-### 7.4.6. `dimensions.3d`
+### 7.3.6. `dimensions.3d`
 Contains general information about the physical dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh data.
 
 An object that MUST conform to this format:
 
-| Field      | Format | Required | Description                    |
-| ---------- | ------ | -------- | ------------------------------ |
-| `width_m`  | float  | yes      | Width of the referenced asset  |
-| `height_m` | float  | yes      | Height of the referenced asset |
-| `depth_m`  | float  | yes      | Depth of the referenced asset  |
+| Field      | Format | Requirement | Description                    |
+| ---------- | ------ | ----------- | ------------------------------ |
+| `width_m`  | float  | MUST        | Width of the referenced asset  |
+| `height_m` | float  | MUST        | Height of the referenced asset |
+| `depth_m`  | float  | MUST        | Depth of the referenced asset  |
 
-### 7.4.7. `dimensions.2d`
+### 7.3.7. `dimensions.2d`
 Contains general information about the physical dimensions of a two-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh-,texture-, or uv data.
 
 An object that MUST conform to this format:
 
-| Field      | Format | Required | Description                    |
-| ---------- | ------ | -------- | ------------------------------ |
-| `width_m`  | float  | yes      | Width of the referenced asset  |
-| `height_m` | float  | yes      | Height of the referenced asset |
+| Field      | Format | Requirement | Description                    |
+| ---------- | ------ | ----------- | ------------------------------ |
+| `width_m`  | float  | MUST        | Width of the referenced asset  |
+| `height_m` | float  | MUST        | Height of the referenced asset |
 
-### 7.4.8. `preview_image_supplemental`
+### 7.3.8. `preview_image_supplemental`
 Contains a list of preview images with `uri`s and `alt`-Strings associated to the asset.
 
-An array where every field must conform to the following structure:
+An **array** of objects that conform to the following structure:
 
-| Field | Format | Required | Description                                                                                                   |
-| ----- | ------ | -------- | ------------------------------------------------------------------------------------------------------------- |
-| `alt` | string | no       | An "alt" String for the image.                                                                                |
-| `uri` | string | yes      | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
+| Field | Format | Requirement | Description                                                                                                   |
+| ----- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------- |
+| `alt` | string | SHOULD      | An "alt" String for the image.                                                                                |
+| `uri` | string | MUST        | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
-### 7.4.9. `preview_image_thumbnail`
+### 7.3.9. `preview_image_thumbnail`
 Contains information about a thumbnail for an asset. The thumbnail can be provided in multiple resolutions.
 
 An object that MUST conform to this format:
 
-| Field  | Format | Required | Description                    |
-| ------ | ------ | -------- | ------------------------------ |
-| `alt`  | string | no       | An "alt" String for the image. |
-| `uris` | object | yes      | See structure described below. |
+| Field  | Format | Requirement | Description                    |
+| ------ | ------ | ----------- | ------------------------------ |
+| `alt`  | string | SHOULD      | An "alt" String for the image. |
+| `uris` | object | MUST        | See structure described below. |
 
-#### 7.4.9.1. `uris` Structure
+#### 7.3.9.1. `uris` Structure
 
 The `uris` field MUST be an object whose keys are strings containing an integer and whose values are strings.
 The object MUST have at least one member.
