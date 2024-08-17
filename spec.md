@@ -990,26 +990,18 @@ Array of objects that MUST have this structure:
 | `uri`  | string | MAY         | A URI for this author, for example a profile link.              |
 | `role` | string | MAY         | The role that the author has had in the creation of this asset. |
 
-### 7.3.6. `dimensions.3d`
-Contains general information about the physical dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh data.
+### 7.3.6. `dimensions`
+Contains general information about the physical dimensions of a three-dimensional asset. This is primarily intended for displaying to users, not for actually scaling meshes or textures.
+
+When using this datablock to describe two-dimensional assets, such as textures, providers MUST use the `width_m` and `height_m` fields and only add `depth_m` when dealing with three-dimensional data.
 
 An object that MUST conform to this format:
 
 | Field      | Format | Requirement | Description                    |
 | ---------- | ------ | ----------- | ------------------------------ |
-| `width_m`  | float  | MUST        | Width of the referenced asset  |
-| `height_m` | float  | MUST        | Height of the referenced asset |
-| `depth_m`  | float  | MUST        | Depth of the referenced asset  |
-
-### 7.3.7. `dimensions.2d`
-Contains general information about the physical dimensions of a two-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh-,texture-, or uv data.
-
-An object that MUST conform to this format:
-
-| Field      | Format | Requirement | Description                    |
-| ---------- | ------ | ----------- | ------------------------------ |
-| `width_m`  | float  | MUST        | Width of the referenced asset  |
-| `height_m` | float  | MUST        | Height of the referenced asset |
+| `width_m`  | float  | MAY         | Width of the referenced asset  |
+| `height_m` | float  | MAY         | Height of the referenced asset |
+| `depth_m`  | float  | MAY         | Depth of the referenced asset  |
 
 ### 7.3.8. `preview_image_supplemental`
 Contains a list of preview images with `uri`s and `alt`-Strings associated to the asset.
