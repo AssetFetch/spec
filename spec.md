@@ -186,7 +186,7 @@ As mentioned in the previous section, the provider MAY require custom authentica
 Which headers the client needs to send is communicated by the provider in the initialization data.
 
 The client obtains the required header values, such as passwords or randomly generated access tokens, from the user through a GUI, from a cache or through other mechanisms.
-See [Security considerations](#10-security-considerations) for more details about credential handling.
+See [9. Security considerations](#9-security-considerations) for more details about credential handling.
 
 If the provider uses authentication, then it MUST offer a connection status endpoint in the initialization data.
 Before attempting to perform any other actions using the credentials entered by the user, the client SHOULD contact the connection status endpoint at least once after initialization to verify the correctness of the values entered by the user.
@@ -196,7 +196,7 @@ The connection status endpoint has two primary uses:
 - If available, the provider SHOULD respond with user-specific metadata, such as a username or account details which the client SHOULD display to the user to confirm that they are properly connected to the provider.
 - If the provider implements asset unlocking using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance.
 
-See [8.7](#87-unlocking-related-datablocks).
+See [7.4 Unlocking related datablocks](#74-unlocking-related-datablocks).
 
 ## 3.4. Browsing assets
 After successful initialization (and possibly authentication) the client is ready to browse assets.
@@ -470,7 +470,7 @@ A simple example for a variable query is a query for listing assets that allows 
 
 #### 4.4.1.1. Variable Query Parameters
 
-The full field list of a variable query object can be found in the [`variable_query` datablock template](#721-variable_query).
+The full field list of a variable query object can be found in the [`variable_query` datablock template](#621-variable_query).
 
 A variable query is composed of its URI, HTTP method and optionally one or multiple parameter definitions that are used to determine the payload of the HTTP request.
 
@@ -487,7 +487,7 @@ If the provider offers one or multiple adjustable parameters, it MUST choose one
 
 ### 4.4.2. Fixed Query
 
-The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#722-fixed_query).
+The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#622-fixed_query).
 
 A **fixed query** is an HTTP(S) request defined by its URI, method and a payload _that is not configurable by the user_  which is sent by the client to the provider in order to receive data in response.
 
@@ -508,7 +508,7 @@ In concrete terms, this means:
 - If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to perform a download that has not been unlocked, the provider MAY respond with code `402 - Payment Required` instead.
 
 If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
-This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#511-the-meta-template), if they have content.
+This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#521-the-meta-template), if they have content.
 
 
 
@@ -575,8 +575,8 @@ All instances of this template MUST have the following structure:
 
 | Field                                | Format          | Description                                                                |
 | ------------------------------------ | --------------- | -------------------------------------------------------------------------- |
-| \<string-key\>                       | object or array | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
-| \<string-key\>                       | object or array | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
+| \<string-key\>                       | object or array | Exact structure is defined in the [Datablocks section](#7-datablock-index) |
+| \<string-key\>                       | object or array | Exact structure is defined in the [Datablocks section](#7-datablock-index) |
 | ... (arbitrary number of datablocks) |
 
 Every key of this data object is the identifier for the datablock stored in that key's field.
@@ -788,55 +788,59 @@ The following datablocks are to be included in the `data` field:
 
 ## 6.1. Datablock names
 
-The name of a datablock MUST be a string composed of small alphanumerical characters, underscores and dots.
-Datablock names MUST contain either 0 or 1 instance of the dot (`.`) character which indicates that a datablock has multiple variations.
-One resource MUST NOT have two datablocks that share the same string *before* the dot separator.
+Every datablock outlined in this specification has a name that identifies its structure.
+The name is a string composed of lowercase alphanumerical characters, underscores and dots.
 
-The resulting regular expression from these rules is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
+Datablock names contain either 0 or 1 instances of the dot (`.`) character which is used to indicate that a datablock has multiple variations.
+The part before the dot separator is considered the "base name" of the datablock and the part after it (if it exists) the "variation name".
+
+A resource MUST NOT carry two datablocks that share the same base name.
+
+The resulting regular expression for all datablock names is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
 
 ## 6.2. Datablock value templates
 This section describes additional data types that can be used within other datablocks.
 They exist to eliminate the need to re-specify the same data structure in two different datablock definitions.
-*The templates can not be used directly as datablocks under their template name, though some datablock completely inherit their structure under a new name.*
+<!-- TODO: Do any DBs use foly a template? *The templates can not be used directly as datablocks under their template name* though some datablock completely inherit their structure under a new name.*-->
 
 ### 6.2.1. `variable_query`
 This template describes an HTTP query whose parameters are controllable by the user.
 See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more details.
 
-| Field        | Format               | Required | Description                                 |
-| ------------ | -------------------- | -------- | ------------------------------------------- |
-| `uri`        | string               | yes      | The URI to send the request to.             |
-| `method`     | string               | yes      | One of `get`, `post`                        |
-| `parameters` | array of `parameter` | yes      | The configurable parameters for this query. |
+| Field        | Format               | Requirement | Description                                 |
+| ------------ | -------------------- | ----------- | ------------------------------------------- |
+| `uri`        | string               | MUST        | The URI to send the request to.             |
+| `method`     | string               | MUST        | One of `get`, `post`                        |
+| `parameters` | array of `parameter` | MUST        | The configurable parameters for this query. |
 
 #### 6.2.1.1. `parameter` Structure
 A parameter describes the attributes of one parameter for the query and how the client can present this to its user.
 
-| Field     | Format            | Required                      | Description                                                                                                                                                                                                          |
-| --------- | ----------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`    | string            | yes                           | One of `text`, `boolean`, `select`, `fixed`                                                                                                                                                                          |
-| `id`      | string            | yes                           | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key when sending a response using this parameter.                                |
-| `title`   | string            | no                            | The title that the client SHOULD display to the user to represent this parameter.                                                                                                                                    |
-| `default` | string            | no                            | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
-| `choices` | array of `choice` | yes, if `select` type is used | This field contains all possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
+| Field     | Format            | Requirement                    | Description                                                                                                                                                                                                          |
+| --------- | ----------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`    | string            | MUST                           | One of `text`, `boolean`, `select`, `fixed`                                                                                                                                                                          |
+| `id`      | string            | MUST                           | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key when sending a response using this parameter.                                |
+| `title`   | string            | MAY                            | The title that the client SHOULD display to the user to represent this parameter.                                                                                                                                    |
+| `default` | string            | MAY                            | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
+| `choices` | array of `choice` | MUST, if `select` type is used | This field contains all possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
 
 #### 6.2.1.2. `choice` Structure
 A single choice for a `select` type parameter.
 
-| Field   | Format | Required | Description                                                                                   |
-| ------- | ------ | -------- | --------------------------------------------------------------------------------------------- |
-| `value` | string | yes      | The value that the client MUST use in its HTTP response if the user has selected this choice. |
-| `title` | string | yes      | The title that the client SHOULD display to the user to represent this choice.                |
+| Field   | Format | Requirement | Description                                                                                   |
+| ------- | ------ | ----------- | --------------------------------------------------------------------------------------------- |
+| `value` | string | MUST        | The value that the client MUST use in its HTTP response if the user has selected this choice. |
+| `title` | string | MUST        | The title that the client SHOULD display to the user to represent this choice.                |
 
 ### 6.2.2. `fixed_query`
 This template describes a fixed query that can be sent by the client to the provider without additional user input or configuration.
 See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more details.
 
-| Field     | Format                        | Required | Description                                         |
-| --------- | ----------------------------- | -------- | --------------------------------------------------- |
-| `uri`     | string                        | yes      | The URI to contact for getting more results.        |
-| `method`  | string                        | yes      | MUST be one of `get` or `post`                      |
-| `payload` | object with string properties | no       | The keys and values for the payload of the request. |
+| Field     | Format                        | Requirement | Description                                         |
+| --------- | ----------------------------- | ----------- | --------------------------------------------------- |
+| `uri`     | string                        | MUST        | The URI to contact for getting more results.        |
+| `method`  | string                        | MUST        | MUST be one of `get` or `post`                      |
+| `payload` | object with string properties | MAY         | The keys and values for the payload of the request. |
 
 
 
@@ -849,12 +853,7 @@ See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more detail
 
 # 7. Datablock Index
 
-This section displays all datablocks that are currently part of the standard.
-
-The text in brackets before the title indicates which kind of AssetFetch resources this block can be applied to.
-To aid with reading this list, exclamation marks and question marks are used to indicate whether this datablock MUST be applied to that resource (!) or if it SHOULD/MAY (?) be applied.
-A star (*) is used to indicate that there are special rules for when/if this datablock is to be used.
-
+This section displays all datablocks that are used in AssetFetch.
 
 ## 7.1. Configuration and authentication-related datablocks
 
@@ -863,35 +862,35 @@ Headers that the provider expects to receive from the client on every subsequent
 
 This datablock has the following structure:
 
-| Field                          | Format            | Required | Description                                                                                                       |
-| ------------------------------ | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `headers`                      | Array of `header` | yes      | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request.     |
-| `connection_status_query`      | `fixed_query`     | yes      | Query to use for checking whether the provided headers are valid und for obtaining connection status information. |
-| `header_acquisition_uri`       | string            | no       | A URI that the client MAY offer to open in the user's web browser to help them obtain the header values.          |
-| `header_acquisition_uri_title` | string            | no       | Title for the `acquisition_uri`.                                                                                  |
+| Field                          | Format            | Requirement | Description                                                                                                       |
+| ------------------------------ | ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| `headers`                      | Array of `header` | MUST        | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request.     |
+| `connection_status_query`      | `fixed_query`     | MUST        | Query to use for checking whether the provided headers are valid und for obtaining connection status information. |
+| `header_acquisition_uri`       | string            | MAY         | A URI that the client MAY offer to open in the user's web browser to help them obtain the header values.          |
+| `header_acquisition_uri_title` | string            | MAY         | Title for the `acquisition_uri`.                                                                                  |
 
 
 #### 7.1.1.1. `header` structure
 
-| Field          | Format  | Required            | Description                                                                                                                                                                |
-| -------------- | ------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | string  | yes                 | Name of the header                                                                                                                                                         |
-| `default`      | string  | no                  | Default value as a suggestion to the client.                                                                                                                               |
-| `is_required`  | boolean | yes                 | Indicates if this header is required.                                                                                                                                      |
-| `is_sensitive` | boolean | yes                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#101-storing-sensitive-headers) |
-| `prefix`       | string  | no                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.  |
-| `suffix`       | string  | no                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.    |
-| `title`        | string  | no                  | Title that the client SHOULD display to the user.                                                                                                                          |
-| `encoding`     | string  | no, default=`plain` | The encoding that the client MUST apply to the header value and the prefix/suffix. MUST be one of `plain` or `base64`.                                                     |
+| Field          | Format  | Requirement          | Description                                                                                                                                                                |
+| -------------- | ------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | string  | MUST                 | Name of the header                                                                                                                                                         |
+| `default`      | string  | MAY                  | Default value as a suggestion to the client.                                                                                                                               |
+| `is_required`  | boolean | MUST                 | Indicates if this header is required.                                                                                                                                      |
+| `is_sensitive` | boolean | MUST                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#91-storing-sensitive-headers) |
+| `prefix`       | string  | MAY                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.  |
+| `suffix`       | string  | MAY                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.    |
+| `title`        | string  | MAY                  | Title that the client SHOULD display to the user.                                                                                                                          |
+| `encoding`     | string  | MAY, default=`plain` | The encoding that the client MUST apply to the header value and the prefix/suffix. MUST be one of `plain` or `base64`.                                                     |
 
 ### 7.1.2. `provider_reconfiguration`
 
 This datablock allows the provider to communicate to the client that a new set of headers that it MUST sent along with every request instead of those entered by the user until a new initialization is performed.
 The client MUST fully replace the values defined using the requirements from the original `provider_configuration` datablock with the new values defined in this datablock.
 
-| Field     | Format | Required | Description                                                                                                                                             |
-| --------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `headers` | Object | yes      | An object whose properties MUST all be strings. The keys indicate the new header names, the property values represent the new header values to be used. |
+| Field     | Format | Requirement | Description                                                                                                                                             |
+| --------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `headers` | Object | MUST        | An object whose properties MUST all be strings. The keys indicate the new header names, the property values represent the new header values to be used. |
 
 
 These new headers effectively act like cookies used on web sites.
@@ -903,11 +902,11 @@ Clients MAY require the user to confirm the new header values before starting to
 
 This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
 
-| Field              | Format | Required | Description                                                                                                            |
-| ------------------ | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `display_name`     | string | no       | The name of the user to display.                                                                                       |
-| `display_tier`     | string | no       | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.                 |
-| `display_icon_uri` | string | no       | URI to an image with an aspect ratio of 1:1, for example a profile picture or icon representing the subscription tier. |
+| Field              | Format | Requirement | Description                                                                                                            |
+| ------------------ | ------ | ----------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `display_name`     | string | MAY         | The name of the user to display.                                                                                       |
+| `display_tier`     | string | MAY         | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.                 |
+| `display_icon_uri` | string | MAY         | URI to an image with an aspect ratio of 1:1, for example a profile picture or icon representing the subscription tier. |
 
 ## 7.2. Browsing-related datablocks
 
@@ -931,176 +930,108 @@ Follows the `fixed_query` template.
 This datablock contains statistics about the current response.
 It can be used to communicate the total number of results in a query where not all results can be communicated in one response and are instead deferred using `next_query`.
 
-| Field                | Format | Required | Description                                                                                                                                                                                            |
-| -------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `result_count_total` | int    | yes      | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
+| Field                | Format | Requirement | Description                                                                                                                                                                                            |
+| -------------------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `result_count_total` | int    | MUST        | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
 
 
-## 7.3. File-related datablocks
-
-### 7.3.1. `file_info`
-
-This datablock contains information about any kind of file.
-
-| Field       | Format  | Required | Description                                            |
-| ----------- | ------- | -------- | ------------------------------------------------------ |
-| `length`    | integer | no       | The length of the file in bytes.                       |
-| `extension` | string  | yes      | The file extension indicating the format of this file. |
-
-The `extension` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
-MUST include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
-
-### 7.3.2. `file_handle`
-
-This datablock indicates how this file should behave during the import process.
-The full description of component handling can be found in the [component handling section](#933-handling-component-files).
-
-| Field        | Format | Required                                         | Description                                                                                |
-| ------------ | ------ | ------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| `local_path` | string | yes, unless `behavior=archive_unpack_referenced` |                                                                                            |
-| `behavior`   | string | yes                                              | One of `single_active`,`single_passive`,`archive_unpack_fully`,`archive_unpack_referenced` |
-
-**If `behavior` is `single_*`:**
-
-The `local_path` MUST include the full name that the file should take in the destination and it MUST NOT start with a "leading slash".
-It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
-
-`example.txt` or `sub/dir/example.txt` would be correct.
-`/example.txt`, `./example.txt` or `/sub/dir/example.txt` would be incorrect.
-
-**If `behavior` is `archive_*`:**
-
-The `local_path` MUST end with a slash ("trailing slash") and MUST NOT start with a slash (unless it targets the root of the asset directory in which case the `local_path` is simply `/`).
-It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
-
-`/`, `contents/` or `my/contents/` would be correct.
-`contents`,`./contents/`,`./contents`,`my/../../contents` or `../contents` would all be incorrect.
-
-### 7.3.3. `file_fetch.download`
-
-This datablock indicates that this is a file which can be downloaded directly using the provided query.
-
-The full description of component handling can be found in the [component handling section](#933-handling-component-files).
-
-The structure of this datablock follows the `fixed_query` template.
-
-### 7.3.4. `file_fetch.download_post_unlock`
-
-This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
-It indicates that when the referenced unlock query has been completed, the *real* `file_fetch.download` datablock can be received by performing the fixed query in `unlocked_data_query`
-
-| Field                 | Format        | Required | Description                                                                                                                                                                                                                                    |
-| --------------------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `unlock_query_id`     | string        | yes      | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_data_query`. |
-| `unlocked_data_query` | `fixed_query` | yes      | The query to fetch the previously withheld `file_fetch.download` datablock for this component if the unlocking was successful.                                                                                                                 |
-
-
-### 7.3.5. `file_fetch.from_archive`
-This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
-More about the handling in the [import and handling section](#9-implementation-analysis-and-handling).
-
-| Field                  | Format | Required                                                                                                                                                                                                                                                                                           | Description                                                                           |
-| ---------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `archive_component_id` | string | yes                                                                                                                                                                                                                                                                                                | The id of the component representing the archive that this component is contained in. |
-| `component_path`       | string | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`). |
-
-## 7.4. Display related datablocks
+## 7.3. Display related datablocks
 
 These datablocks relate to how assets and their details are displayed to the user.
 
-### 7.4.1. `text`
+### 7.3.1. `text`
 General text information to be displayed to the user.
 
-| Field         | Format | Required | Description                                    |
-| ------------- | ------ | -------- | ---------------------------------------------- |
-| `title`       | string | yes      | A title for the datablock's subject.           |
-| `description` | string | no       | A description text for the datablocks subject. |
+| Field         | Format | Requirement | Description                                    |
+| ------------- | ------ | ----------- | ---------------------------------------------- |
+| `title`       | string | MUST        | A title for the datablock's subject.           |
+| `description` | string | MAY         | A description text for the datablocks subject. |
 
 
-### 7.4.2. `web_references`
+### 7.3.2. `web_references`
 References to external websites for documentation or support.
 
 An array of objects each of which MUST follow this format:
 
-| Field      | Format | Required | Description                                                                                                   |
-| ---------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------- |
-| `title`    | string | yes      | The title to display for this web reference.                                                                  |
-| `uri`      | string | yes      | The URL to be opened in the users browser.                                                                    |
-| `icon_uri` | string | yes      | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
+| Field      | Format | Requirement | Description                                                                                                   |
+| ---------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------- |
+| `title`    | string | MUST        | The title to display for this web reference.                                                                  |
+| `uri`      | string | MUST        | The URL to be opened in the users browser.                                                                    |
+| `icon_uri` | string | MAY         | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
-### 7.4.3. `branding`
+### 7.3.3. `branding`
 Brand information about the provider.
 
-| Field             | Format | Required | Description                                                                                                                   |
-| ----------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `color_accent`    | string | no       | Color for the provider, hex string in the format 'abcdef' (no #)                                                              |
-| `logo_square_uri` | string | no       | URI to a square logo. It SHOULD be of the mediatype `image/png` and SHOULD be transparent.                                    |
-| `logo_wide_uri`   | string | no       | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD be transparent.                    |
-| `banner_uri`      | string | no       | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent. |
+| Field             | Format | Requirement | Description                                                                                                                   |
+| ----------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `color_accent`    | string | MAY         | Color for the provider, hex string in the format 'abcdef' (no #)                                                              |
+| `logo_square_uri` | string | MAY         | URI to a square logo. It SHOULD be of the mediatype `image/png` and SHOULD be transparent.                                    |
+| `logo_wide_uri`   | string | MAY         | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png`, it SHOULD have a transparent background.     |
+| `banner_uri`      | string | MAY         | URI to an image with an aspect ratio between 2:1 and 4:1. SHOULD be `image/png` or `image/jpg`. It SHOULD NOT be transparent. |
 
-### 7.4.4. `license`
+### 7.3.4. `license`
 Contains license information.
 When attached to an asset, it means that the license information only applies to that asset, when applied to a provider, it means that the license information applies to all assets offered through that provider.
 
-| Field          | Format | Required | Description                                                                                               |
-| -------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------- |
-| `license_spdx` | string | no       | MUST be an [SPDX license identifier](https://spdx.org/licenses/) or be left unset/null if not applicable. |
-| `license_uri`  | string | no       | URI which the client SHOULD offer to open in the user's web browser to learn more about the license.      |
+| Field          | Format | Requirement | Description                                                                                               |
+| -------------- | ------ | ----------- | --------------------------------------------------------------------------------------------------------- |
+| `license_spdx` | string | MAY         | MUST be an [SPDX license identifier](https://spdx.org/licenses/) or be left unset/null if not applicable. |
+| `license_uri`  | string | MAY         | URI which the client SHOULD offer to open in the user's web browser to learn more about the license.      |
 
-### 7.4.5. `authors`
+### 7.3.5. `authors`
 
 This datablock can be used to communicate the author(s) of a particular asset.
 
 Array of objects that MUST have this structure:
 
-| Field  | Format | Required | Description                                                     |
-| ------ | ------ | -------- | --------------------------------------------------------------- |
-| `name` | string | yes      | Name of the author.                                             |
-| `uri`  | string | no       | A URI for this author, for example a profile link.              |
-| `role` | string | no       | The role that the author has had in the creation of this asset. |
+| Field  | Format | Requirement | Description                                                     |
+| ------ | ------ | ----------- | --------------------------------------------------------------- |
+| `name` | string | MUST        | Name of the author.                                             |
+| `uri`  | string | MAY         | A URI for this author, for example a profile link.              |
+| `role` | string | MAY         | The role that the author has had in the creation of this asset. |
 
-### 7.4.6. `dimensions.3d`
+### 7.3.6. `dimensions.3d`
 Contains general information about the physical dimensions of a three-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh data.
 
 An object that MUST conform to this format:
 
-| Field      | Format | Required | Description                    |
-| ---------- | ------ | -------- | ------------------------------ |
-| `width_m`  | float  | yes      | Width of the referenced asset  |
-| `height_m` | float  | yes      | Height of the referenced asset |
-| `depth_m`  | float  | yes      | Depth of the referenced asset  |
+| Field      | Format | Requirement | Description                    |
+| ---------- | ------ | ----------- | ------------------------------ |
+| `width_m`  | float  | MUST        | Width of the referenced asset  |
+| `height_m` | float  | MUST        | Height of the referenced asset |
+| `depth_m`  | float  | MUST        | Depth of the referenced asset  |
 
-### 7.4.7. `dimensions.2d`
+### 7.3.7. `dimensions.2d`
 Contains general information about the physical dimensions of a two-dimensional asset. Primarily intended as metadata to be displayed to users, but MAY also be used by the client to scale mesh-,texture-, or uv data.
 
 An object that MUST conform to this format:
 
-| Field      | Format | Required | Description                    |
-| ---------- | ------ | -------- | ------------------------------ |
-| `width_m`  | float  | yes      | Width of the referenced asset  |
-| `height_m` | float  | yes      | Height of the referenced asset |
+| Field      | Format | Requirement | Description                    |
+| ---------- | ------ | ----------- | ------------------------------ |
+| `width_m`  | float  | MUST        | Width of the referenced asset  |
+| `height_m` | float  | MUST        | Height of the referenced asset |
 
-### 7.4.8. `preview_image_supplemental`
+### 7.3.8. `preview_image_supplemental`
 Contains a list of preview images with `uri`s and `alt`-Strings associated to the asset.
 
-An array where every field must conform to the following structure:
+An **array** of objects that conform to the following structure:
 
-| Field | Format | Required | Description                                                                                                   |
-| ----- | ------ | -------- | ------------------------------------------------------------------------------------------------------------- |
-| `alt` | string | no       | An "alt" String for the image.                                                                                |
-| `uri` | string | yes      | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
+| Field | Format | Requirement | Description                                                                                                   |
+| ----- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------- |
+| `alt` | string | SHOULD      | An "alt" String for the image.                                                                                |
+| `uri` | string | MUST        | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
-### 7.4.9. `preview_image_thumbnail`
+### 7.3.9. `preview_image_thumbnail`
 Contains information about a thumbnail for an asset. The thumbnail can be provided in multiple resolutions.
 
 An object that MUST conform to this format:
 
-| Field  | Format | Required | Description                    |
-| ------ | ------ | -------- | ------------------------------ |
-| `alt`  | string | no       | An "alt" String for the image. |
-| `uris` | object | yes      | See structure described below. |
+| Field  | Format | Requirement | Description                    |
+| ------ | ------ | ----------- | ------------------------------ |
+| `alt`  | string | SHOULD      | An "alt" String for the image. |
+| `uris` | object | MUST        | See structure described below. |
 
-#### 7.4.9.1. `uris` Structure
+#### 7.3.9.1. `uris` Structure
 
 The `uris` field MUST be an object whose keys are strings containing an integer and whose values are strings.
 The object MUST have at least one member.
@@ -1110,118 +1041,211 @@ If the image is not a square, its key SHOULD be set based on the pixel count of 
 The image's media type SHOULD be one of `image/png` or `image/jpeg`.
 If the provider does not have insight into the dimensions of the thumbnail that it is referring the client to, it SHOULD use use the key `0` for the thumbnail url.
 
-## 7.5. File handling and relationship datablocks
 
-These datablocks describe how files relate to each other.
-In many cases the relationships can be represented purely by placing component files adjacently in one directory and making only some of them "active", but in some cases it is necessary to declare relationships explicitly in AssetFetch.
+## 7.4. Unlocking-related datablocks
 
-### 7.5.1. `loose_environment`
-The presence of this datablock on a component indicates that it is an environment map.
-This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR), not if the environment is already wrapped in another format with native support.
-An object that MUST conform to this format:
+These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch. 
 
-| Field        | Format | Required | Description                             |
-| ------------ | ------ | -------- | --------------------------------------- |
-| `projection` | string | yes      | One of `equirectangular`, `mirror_ball` |
-
-### 7.5.2. `loose_material.define`
-
-This datablock is applied to a component that is part of a loose material, most likely a material map.
-It indicates which role the component should play in this material.
-
-| Field           | Format | Required | Description                                                                                                                               |
-| --------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `material_name` | string | yes      |                                                                                                                                           |
-| `map`           | string | yes      | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
-| `colorspace`    | string | no       | One of `srgb`, `linear`                                                                                                                   |
-
-### 7.5.3. `loose_material.apply`
-
-When applied to a component, it indicates that this component uses one or multiple materials defined using `loose_material.define` datablocks.
-
-The datablock is an **array of objects** with this structure:
-
-| Field                  | Format | Required | Description                                                                                                                           |
-| ---------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `material_name`        | string | yes      | Name of the material used in the definition datablocks                                                                                |
-| `apply_selectively_to` | string | no       | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
-
-### 7.5.4. `mtlx_apply`
-When applied to a component, it indicates that this component makes use of a material defined in mtlx document represented by another component.
-
-| Field                  | Format | Required | Description                                                                                                                           |
-| ---------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `mtlx_component_id`    | string | yes      | Id of the component that represents the mtlx file.                                                                                    |
-| `mtlx_material`        | string | no       | Optional reference for which material to use from the mtlx file, if it contains multiple.                                             |
-| `apply_selectively_to` | string | no       | Indicates that the material should only be applied to a part of this component, for example one of multiple objects in a `.obj` file. |
-
-## 7.6. File-format specific datablocks
-
-These datablocks relate to one specific file format.
-
-### 7.6.1. `format.blend`
-Information about files with the extension `.blend`.
-This information is intended to help the client understand the file.
-
-| Field      | Format            | Required | Description                                                                                                       |
-| ---------- | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `version`  | string            | no       | Blender Version in the format `Major.Minor.Patch` or `Major.Minor` or `Major`                                     |
-| `is_asset` | boolean           | no       | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
-| `targets`  | array of `target` | no       | Array containing the blender structures inside the file that are relevant to the asset.                           |
-
-#### 7.6.1.1. `target` Structure
-
-| Field   | Format            | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------- | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `kind`  | `string`          | yes      | One of `actions`, `armatures`, `brushes`, `cache_files`, `cameras`, `collections`, `curves`, `fonts`, `grease_pencils`, `hair_curves`, `images`, `lattices`, `lightprobes`, `lights`, `linestyles`, `masks`, `materials`, `meshes`, `metaballs`, `movieclips`, `node_groups`, `objects`, `paint_curves`, `palettes`, `particles`, `pointclouds`, `scenes`, `screens`, `simulations`, `sounds`, `speakers`, `texts`, `textures`, `volumes`, `workspaces`, `worlds` |
-| `names` | Array of `string` | yes      | List of the names of the resources to import.                                                                                                                                                                                                                                                                                                                                                                                                                     |
-
-### 7.6.2. `format.usd`
-Information about files with the extension `.usd`.
-
-| Field      | Format  | Required | Description                                                                |
-| ---------- | ------- | -------- | -------------------------------------------------------------------------- |
-| `is_crate` | boolean | no       | Indicates whether this file is a "crate" (like .usdc) or not (like .usda). |
-
-### 7.6.3. `format.obj`
-Information about files with the extension `.obj`.
-
-| Field     | Format | Required | Description                                                        |
-| --------- | ------ | -------- | ------------------------------------------------------------------ |
-| `up_axis` | string | yes      | Indicates which axis should be treated as up. MUST be `+y` or `+z` |
-
-
-## 7.7. Unlocking-related datablocks
-
-These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch.
-
-*Note that the `file_fetch.download_post_unlock` datablock is also related to the unlocking system but is [grouped with the other `file_fetch.*` datablocks](#83-file-related-datablocks).* 
-
-### 7.7.1. `unlock_balance`
+### 7.4.1. `unlock_balance`
 Information about the user's current account balance.
 
-| Field                | Format | Required | Description                                                                                                 |
-| -------------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------- |
-| `balance`            | number | yes      | Balance.                                                                                                    |
-| `balance_unit`       | string | yes      | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
-| `balance_refill_uri` | string | yes      | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form.    |
+| Field                | Format | Requirement | Description                                                                                                 |
+| -------------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------- |
+| `balance`            | number | MUST        | Balance.                                                                                                    |
+| `balance_unit`       | string | MUST        | The currency or name of token that's used by this provider to be displayed alongside the price of anything. |
+| `balance_refill_uri` | string | MAY         | URL to direct the user to in order to refill their prepaid balance, for example an online purchase form.    |
 
-### 7.7.2. `unlock_queries`
+### 7.4.2. `unlock_queries`
 
 This datablock contains the query or queries required to unlock all or some of the components in this implementation list.
 
 This datablock is **an array** consisting of `unlock_query` objects.
 
-#### 7.7.2.1. `unlock_query` structure
+#### 7.4.2.1. `unlock_query` structure
 
-| Field                | Format            | Required                 | Description                                                                                                                                                                                    |
-| -------------------- | ----------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                 | string            | yes                      | This is the id by which `file_fetch.download_post_unlock` datablocks will reference this query.                                                                                                |
-| `unlocked`           | boolean           | yes                      | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
-| `price`              | number            | only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
-| `query`              | `fixed_query`     | only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
-| `child_queries`      | Array of `string` | no                       | A list containing the ids of other queries that can also be considered "unlocked" if this query has been executed.                                                                             |
-| `query_fallback_uri` | string            | no                       | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
+| Field                | Format            | Requirement                    | Description                                                                                                                                                                                    |
+| -------------------- | ----------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                 | string            | MUST                           | This is the id by which `fetch.download_post_unlock` datablocks will reference this query.                                                                                                     |
+| `unlocked`           | boolean           | MUST                           | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
+| `price`              | number            | MUST, only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
+| `query`              | `fixed_query`     | MUST, only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
+| `child_queries`      | Array of `string` | MAY                            | A list containing the ids of other queries that can also be considered "unlocked" if this query has been executed.                                                                             |
+| `query_fallback_uri` | string            | MAY                            | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
+
+
+## 7.5. Format-related datablocks
+
+
+### 7.5.1. `format`
+This is the default format datablock for all file formats that do not have their own dedicated `format.*` datablock in AssetFetch.
+
+| Field       | Format | Requirement | Description                                       |
+| ----------- | ------ | ----------- | ------------------------------------------------- |
+| `extension` | string | MUST        | The file extension.                               |
+| `mediatype` | string | (see below) | The mediatype string for this file, if available. |
+
+#### 7.5.1.1. `extension` rules
+
+The `extension` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
+SHOULD include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
+
+#### 7.5.1.2. `mediatype` rules
+
+The `mediatype` field SHOULD be used if (and only if) an official mediatype definition exists for the file format of the file associated with the component.
+See [the official mediatype list on the IANA website](https://www.iana.org/assignments/media-types/media-types.xhtml).
+
+### 7.5.2. `format.blend`
+Information about files with the extension `.blend`.
+This information is intended to help the client understand the file.
+
+| Field      | Format            | Requirement | Description                                                                                                       |
+| ---------- | ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| `version`  | string            | MAY         | Blender Version in the format `Major.Minor.Patch` or `Major.Minor` or `Major`                                     |
+| `is_asset` | boolean           | MAY         | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
+| `targets`  | array of `target` | MAY         | Array containing the blender structures inside the file that are relevant to the asset.                           |
+
+#### 7.5.2.1. `target` Structure
+
+| Field   | Format            | Requirement | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------- | ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kind`  | `string`          | MUST        | One of `actions`, `armatures`, `brushes`, `cache_files`, `cameras`, `collections`, `curves`, `fonts`, `grease_pencils`, `hair_curves`, `images`, `lattices`, `lightprobes`, `lights`, `linestyles`, `masks`, `materials`, `meshes`, `metaballs`, `movieclips`, `node_groups`, `objects`, `paint_curves`, `palettes`, `particles`, `pointclouds`, `scenes`, `screens`, `simulations`, `sounds`, `speakers`, `texts`, `textures`, `volumes`, `workspaces`, `worlds` |
+| `names` | Array of `string` | MUST        | List of the names of the resources to import.                                                                                                                                                                                                                                                                                                                                                                                                                     |
+
+### 7.5.3. `format.obj`
+Information about files with the extension `.obj`.
+
+| Field        | Format | Requirement | Description                                                                                          |
+| ------------ | ------ | ----------- | ---------------------------------------------------------------------------------------------------- |
+| `up_axis`    | string | SHOULD      | Indicates which axis should be treated as "up". MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`.        |
+| `front_axis` | string | MAY         | Indicates which axis should be treated as the "front". MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`. |
+
+
+## 7.6. Fetching-related datablocks
+
+These datablocks describe how a client can gain access to a component file.
+
+### 7.6.1. `fetch.download`
+
+This datablock indicates that this is a file which can be downloaded directly using the provided query.
+
+| Field | Format        | Requirement | Description                                 |
+| ----- | ------------- | ----------- | ------------------------------------------- |
+| query | `fixed_query` | MUST        | The query to use.                           |
+| sha1  | string        | MAY         | A sha1-hash to allow for data verification. |
+
+### 7.6.2. `fetch.download_post_unlock`
+
+This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
+It indicates that when the referenced unlock query has been completed, the *real* `fetch.download` datablock can be received by performing the fixed query in `unlocked_data_query`
+
+| Field                 | Format        | Requirement | Description                                                                                                                                                                                                                                    |
+| --------------------- | ------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `unlock_query_id`     | string        | MUST        | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_data_query`. |
+| `unlocked_data_query` | `fixed_query` | MUST        | The query to fetch the previously withheld `fetch.download` datablock for this component if the unlocking was successful.                                                                                                                      |
+
+
+### 7.6.3. `fetch.from_archive`
+This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
+More about the handling in the [import and handling section](#8-implementation-analysis-and-handling).
+
+| Field                  | Format | Requirement | Description                                                                                                                                                                                                                                                                                        |
+| ---------------------- | ------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `archive_component_id` | string | MUST        | The id of the component representing the archive that this component is contained in.                                                                                                                                                                                                              |
+| `component_path`       | string | MUST        | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`). |
+
+## 7.7. Storage-related datablocks
+
+These datablocks describe the arrangement that the component files should take in local storage.
+
+### 7.7.1. `store.file`
+
+| Field             | Format  | Requirement | Description                                     |
+| ----------------- | ------- | ----------- | ----------------------------------------------- |
+| `bytes`           | integer | MAY         | The length of the file in bytes.                |
+| `local_file_path` | string  | MUST        | Local sub-path in the implementation directory. |
+
+#### 7.7.1.1. `local_file_path` rules
+
+The `local_file_path` MUST include the full name that the file should take in the destination.
+It MUST NOT start with a "leading slash".
+It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
+
+**Examples:**
+
+`example.jpg` and `sub/dir/example.jpg` are valid local file paths.
+
+`/example.jpg`, `./example.jpg`, `sub/dir/` and `/sub/dir/example.jpg` are NOT valid local file paths.
+
+
+### 7.7.2. `store.archive`
+
+| Field                  | Format  | Requirement                       | Description                                                                                                                       |
+| ---------------------- | ------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `bytes_compressed`     | integer | MAY                               | The length of the archive in bytes.                                                                                               |
+| `bytes_extracted`      | integer | MAY                               | The length of the archive in bytes (uncompressed).                                                                                |
+| `extract_fully`        | boolean | MUST                              | Indicates whether or not the entire archive should be fully extracted into the local implementation directory. TODO add reference |
+| `local_directory_path` | string  | MUST, only if `unpack_fully=true` | Local (sub-)path where the file MUST be placed by the client.                                                                     |
+
+#### 7.7.2.1. `local_directory_path` rules
+
+The `local_directory_path` MUST end with a slash ("trailing slash") and MUST NOT start with a slash 
+(unless it targets the root of the implementation directory in which case the `local_path` is simply `/`).
+It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
+
+**Examples:**
+
+`/`, `contents/` and `my/contents/` are valid local directory paths.
+
+`contents`,`./contents/`,`./contents`,`my/../../contents` and `../contents` are NOT valid local directory paths.
+
+## 7.8. Role/Processing-related datablocks
+
+These datablocks describe which "role" a specific component should play in the asset implementation.
+
+### 7.8.1. `role.native`
+This datablock indicates that this file should be handled by the host application's native import functionality.
+The full description of component handling can be found in the [component handling section](#833-handling-component-files).
+
+This datablock contains no fields is therefore represented by the empty object `{}`.
+
+### 7.8.2. `role.loose_environment_map`
+The presence of this datablock on a component indicates that it is an environment map.
+This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR).
+An object that MUST conform to this format:
+
+| Field        | Format | Requirement                       | Description                             |
+| ------------ | ------ | --------------------------------- | --------------------------------------- |
+| `projection` | string | SHOULD, default=`equirectangular` | One of `equirectangular`, `mirror_ball` |
+
+### 7.8.3. `role.loose_material_map`
+
+This datablock is applied to a component that is part of a loose material as a material map.
+It indicates which role the component should play in the material.
+
+| Field           | Format | Requirement | Description                                                                                                                               |
+| --------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `material_name` | string | MUST        |                                                                                                                                           |
+| `map`           | string | MUST        | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
+| `colorspace`    | string | MAY         | One of `srgb`, `linear`                                                                                                                   |
+
+## 7.9. Linking-related datablocks
+
+### 7.9.1. `link.loose_material`
+
+When applied to a component, it indicates that this component uses one or multiple materials defined using `process.loose_material` datablocks.
+
+| Field           | Format | Requirement | Description                                            |
+| --------------- | ------ | ----------- | ------------------------------------------------------ |
+| `material_name` | string | MUST        | Name of the material used in the definition datablocks |
+
+### 7.9.2. `link.mtlx_material`
+When applied to a component, it indicates that this component makes use of a material defined in mtlx document represented by another component.
+
+| Field               | Format | Required | Description                                                                               |
+| ------------------- | ------ | -------- | ----------------------------------------------------------------------------------------- |
+| `mtlx_component_id` | string | yes      | Id of the component that represents the mtlx file.                                        |
+| `mtlx_material`     | string | no       | Optional reference for which material to use from the mtlx file, if it contains multiple. |
+
 
 
 
@@ -1255,7 +1279,7 @@ The client MAY choose create an intermediary plan to allow the user to preview t
 
 ## 8.2. Implementation analysis
 
-When analyzing a set of implementation sent from the provider via the [implementation list endpoint](#54-implementation-list),
+When analyzing a set of implementation sent from the provider via the [implementation list endpoint](#55-endpoint-implementation-list-implementation_list),
 the client SHOULD decide for every implementation whether it is "readable".
 It MAY represent this as a binary choice or a more gradual representation.
 
@@ -1381,7 +1405,7 @@ They SHOULD consider storing secret headers through native operation system APIs
 
 ## 9.2. Avoiding Relative Paths in `local_path`
 Datablocks of the `fetch.*` family specify a local sub-path for every component that needs to be appended to a local path chosen by the client in order to assemble the correct file structure for this asset.
-As specified in the [datablock requirements](#83-file-related-datablocks) the `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
+The `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
 Clients MUST take cate to ensure that components with references like `./` or `../` in their local path are rejected.
 
 <!-- CDN Link to use FontAwesomeIcons in some of the diagrams -->
