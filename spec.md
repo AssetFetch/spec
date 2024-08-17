@@ -1158,15 +1158,101 @@ More about the handling in the [import and handling section](#9-implementation-a
 | `archive_component_id` | string | MUST        | The id of the component representing the archive that this component is contained in.                                                                                                                                                                                                              |
 | `component_path`       | string | MUST        | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`). |
 
+## 7.7. Storage-related datablocks
 
-| Field                | Format            | Required                 | Description                                                                                                                                                                                    |
-| -------------------- | ----------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                 | string            | yes                      | This is the id by which `file_fetch.download_post_unlock` datablocks will reference this query.                                                                                                |
-| `unlocked`           | boolean           | yes                      | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
-| `price`              | number            | only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
-| `query`              | `fixed_query`     | only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
-| `child_queries`      | Array of `string` | no                       | A list containing the ids of other queries that can also be considered "unlocked" if this query has been executed.                                                                             |
-| `query_fallback_uri` | string            | no                       | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
+These datablocks describe the arrangement that the component files should take in local storage.
+
+### 7.7.1. `store.file`
+
+| Field             | Format  | Requirement | Description                                     |
+| ----------------- | ------- | ----------- | ----------------------------------------------- |
+| `bytes`           | integer | MAY         | The length of the file in bytes.                |
+| `local_file_path` | string  | MUST        | Local sub-path in the implementation directory. |
+
+#### 7.7.1.1. `local_file_path` rules
+
+The `local_file_path` MUST include the full name that the file should take in the destination.
+It MUST NOT start with a "leading slash".
+It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
+
+**Examples:**
+
+`example.jpg` and `sub/dir/example.jpg` are valid local file paths.
+
+`/example.jpg`, `./example.jpg`, `sub/dir/` and `/sub/dir/example.jpg` are NOT valid local file paths.
+
+
+### 7.7.2. `store.archive`
+
+| Field                  | Format  | Requirement                       | Description                                                                                                                       |
+| ---------------------- | ------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `bytes_compressed`     | integer | MAY                               | The length of the archive in bytes.                                                                                               |
+| `bytes_extracted`      | integer | MAY                               | The length of the archive in bytes (uncompressed).                                                                                |
+| `extract_fully`        | boolean | MUST                              | Indicates whether or not the entire archive should be fully extracted into the local implementation directory. TODO add reference |
+| `local_directory_path` | string  | MUST, only if `unpack_fully=true` | Local (sub-)path where the file MUST be placed by the client.                                                                     |
+
+#### 7.7.2.1. `local_directory_path` rules
+
+The `local_directory_path` MUST end with a slash ("trailing slash") and MUST NOT start with a slash 
+(unless it targets the root of the implementation directory in which case the `local_path` is simply `/`).
+It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
+
+**Examples:**
+
+`/`, `contents/` and `my/contents/` are valid local directory paths.
+
+`contents`,`./contents/`,`./contents`,`my/../../contents` and `../contents` are NOT valid local directory paths.
+
+## 7.8. Role/Processing-related datablocks
+
+These datablocks describe which "role" a specific component should play in the asset implementation.
+
+### 7.8.1. `role.native`
+This datablock indicates that this file should be handled by the host application's native import functionality.
+The full description of component handling can be found in the [component handling section](#933-handling-component-files).
+
+This datablock contains no fields is therefore represented by the empty object `{}`.
+
+### 7.8.2. `role.loose_environment_map`
+The presence of this datablock on a component indicates that it is an environment map.
+This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR).
+An object that MUST conform to this format:
+
+| Field        | Format | Requirement                       | Description                             |
+| ------------ | ------ | --------------------------------- | --------------------------------------- |
+| `projection` | string | SHOULD, default=`equirectangular` | One of `equirectangular`, `mirror_ball` |
+
+### 7.8.3. `role.loose_material_map`
+
+This datablock is applied to a component that is part of a loose material as a material map.
+It indicates which role the component should play in the material.
+
+| Field           | Format | Requirement | Description                                                                                                                               |
+| --------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `material_name` | string | MUST        |                                                                                                                                           |
+| `map`           | string | MUST        | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
+| `colorspace`    | string | MAY         | One of `srgb`, `linear`                                                                                                                   |
+
+TODO info about normal+y/normal-y
+
+## 7.9. Linking-related datablocks
+
+### 7.9.1. `link.loose_material`
+
+When applied to a component, it indicates that this component uses one or multiple materials defined using `process.loose_material` datablocks.
+
+| Field           | Format | Requirement | Description                                            |
+| --------------- | ------ | ----------- | ------------------------------------------------------ |
+| `material_name` | string | MUST        | Name of the material used in the definition datablocks |
+
+### 7.9.2. `link.mtlx_material`
+When applied to a component, it indicates that this component makes use of a material defined in mtlx document represented by another component.
+
+| Field               | Format | Required | Description                                                                               |
+| ------------------- | ------ | -------- | ----------------------------------------------------------------------------------------- |
+| `mtlx_component_id` | string | yes      | Id of the component that represents the mtlx file.                                        |
+| `mtlx_material`     | string | no       | Optional reference for which material to use from the mtlx file, if it contains multiple. |
+
 
 
 
