@@ -186,7 +186,7 @@ As mentioned in the previous section, the provider MAY require custom authentica
 Which headers the client needs to send is communicated by the provider in the initialization data.
 
 The client obtains the required header values, such as passwords or randomly generated access tokens, from the user through a GUI, from a cache or through other mechanisms.
-See [Security considerations](#10-security-considerations) for more details about credential handling.
+See [9. Security considerations](#9-security-considerations) for more details about credential handling.
 
 If the provider uses authentication, then it MUST offer a connection status endpoint in the initialization data.
 Before attempting to perform any other actions using the credentials entered by the user, the client SHOULD contact the connection status endpoint at least once after initialization to verify the correctness of the values entered by the user.
@@ -196,7 +196,7 @@ The connection status endpoint has two primary uses:
 - If available, the provider SHOULD respond with user-specific metadata, such as a username or account details which the client SHOULD display to the user to confirm that they are properly connected to the provider.
 - If the provider implements asset unlocking using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance.
 
-See [8.7](#87-unlocking-related-datablocks).
+See [7.4 Unlocking related datablocks](#74-unlocking-related-datablocks).
 
 ## 3.4. Browsing assets
 After successful initialization (and possibly authentication) the client is ready to browse assets.
@@ -470,7 +470,7 @@ A simple example for a variable query is a query for listing assets that allows 
 
 #### 4.4.1.1. Variable Query Parameters
 
-The full field list of a variable query object can be found in the [`variable_query` datablock template](#721-variable_query).
+The full field list of a variable query object can be found in the [`variable_query` datablock template](#621-variable_query).
 
 A variable query is composed of its URI, HTTP method and optionally one or multiple parameter definitions that are used to determine the payload of the HTTP request.
 
@@ -487,7 +487,7 @@ If the provider offers one or multiple adjustable parameters, it MUST choose one
 
 ### 4.4.2. Fixed Query
 
-The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#722-fixed_query).
+The full field list of a fixed query object can be found in the [`fixed_query` datablock template](#622-fixed_query).
 
 A **fixed query** is an HTTP(S) request defined by its URI, method and a payload _that is not configurable by the user_  which is sent by the client to the provider in order to receive data in response.
 
@@ -508,7 +508,7 @@ In concrete terms, this means:
 - If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to perform a download that has not been unlocked, the provider MAY respond with code `402 - Payment Required` instead.
 
 If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
-This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#511-the-meta-template), if they have content.
+This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#521-the-meta-template), if they have content.
 
 
 
@@ -575,8 +575,8 @@ All instances of this template MUST have the following structure:
 
 | Field                                | Format          | Description                                                                |
 | ------------------------------------ | --------------- | -------------------------------------------------------------------------- |
-| \<string-key\>                       | object or array | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
-| \<string-key\>                       | object or array | Exact structure is defined in the [Datablocks section](#8-datablock-index) |
+| \<string-key\>                       | object or array | Exact structure is defined in the [Datablocks section](#7-datablock-index) |
+| \<string-key\>                       | object or array | Exact structure is defined in the [Datablocks section](#7-datablock-index) |
 | ... (arbitrary number of datablocks) |
 
 Every key of this data object is the identifier for the datablock stored in that key's field.
@@ -877,7 +877,7 @@ This datablock has the following structure:
 | `name`         | string  | MUST                 | Name of the header                                                                                                                                                         |
 | `default`      | string  | MAY                  | Default value as a suggestion to the client.                                                                                                                               |
 | `is_required`  | boolean | MUST                 | Indicates if this header is required.                                                                                                                                      |
-| `is_sensitive` | boolean | MUST                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#101-storing-sensitive-headers) |
+| `is_sensitive` | boolean | MUST                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#91-storing-sensitive-headers) |
 | `prefix`       | string  | MAY                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.  |
 | `suffix`       | string  | MAY                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.    |
 | `title`        | string  | MAY                  | Title that the client SHOULD display to the user.                                                                                                                          |
@@ -1044,9 +1044,7 @@ If the provider does not have insight into the dimensions of the thumbnail that 
 
 ## 7.4. Unlocking-related datablocks
 
-These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch.
-
-*Note that the `fetch.download_post_unlock` datablock is also related to the unlocking system but is [grouped with the other `fetch.*` datablocks](#83-file-related-datablocks).* 
+These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch. 
 
 ### 7.4.1. `unlock_balance`
 Information about the user's current account balance.
@@ -1130,9 +1128,6 @@ These datablocks describe how a client can gain access to a component file.
 
 This datablock indicates that this is a file which can be downloaded directly using the provided query.
 
-The full description of component handling can be found in the [component handling section](#933-handling-component-files).
-TODO update reference
-
 | Field | Format        | Requirement | Description                                 |
 | ----- | ------------- | ----------- | ------------------------------------------- |
 | query | `fixed_query` | MUST        | The query to use.                           |
@@ -1151,7 +1146,7 @@ It indicates that when the referenced unlock query has been completed, the *real
 
 ### 7.6.3. `fetch.from_archive`
 This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
-More about the handling in the [import and handling section](#9-implementation-analysis-and-handling).
+More about the handling in the [import and handling section](#8-implementation-analysis-and-handling).
 
 | Field                  | Format | Requirement | Description                                                                                                                                                                                                                                                                                        |
 | ---------------------- | ------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1209,7 +1204,7 @@ These datablocks describe which "role" a specific component should play in the a
 
 ### 7.8.1. `role.native`
 This datablock indicates that this file should be handled by the host application's native import functionality.
-The full description of component handling can be found in the [component handling section](#933-handling-component-files).
+The full description of component handling can be found in the [component handling section](#833-handling-component-files).
 
 This datablock contains no fields is therefore represented by the empty object `{}`.
 
@@ -1284,7 +1279,7 @@ The client MAY choose create an intermediary plan to allow the user to preview t
 
 ## 8.2. Implementation analysis
 
-When analyzing a set of implementation sent from the provider via the [implementation list endpoint](#54-implementation-list),
+When analyzing a set of implementation sent from the provider via the [implementation list endpoint](#55-endpoint-implementation-list-implementation_list),
 the client SHOULD decide for every implementation whether it is "readable".
 It MAY represent this as a binary choice or a more gradual representation.
 
@@ -1410,7 +1405,7 @@ They SHOULD consider storing secret headers through native operation system APIs
 
 ## 9.2. Avoiding Relative Paths in `local_path`
 Datablocks of the `fetch.*` family specify a local sub-path for every component that needs to be appended to a local path chosen by the client in order to assemble the correct file structure for this asset.
-As specified in the [datablock requirements](#83-file-related-datablocks) the `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
+The `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
 Clients MUST take cate to ensure that components with references like `./` or `../` in their local path are rejected.
 
 <!-- CDN Link to use FontAwesomeIcons in some of the diagrams -->
