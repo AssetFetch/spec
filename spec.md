@@ -1233,8 +1233,6 @@ It indicates which role the component should play in the material.
 | `map`           | string | MUST        | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
 | `colorspace`    | string | MAY         | One of `srgb`, `linear`                                                                                                                   |
 
-TODO info about normal+y/normal-y
-
 ## 7.9. Linking-related datablocks
 
 ### 7.9.1. `link.loose_material`
