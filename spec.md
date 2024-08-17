@@ -266,16 +266,18 @@ Overall, this process is comparable to the less commonly used [agent-driven cont
 
 The unlocking system in AssetFetch works by linking individual components to an "unlocking query".
 
-When operating *without* asset unlocking, the provider includes download information for every component in every implementation into its original list of suggested implementations.
+When operating *without* asset unlocking, there is only one download-related piece of information that the provider MUST define:
 
-When operating *with* asset unlocking, the provider initially withholds the download information that would normally be sent for one or all of the components in one or all of the implementations.
-If it does that with at least one component, it then MUST instead provide:
-- A description of one or multiple unlocking queries
-- A mapping between components and unlocking queries
-- A query to receive the previously withheld download information for every locked component component which the client can execute after the unlocking has happened.
+- The query to download the component file (for every component)
 
-The client SHOULD then present the required unlocking queries (along with the accompanying charges, if any, that the provider has declared will happen to) to the user.
-If the user agrees, the client first performs the unlocking query (or queries) required to unlock all components it wants to download and then queries the provider for the previously withheld real download links, which MAY be ephemeral or otherwise personalized to the user.
+When operating *with* asset unlocking, the provider MUST instead provide the following information:
+
+- A list containing one or multiple **unlocking queries**
+- A mapping between components and said unlocking queries
+- The query to download the component file (for every component)
+
+The client SHOULD then present the required unlocking queries (along with any accompanying charges that the provider has declared) to the user.
+If the user agrees, the client first performs the unlocking query (or queries) required to unlock all components it wants to download and then performs the real download queries.
 
 This component-level linking gives providers flexibility in how they structure the unlocking process.
 
@@ -742,23 +744,6 @@ The URI and parameters for this endpoint are communicated through the `unlock_qu
 This endpoint currently does not use any datablocks.
 Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
 
-## 5.7. Endpoint: Unlocked Data (`unlocked_data`)
-
-| Field  | Format                 | Requirement | Description                     |
-| ------ | ---------------------- | ----------- | ------------------------------- |
-| `meta` | `meta`                 | MUST        | Metadata, kind:`unlocked_data`. |
-| `data` | `datablock_collection` | MUST        | Datablocks.                     |
-
-This endpoint type responds with the previously withheld data for one component, assuming that the client has made all the necessary calls to the unlocking endpoint(s).
-It gets called by the client for every component that had an `fetch.download_post_unlock` datablock assigned to it and returns the "real" `fetch.download` datablock (which may be temporarily generated).
-
-The following datablocks are to be included in the `data` field:
-
-| Requirement Level | Datablocks       |
-| ----------------- | ---------------- |
-| MUST              | `fetch.download` |
-
-
 ## 5.8. Endpoint: Connection Status (`connection_status`)
 
 | Field  | Format                 | Requirement | Description                         |
@@ -1060,7 +1045,7 @@ This datablock is **an array** consisting of `unlock_query` objects.
 | `id`                 | string            | MUST                           | This is the id by which `fetch.download_post_unlock` datablocks will reference this query.                                                                                                     |
 | `unlocked`           | boolean           | MUST                           | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
 | `price`              | number            | MUST, only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
-| `query`              | `fixed_query`     | MUST, only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
+| `activation_query`   | `fixed_query`     | MUST, only if `unlocked=False` | Query to actually unlock the requested resource ("make the purchase").                                                                                                                         |
 | `child_queries`      | Array of `string` | MAY                            | A list containing the ids of other queries that can also be considered "unlocked" if this query has been executed.                                                                             |
 | `query_fallback_uri` | string            | MAY                            | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
 
@@ -1120,21 +1105,23 @@ These datablocks describe how a client can gain access to a component file.
 
 This datablock indicates that this is a file which can be downloaded directly using the provided query.
 
-| Field | Format        | Requirement | Description                                 |
-| ----- | ------------- | ----------- | ------------------------------------------- |
-| query | `fixed_query` | MUST        | The query to use.                           |
-| sha1  | string        | MAY         | A sha1-hash to allow for data verification. |
+| Field            | Format        | Requirement | Description                                 |
+| ---------------- | ------------- | ----------- | ------------------------------------------- |
+| `download_query` | `fixed_query` | MUST        | The query to download the file.             |
+| `sha1`           | string        | MAY         | A sha1-hash to allow for data verification. |
 
 ### 7.6.2. `fetch.download_post_unlock`
 
 This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
-It indicates that when the referenced unlock query has been completed, the *real* `fetch.download` datablock can be received by performing the fixed query in `unlocked_data_query`
+It indicates that when the referenced unlock query has been completed, the *real* `download_query` can be performed.
 
-| Field                 | Format        | Requirement | Description                                                                                                                                                                                                                                    |
-| --------------------- | ------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `unlock_query_id`     | string        | MUST        | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_data_query`. |
-| `unlocked_data_query` | `fixed_query` | MUST        | The query to fetch the previously withheld `fetch.download` datablock for this component if the unlocking was successful.                                                                                                                      |
+| Field             | Format        | Requirement | Description                                                                                 |
+| ----------------- | ------------- | ----------- | ------------------------------------------------------------------------------------------- |
+| `unlock_query_id` | string        | MUST        | The id of the unlocking query in the `unlock_queries` datablock required for this download. |
+| `download_query`  | `fixed_query` | MUST        | The query to download the file.                                                             |
+| `sha1`            | string        | MAY         | A sha1-hash to allow for data verification.                                                 |
 
+The `unlock_query_id` indicates that the referenced unlocking query MUST be executed by the client before attempting to perform the actual download. 
 
 ### 7.6.3. `fetch.from_archive`
 This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
