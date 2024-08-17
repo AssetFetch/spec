@@ -744,7 +744,7 @@ The URI and parameters for this endpoint are communicated through the `unlock_qu
 This endpoint currently does not use any datablocks.
 Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
 
-## 5.8. Endpoint: Connection Status (`connection_status`)
+## 5.7. Endpoint: Connection Status (`connection_status`)
 
 | Field  | Format                 | Requirement | Description                         |
 | ------ | ---------------------- | ----------- | ----------------------------------- |
