@@ -853,12 +853,7 @@ See [Variable and Fixed Queries](#44-variable-and-fixed-queries) for more detail
 
 # 7. Datablock Index
 
-This section displays all datablocks that are currently part of the standard.
-
-The text in brackets before the title indicates which kind of AssetFetch resources this block can be applied to.
-To aid with reading this list, exclamation marks and question marks are used to indicate whether this datablock MUST be applied to that resource (!) or if it SHOULD/MAY (?) be applied.
-A star (*) is used to indicate that there are special rules for when/if this datablock is to be used.
-
+This section displays all datablocks that are used in AssetFetch.
 
 ## 7.1. Configuration and authentication-related datablocks
 
