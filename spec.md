@@ -1003,7 +1003,7 @@ An object that MUST conform to this format:
 | `height_m` | float  | MAY         | Height of the referenced asset |
 | `depth_m`  | float  | MAY         | Depth of the referenced asset  |
 
-### 7.3.8. `preview_image_supplemental`
+### 7.3.7. `preview_image_supplemental`
 Contains a list of preview images with `uri`s and `alt`-Strings associated to the asset.
 
 An **array** of objects that conform to the following structure:
@@ -1013,7 +1013,7 @@ An **array** of objects that conform to the following structure:
 | `alt` | string | SHOULD      | An "alt" String for the image.                                                                                |
 | `uri` | string | MUST        | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
-### 7.3.9. `preview_image_thumbnail`
+### 7.3.8. `preview_image_thumbnail`
 Contains information about a thumbnail for an asset. The thumbnail can be provided in multiple resolutions.
 
 An object that MUST conform to this format:
@@ -1023,7 +1023,7 @@ An object that MUST conform to this format:
 | `alt`  | string | SHOULD      | An "alt" String for the image. |
 | `uris` | object | MUST        | See structure described below. |
 
-#### 7.3.9.1. `uris` Structure
+#### 7.3.8.1. `uris` Structure
 
 The `uris` field MUST be an object whose keys are strings containing an integer and whose values are strings.
 The object MUST have at least one member.
