@@ -862,35 +862,35 @@ Headers that the provider expects to receive from the client on every subsequent
 
 This datablock has the following structure:
 
-| Field                          | Format            | Required | Description                                                                                                       |
-| ------------------------------ | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `headers`                      | Array of `header` | yes      | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request.     |
-| `connection_status_query`      | `fixed_query`     | yes      | Query to use for checking whether the provided headers are valid und for obtaining connection status information. |
-| `header_acquisition_uri`       | string            | no       | A URI that the client MAY offer to open in the user's web browser to help them obtain the header values.          |
-| `header_acquisition_uri_title` | string            | no       | Title for the `acquisition_uri`.                                                                                  |
+| Field                          | Format            | Requirement | Description                                                                                                       |
+| ------------------------------ | ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| `headers`                      | Array of `header` | MUST        | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request.     |
+| `connection_status_query`      | `fixed_query`     | MUST        | Query to use for checking whether the provided headers are valid und for obtaining connection status information. |
+| `header_acquisition_uri`       | string            | MAY         | A URI that the client MAY offer to open in the user's web browser to help them obtain the header values.          |
+| `header_acquisition_uri_title` | string            | MAY         | Title for the `acquisition_uri`.                                                                                  |
 
 
 #### 7.1.1.1. `header` structure
 
-| Field          | Format  | Required            | Description                                                                                                                                                                |
-| -------------- | ------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | string  | yes                 | Name of the header                                                                                                                                                         |
-| `default`      | string  | no                  | Default value as a suggestion to the client.                                                                                                                               |
-| `is_required`  | boolean | yes                 | Indicates if this header is required.                                                                                                                                      |
-| `is_sensitive` | boolean | yes                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#101-storing-sensitive-headers) |
-| `prefix`       | string  | no                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.  |
-| `suffix`       | string  | no                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.    |
-| `title`        | string  | no                  | Title that the client SHOULD display to the user.                                                                                                                          |
-| `encoding`     | string  | no, default=`plain` | The encoding that the client MUST apply to the header value and the prefix/suffix. MUST be one of `plain` or `base64`.                                                     |
+| Field          | Format  | Requirement          | Description                                                                                                                                                                |
+| -------------- | ------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | string  | MUST                 | Name of the header                                                                                                                                                         |
+| `default`      | string  | MAY                  | Default value as a suggestion to the client.                                                                                                                               |
+| `is_required`  | boolean | MUST                 | Indicates if this header is required.                                                                                                                                      |
+| `is_sensitive` | boolean | MUST                 | Indicates if this header is sensitive and instructs the client to take appropriate measures to protect it. See [Storing Sensitive Headers](#101-storing-sensitive-headers) |
+| `prefix`       | string  | MAY                  | Prefix that the client should prepend to the value entered by the user when sending it to the provider. The prefix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.  |
+| `suffix`       | string  | MAY                  | Suffix that the client should append to the value entered by the user when sending it to the provider.The suffix MUST match the regular expression `[a-zA-Z0-9-_\. ]*`.    |
+| `title`        | string  | MAY                  | Title that the client SHOULD display to the user.                                                                                                                          |
+| `encoding`     | string  | MAY, default=`plain` | The encoding that the client MUST apply to the header value and the prefix/suffix. MUST be one of `plain` or `base64`.                                                     |
 
 ### 7.1.2. `provider_reconfiguration`
 
 This datablock allows the provider to communicate to the client that a new set of headers that it MUST sent along with every request instead of those entered by the user until a new initialization is performed.
 The client MUST fully replace the values defined using the requirements from the original `provider_configuration` datablock with the new values defined in this datablock.
 
-| Field     | Format | Required | Description                                                                                                                                             |
-| --------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `headers` | Object | yes      | An object whose properties MUST all be strings. The keys indicate the new header names, the property values represent the new header values to be used. |
+| Field     | Format | Requirement | Description                                                                                                                                             |
+| --------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `headers` | Object | MUST        | An object whose properties MUST all be strings. The keys indicate the new header names, the property values represent the new header values to be used. |
 
 
 These new headers effectively act like cookies used on web sites.
@@ -902,11 +902,11 @@ Clients MAY require the user to confirm the new header values before starting to
 
 This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
 
-| Field              | Format | Required | Description                                                                                                            |
-| ------------------ | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `display_name`     | string | no       | The name of the user to display.                                                                                       |
-| `display_tier`     | string | no       | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.                 |
-| `display_icon_uri` | string | no       | URI to an image with an aspect ratio of 1:1, for example a profile picture or icon representing the subscription tier. |
+| Field              | Format | Requirement | Description                                                                                                            |
+| ------------------ | ------ | ----------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `display_name`     | string | MAY         | The name of the user to display.                                                                                       |
+| `display_tier`     | string | MAY         | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.                 |
+| `display_icon_uri` | string | MAY         | URI to an image with an aspect ratio of 1:1, for example a profile picture or icon representing the subscription tier. |
 
 ## 7.2. Browsing-related datablocks
 
@@ -930,9 +930,9 @@ Follows the `fixed_query` template.
 This datablock contains statistics about the current response.
 It can be used to communicate the total number of results in a query where not all results can be communicated in one response and are instead deferred using `next_query`.
 
-| Field                | Format | Required | Description                                                                                                                                                                                            |
-| -------------------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `result_count_total` | int    | yes      | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
+| Field                | Format | Requirement | Description                                                                                                                                                                                            |
+| -------------------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `result_count_total` | int    | MUST        | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
 
 
 ## 7.3. File-related datablocks
