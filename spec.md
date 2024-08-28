@@ -127,15 +127,17 @@ Datablocks are flexible and sometimes reusable pieces of metadata that enable th
 - Instructions for parsing or otherwise handling specific data
 - Relationships between resources
 
-## 2.9. Asset unlocking 
-> Performing a query from the client to the provider to indicate that the user requests access to a specific asset or implementation. The provider acknowledges the query and then grants access to the requested resource, often along with a side-effect in the provider's back-end systems, such as a charging the user for a purchase.
+## 2.9. Component unlocking 
+> Performing a query from the client to the provider to request access to a specific component of an implementation.
+> The provider acknowledges the query and then grants access to the requested component(s), possibly along with a side-effect in the provider's back-end system, such as a charging the user for a purchase.
 
-The standard operating mode of an AssetFetch provider is to freely distribute the files for any asset implementation that the client.
+The standard operating mode of an AssetFetch provider is to freely distribute the component files for any asset implementation that the client.
 
-However, the provider MAY choose to deploy access limitations to component resources to require payment, impose usage quotas, or add other limitations to control asset distribution.
-To accommodate this, providers are able to define an additional procedure to "unlock" assets, requiring further action by the client and user to access the files associated with components.
+However, the provider MAY choose to configure access limitations for all or some components to require payment, impose usage quotas, or add other limitations to control distribution.
+To accommodate this, providers are able to define an additional endpoint to perform "unlocking" queries against.
+The pattern by which components are unlocked (for example on a per-asset or per-implementation basis - or even more granular) can be controlled with a high degree of flexibility, accommodating many patterns commonly used by digital asset stores.
 
-**AssetFetch does not concern itself with the actual transaction itself, users still need to perform any required account- and payment setup with the provider through external means, usually the provider's website.**
+**AssetFetch does not concern itself with any actual monetary transactions, users still need to perform any required account- and payment setup with the provider through external means, usually through the provider's website.**
 
 
 
@@ -160,7 +162,7 @@ Generally, the following interactions are modeled:
 - **Connection checking (optional):** If the provider requires authentication from the client, then an additional step is performed to confirm that the connection has been established and that the user has been logged in successfully.
 - **Browsing assets:** The client receives a list of available assets from the provider and displays it to the user. This list can be influenced using  parameters to implement common filtering techniques, such as keyword- or category-based searching. The user chooses an asset they with to obtain.
 - **Implementation negotiation:** The client receives a list of available implementations for the chosen asset. This list can again be controlled using parameters to implement common per-asset choices like resolution or level-of-detail. The client then determines based on the metadata which of the implementations offered by the provider are viable for its environment/host application and chooses one implementation, possibly with manual support of the user.
-- **Asset unlocking (optional):** If the provider requires asset unlocking, then relevant unlocking information was already included in the implementation metadata. The client uses this data to make the required unlocking queries to the provider which ensures that the provider will actually allow the download during the next step. If asset unlocking is not used then this step can be skipped.
+- **Component Unlocking (optional):** If the provider requires component unlocking, then relevant unlocking information was already included in the implementation metadata. The client uses this data to make the required unlocking queries to the provider which ensures that the provider will actually allow the download during the next step. If component unlocking is not required by the provider then this step can be skipped.
 - **Downloading and arranging**: The client uses the download information it obtained together with the other implementation metadata to download the component files and arrange them in a local file system directory or similar storage location.
 - **Local handling**: Finally, the client "handles" the files it downloaded along with aid from the implementation metadata. This "handling" can vary between clients developed for different host applications, but it usually involves importing the downloaded resources into the currently open project/scene or placing the data in a local repository, such as an application's proprietary asset management solution.
 
@@ -191,7 +193,7 @@ Before attempting to perform any other actions using the credentials entered by 
 The connection status endpoint has two primary uses:
 
 - If available, the provider SHOULD respond with user-specific metadata, such as a username or account details which the client SHOULD display to the user to confirm that they are properly connected to the provider.
-- If the provider implements asset unlocking using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance. See [7.4 Unlocking related datablocks](#74-unlocking-related-datablocks).
+- If the provider implements component unlocking using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance. See [7.4](#74-unlocking-related-datablocks).
 
 ## 3.4. Browsing assets
 After successful initialization (and possibly authentication) the client is ready to browse assets.
@@ -257,22 +259,23 @@ If more than one implementation is valid for the given client and its host appli
 
 Overall, this process is comparable to the less commonly used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
 
-## 3.6. Asset unlocking (optional)
+## 3.6. Component unlocking (optional)
 
-When operating *without* asset unlocking, there is only one download-related piece of information that the provider MUST define:
+Component unlocking allows the provider to require the client to perform a special unlocking query before downloading component files.
+
+When operating *without* component unlocking, there is only one download-related piece of information that the provider MUST define:
 
 - The query to download the component file (for every component)
 
-When operating *with* asset unlocking, the provider MUST instead provide the following information:
+When operating *with* component unlocking, the provider MUST instead include the following information:
 
 - A list containing one or multiple **unlocking queries**
-- A mapping between components and said unlocking queries
+- A mapping between the components and the unlocking queries
 - The query to download the component file (for every component)
 
 The client SHOULD then present the required unlocking queries (along with any accompanying charges that the provider has declared) to the user.
-If the user agrees, the client first performs the unlocking query (or queries) required to unlock all components it wants to download and then performs the real download queries.
+If the user confirms the action, the client MUST first perform the unlocking query (or queries) required to unlock all components it wants to download and only then performs the real download queries.
 
-This component-level linking gives providers flexibility in how they structure the unlocking process.
 
 ## 3.7. Downloading
 After choosing a suitable implementation and unlocking all of its components, the client downloads the files for every component of the implementation into a dedicated storage location.
@@ -330,7 +333,7 @@ sequenceDiagram
 
 ### 3.9.2. Complete Version
 
-This diagram shows a more complete interaction, including authentication and asset unlocking.
+This diagram shows a more complete interaction, including authentication and component unlocking.
 It also illustrates how the provider can utilize ephemeral download links hosted on a different platform, like a CDN ("Content Delivery Network") service.
 
 ```mermaid
@@ -524,7 +527,7 @@ The interaction model described in the [General Operation](#3-general-operation)
 
 Depending on which features it wants to use, the provider MAY implement:
 - An endpoint for performing a connection status check (MUST be implemented if the provider wants to use user authentication)
-- An endpoint for unlocking resources (MUST be implemented if the provider wants to use asset unlocking)
+- An endpoint for unlocking resources (MUST be implemented if the provider wants to use component unlocking)
 
 *The specific URIs or sub-paths for these endpoint are not prescribed by AssetFetch.*
 The URI and parameters for every endpoint besides the initialization endpoint are communicated by the provider to the client in the response data to a previously made request.
@@ -669,10 +672,10 @@ The URI and available parameters for this endpoint are communicated by the serve
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level                      | Datablocks            |
-| -------------------------------------- | --------------------- |
-| MUST, if asset unlocking is being used | `unlock_queries`      |
-| MAY                                    | `response_statistics` |
+| Requirement Level                          | Datablocks            |
+| ------------------------------------------ | --------------------- |
+| MUST, if component unlocking is being used | `unlock_queries`      |
+| MAY                                        | `response_statistics` |
 
 ### 5.5.1. `implementation` Structure
 
@@ -743,10 +746,10 @@ The URI and parameters for the balance endpoint are communicated by the provider
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level                                                  | Datablocks       |
-| ------------------------------------------------------------------ | ---------------- |
-| SHOULD, if the provider uses a prepaid system for unlocking assets | `unlock_balance` |
-| MAY                                                                | `user`           |
+| Requirement Level                                                      | Datablocks       |
+| ---------------------------------------------------------------------- | ---------------- |
+| SHOULD, if the provider uses a prepaid system for unlocking components | `unlock_balance` |
+| MAY                                                                    | `user`           |
 
 
 
@@ -1009,7 +1012,7 @@ If the provider does not have insight into the dimensions of the thumbnail that 
 
 ## 7.4. Unlocking-related datablocks
 
-These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch. 
+These datablocks are used if the provider is utilizing the component unlocking system in AssetFetch. 
 
 ### 7.4.1. `unlock_balance`
 Information about the user's current account balance.
@@ -1243,7 +1246,7 @@ It MAY represent this as a binary choice or a more gradual representation.
 Possible factors for this decision are:
 
 - The file types used in the implementation, as indicated by the `extension` field in the `file_handle` datablock.
-- The use of more advanced AssetFetch features such as archive handling or asset unlocking.
+- The use of more advanced AssetFetch features such as archive handling or component unlocking.
 - Format-specific indicators in the `format.*` datablock which indicate that the given file is incompatible with the client/host application. 
 
 ## 8.3. Implementation import
