@@ -635,7 +635,7 @@ The following datablocks are to be included in the `data` field:
 | ----------- | ----------------------------------- |
 | MAY         | `next_query`, `response_statistics` |
 
-The `assets` field MUST NOT contain more than 100 items for one response.
+The `assets` field MUST NOT contain more than 100 asset objects for one response.
 If the provider finds more assets than 100 assets which match the query it SHOULD use the `next_query` datablock to define a fixed query that the client can use to fetch more results.
 
 ### 5.4.1. `asset` Structure
@@ -653,11 +653,11 @@ Clients MAY use the id as a display title, but SHOULD prefer the `title` field i
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement | Datablocks                                                                          |
-| ----------- | ----------------------------------------------------------------------------------- |
-| MUST        | `implementation_list_query`                                                         |
-| SHOULD      | `preview_image_thumbnail`, `text`                                                   |
-| MAY         | `preview_image_supplemental`, `license`, `authors`, `dimensions.*`,`web_references` |
+| Requirement | Datablocks                                                                        |
+| ----------- | --------------------------------------------------------------------------------- |
+| MUST        | `implementation_list_query`                                                       |
+| SHOULD      | `preview_image_thumbnail`, `text`                                                 |
+| MAY         | `preview_image_supplemental`, `license`, `authors`, `dimensions`,`web_references` |
 
 
 ## 5.5. Endpoint: Implementation List (`implementation_list`)
