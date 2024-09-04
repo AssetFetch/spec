@@ -693,7 +693,7 @@ The id may be reused for an implementation of a *different* asset.
 Clients MAY use this id when storing and organizing files on disk.
 Clients MAY use the id as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
 
-The following datablocks are to be included in the `data` field:
+The following datablocks are to be included in the `data` field of the response:
 
 | Requirement Level | Datablocks |
 | ----------------- | ---------- |
@@ -712,12 +712,12 @@ The `id` field MUST be unique among all components inside one implementation, bu
 Clients MAY use this id when storing and organizing files on disk.
 Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
 
-The following datablocks are to be included in the `data` field:
+The following datablocks are to be included in the `data` field of every component:
 
-| Requirement Level | Datablocks                                                 |
-| ----------------- | ---------------------------------------------------------- |
-| MUST              | `file_info`,`file_handle`, `fetch.*`                       |
-| MAY               | `environment_map`, `loose_material.*`, `mtlx_apply`,`text` |
+| Requirement Level | Datablocks                                            |
+| ----------------- | ----------------------------------------------------- |
+| MUST              | `fetch.*`, `role` or `role.*`, `format` or `format.*` |
+| MAY               | `link.*`,`text`                                       |
 
 
 
