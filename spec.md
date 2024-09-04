@@ -1219,136 +1219,124 @@ When applied to a component, it indicates that this component makes use of a mat
 
 
 
-# 8. Implementation analysis and handling
+# 8. Working with asset implementations
 
 ## 8.1. Overview
 
-This specification generally does not focus heavily on the exact handling of assets implementations and their associated files on the client side, as it may vary greatly between different applications/clients.
-It only outlines a general structure that the client SHOULD follow in order to make its asset definitions as portable between applications as reasonably possible.
+Building on the description of the general operation in section [3](#3-general-operation) this section provides a more detailed look at the process of analyzing and importing asset implementations.
 
-When receiving several implementations for the same asset from a provider, the client SHOULD, broadly, perform the following steps:
+When receiving the metadata of several implementations of an asset from a provider, the client SHOULD perform the following steps:
 
 1. Analyze the implementations and decide if there is one (or multiple) that it can handle.
 2. If multiple implementations are deemed acceptable, choose one to *actually* import.
 3. Run the import, which entails:
-   1. Dedicate a space in its local storage to the asset (this is almost certainly a directory but could theoretically also be another means of storage in a proprietary database system).
-   2. Perform all required unlocking queries based on the information in the `unlock_queries` and `file_fetch.download` datablocks.
-   3. Fetch and arrange all files for all components using the instructions in their `file_fetch.*` datablocks.
-   4. Handle the component files using the instructions in the `file_handle`, `format.*` and other datablocks.
-
-Client implementors SHOULD consider whether these steps are fitting to their environment and make deviations, if necessary.
+   1. Dedicate a space in its local storage for the asset implementation. This is almost always a directory on disk but could theoretically also be another means of storage in a proprietary database system.
+   2. Perform all required unlocking queries based on the information in the `unlock_queries` datablock and references in the `file_fetch.download` datablocks.
+   3. Fetch and store all files for all components using the instructions in their `store.*` datablocks.
+   4. Handle the component files using the instructions in their `role.*`, `format.*` and other datablocks.
 
 ## 8.2. Implementation analysis
 
-When analyzing a set of implementation sent from the provider via the [implementation list endpoint](#55-endpoint-implementation-list-implementation_list),
-the client SHOULD decide for every implementation whether it is "readable".
-It MAY represent this as a binary choice or a more gradual representation.
+When analyzing a set of implementation sent from the provider via the implementation list endpoint (See [5.5](#55-endpoint-implementation-list-implementation_list)), the client SHOULD decide for every implementation whether it is considered "readable".
 
 Possible factors for this decision are:
 
-- The file types used in the implementation, as indicated by the `extension` field in the `file_handle` datablock.
-- The use of more advanced AssetFetch features such as archive handling or component unlocking.
-- Format-specific indicators in the `format.*` datablock which indicate that the given file is incompatible with the client/host application. 
+- The file types used in the implementation, as indicated by the `format` or `format.*` datablock.
+- The use of more advanced AssetFetch features such as archive handling or component unlocking which the client might not support.
+- Format-specific data in the `format.*` datablock which indicates that the given file is (in)compatible with the client/host application, for example through version-indicators. 
 
-## 8.3. Implementation import
+
 
 If at least one of the implementations offered by the provider has been deemed readable, the client can proceed and make an actual import attempt.
 This usually involves interaction with the host application which means that client implementors SHOULD consider the steps outlined in this section only as a rough indicator for how to perform the import.
 
-### 8.3.1. The implementation directory
+## 8.3. Performing unlock queries
 
-For handling the implementation of an asset offered by the provider the client SHOULD make a dedicated directory into which all the files described by all the components can be arranged.
-For this purpose it MAY use the `id` values transmitted on the provider-, asset- and implementation queries.
-The directory SHOULD be empty at the start of the component handling process.
-
-### 8.3.2. Performing unlock queries
-
-If the implementation contains components with a `file_fetch.download` datablock that references unlocking queries,
+If the implementation contains components with a `fetch.download` datablock that references unlocking queries,
 then the client MUST perform the unlock query referenced in that datablock before it can proceed.
 Otherwise the resources may not be fully unlocked and the provider will likely deny access.
 
-### 8.3.3. Handling component files
+## 8.4. Choosing a local directory
 
-The behavior of a component is dictated by the value of the `behavior` field in the `file_handle` datablock.
+Individual asset components/files may have implicit relationships to each other that are not directly visible from any of the datablocks such as relative file paths *within* project files (i.e. a model file expecting a texture to be at `./tex.png`).
+To ensure that these references are still functional after the download, AssetFetch specifies certain rules regarding how clients arrange downloaded files in the local file system.
 
-#### 8.3.3.1. Handling for `single_active`
+- The client SHOULD create a dedicated directory for every implementation of every asset that it downloads.
+- The directory SHOULD be empty at the start of the component handling process.
+- The location of this directory is not specified and is up to the client implementation.
+- For this purpose it MAY use the `id` values in the the provider-, asset- and implementation queries.
+- It MAY also be dependent on the context in which the client currently runs, for example a subfolder relative to the currently opened project.
 
-Fetch the file using the instructions in the `file_fetch.*` datablock and place it in the `local_path` listed in the `file_handle` datablock.
-Next, make an attempt to load this file directly, for example through the host application's native import functionality.
 
-#### 8.3.3.2. Handling for `single_passive`
+## 8.5. Downloading and storing files
 
-Fetch the file using the instructions in the `file_fetch.*` datablock and place it in the `local_path` listed in the `file_handle` datablock.
+### 8.5.1. Standard files (with `store.file` datablock)
 
-The client SHOULD NOT make a direct attempt to load this file and only process it in the case that it is referenced by another (active) component.
-This can be either through a native reference in the component file itself (in which ase the host application's native import functionality will handle the references by itself)
-or through a reference in the AssetFetch data (like the `loose_material.apply` datablock), in which case the client needs to take additional action to handle the file.
+Inside this directory it SHOULD place every downloaded file in the directory as specified in the `local_file_path` field of the component's `store.file` datablock.
 
-#### 8.3.3.3. Handling for `archive_unpack_fully`
-
-Fetch the file using the instructions in the `file_fetch.*` datablock and place it in a temporary location.
-
-The client MUST unpack the full contents of the archive root into the implementation directory using the `local_path` in the `file_handle` datablock as the sub-path inside the implementation directory.
-
-#### 8.3.3.4. Handling for `archive_unpack_referenced`
-
-Fetch the file using the instructions in the `file_fetch.*` datablock and place it in a temporary location.
-
-Then unpack only those files that are referenced by other components in their `file_fetch.from_archive` datablocks.
-Use the `local_path` in the individual component's `file_handle` datablock as the unpacking destination.
-
-#### 8.3.3.5. Collisions in the implementation directory
-
-In general, if an implementation assigns the same `local_path` to two different components, then the client's behavior is undefined.
+If an implementation assigns the same `local_file_path` to two different file components, then the client's behavior is undefined.
 Providers MUST avoid configurations that lead to this outcome.
 
-If the `local_path` of a component with behavior `single_*` overlaps with a file from within an archive with the behavior `archive_unpack_fully`, then the first (single)
-component SHOULD take priority and overwrite the file from within the archive.
-Therefore, the client SHOULD perform all unpacking initiated by archive components with the `archive_unpack_fully` value first, and then start handling the remaining components for individual files.
+### 8.5.2. Archive files (with `store.archive` datablock)
 
-Conflicts as the result of two archive components with `archive_unpack_fully` behavior have undefined behavior and MUST be avoided by the provider.
+When working with archives, the behavior is dictated by the `extract_fully` field in the `store.archive` datablock.
 
-## 8.4. Local Storage of Asset Files
-As described in the previous section, individual asset components/files may have implicit relationships to each other that are not directly visible from any of the datablocks such as relative file paths within project files.
-To ensure that these references are still functional, AssetFetch specifies certain rules regarding how clients arrange downloaded files in the local file system.
+#### 8.5.2.1. Handling for `extract_fully=true`
 
-A client SHOULD create a dedicated directory for every implementation of every asset that it downloads.
-The location of this directory is not specified and can be fixed for all uses of the client. It can also be dependent on the context in which the client currently runs, for example a subfolder relative to the open project in a 3D suite.
-Inside this directory it SHOULD place every file as specified in the `local_path` field of the component's `datablock`.
-When opening any downloaded file it SHOULD happen from this directory to ensure that relative file paths continue to work.
+The client MUST unpack the full contents of the archive root into the implementation directory using the `local_directory_path` in the `store.archive` datablock as the sub-path.
 
-## 8.5. Materials
+All files extracted by this which are not referenced explicitly by a component MUST be treated as passive files (see [2.7.1](#271-component-activeness)).
 
-Materials can be handled in several different ways, which are outlined in this section.
+Overlapping or conflicting `local_directory_path` values have undefined behavior and MUST be avoided by the provider.
 
-### 8.5.1. Using native formats and hidden components
+#### 8.5.2.2. Handling for `extract_fully=false`
+
+In this case, the client SHOULD store the archive in a temporary location first and unpack only those files that are referenced by other components in their respective `fetch.from_archive` datablock.
+
+
+## 8.6. Handling component files
+
+After downloading all component files and arranging them on disk, the client can begin to handle/import the files.
+The behavior of a component is largely controlled by its `role.*` datablock.
+
+### 8.6.1. Handling based on the default role datablock (`role`)
+
+If the `active` property is set to `true`, make an attempt to load this file through the host application's native import feature for this file format.
+
+If the `active` property is set to `false`, do not handle the file directly, only store it (see [8.3.2](#832-downloading-and-storing-component-files)) so that other components can reference it.
+Also see [2.7.1](#271-component-activeness) for the definition and examples of component activeness.
+
+### 8.6.2. Handling a loose material map (`role.loose_material_map`)
+
 Many file formats for 3D content - both vendor-specific as well as open - offer native support for referencing external texture files.
-Providers SHOULD use these "native" material formats whenever possible.
-When materials are used alongside a 3D model file with proper support, the material map components SHOULD be marked with the behavior `single_passive`,
-since they will be referenced by the host application's native importer automatically.
+Providers SHOULD use these "native" material formats whenever possible and send the relevant texture files along as passive files, as described above.
+The `role.loose_material_map` is designed for cases in which this is not possible or practical.
 
-#### 8.5.1.1. MTLX
-The `mtlx_apply` datablock allows references from a component representing a mesh to a component representing an MaterialX (MTLX) file.
+It provides a basic material system where multiple components define the maps of a PBR material.
+The client SHOULD handle these components by creating a new material in its host application and adding the PBR map to it in a way that represents common practice for the given host application.
+
+### 8.6.3. Handling a loose environment map (`role.loose_environment_map`)
+
+Environments for image-based lighting face a similar challenge as PBR materials as it is common practice to only provide a singular image file without any further information.
+
+This the `role.loose_environment_map` datablock indicates that this component is one such environment map with a specific projection, meaning that it should be imported as an environment or something similar within the context of the host application.
+
+## 8.7. Handling component-links
+
+After every component has been handled individually, it might also be necessary to consider relationships between components.
+Again, providers SHOULD rely on native links right in the component files to model these relationships (for example through the use of .mtl files when working with .obj models).
+For cases in which this is not possible or practical, the `link.*` family of datablocks is used.
+
+### 8.7.1. Handling MTLX material links (`link.mtlx_material`)
+The `link.mtlx_material` datablock allows references from a component representing a mesh to a component representing an MaterialX (MTLX) file.
 This allows the use of `.mtlx` files with mesh file formats that do not have the native ability to reference MTLX files.
 
-### 8.5.2. Using loose material declarations
-The workflow outlined in the previous sections is not always easily achievable since not all file 3D file formats offer up-to-date (or any) support for defining materials.
-Provider may also have their own practical reasons for not offering their material definitions in a widely recognized machine-readable format.
+When encountering such a link, the client SHOULD apply the referenced material from the MTLX file to the entire mesh.
 
-In those cases it is currently common practice to simply distribute the necessary material maps along with the mesh files without any concrete machine-readable description for how the maps should be applied.
+### 8.7.2. Handling loose material links (`link.loose_material`)
+This datablock allows references from a component representing a mesh to a loose material described through `role.loose_material_map` datablocks on multiple other components.
 
-The `loose_material.*` datablocks exist to limit the negative impacts of this limitation.
-They make it possible to define basic PBR materials through datablocks on the individual map components and reference them on the mesh component.
-
-Providers SHOULD make use of this notation if, and only if, other more native representations of the material are unavailable of severely insufficient.
-
-## 8.6. Environments
-HDRI environments or skyboxes face a similar situation as materials:
-They can be represented using native formats, but a common practice is to provide them as a singular image file whose projection must be manually inferred by the artist.
-The `loose_environment` datablock works similar to the `loose_material.*` datablocks and allows the provider to communicate that a component should be treated as an environment and what projection should be used.
-
-
-
+When encountering such a link, the client SHOULD apply the referenced material to the entire mesh.
 
 
 
