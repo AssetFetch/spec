@@ -127,17 +127,19 @@ Datablocks are flexible and sometimes reusable pieces of metadata that enable th
 - Instructions for parsing or otherwise handling specific data
 - Relationships between resources
 
-## 2.9. Asset unlocking 
-> Performing a query from the client to the provider to indicate that the user requests access to a specific asset or implementation. The provider acknowledges the query and then grants access to the requested resource, often along with a side-effect in the provider's back-end systems, such as a purchase.
-The standard operating mode of an AssetFetch provider is to freely distribute the files for any asset implementation that the client.
+## 2.9. Component unlocking 
+> Performing a query from the client to the provider to request access to a specific component of an implementation.
+> The provider acknowledges the query and then grants access to the requested component(s), possibly along with a side-effect in the provider's back-end system, such as a charging the user for a purchase.
 
-However, the provider MAY choose to employ more granular access limitations to component resources to require payment, impose usage quotas, make use of dynamically generated temporary download links from external storage providers, or add other limitations to control asset distribution.
-To accommodate this, providers are able to define additional procedures to "unlock" assets and their download information, requiring further deliberate action by the client and user to access the files associated with components.
+The standard operating mode of an AssetFetch provider is to freely distribute the component files for any asset implementation that the client.
 
-In this context, the act of "unlocking" refers to an action that happens in the provider's backend which causes previously not downloadable resources to become downloadable, usually with some side-effect on the provider's back-end, such as a reduction in account balance (i.e. a "purchase") or decrementing a counter for remaining free daily downloads.
+However, the provider can configure access limitations for all or some components to require payment, impose usage quotas, or add other limitations to control distribution.
+To accommodate this, providers are able to define an additional endpoint to perform "unlocking" queries against.
+The pattern by which components are unlocked (for example on a per-asset, per-implementation or even per-component basis) can be controlled with a high degree of flexibility, accommodating many patterns commonly used by digital asset stores.
 
-**AssetFetch does not concern itself with the actual transaction itself, users still need to perform any required account- and payment setup with the provider through external means, usually the provider's website.**
+**AssetFetch does not concern itself with any actual monetary transactions, users still need to perform any required account- and payment setup with the provider through external means, usually through the provider's website.**
 
+See [3.6](#36-component-unlocking-optional) and [7.4](#74-unlocking-related-datablocks) for details.
 
 
 
@@ -161,11 +163,9 @@ Generally, the following interactions are modeled:
 - **Connection checking (optional):** If the provider requires authentication from the client, then an additional step is performed to confirm that the connection has been established and that the user has been logged in successfully.
 - **Browsing assets:** The client receives a list of available assets from the provider and displays it to the user. This list can be influenced using  parameters to implement common filtering techniques, such as keyword- or category-based searching. The user chooses an asset they with to obtain.
 - **Implementation negotiation:** The client receives a list of available implementations for the chosen asset. This list can again be controlled using parameters to implement common per-asset choices like resolution or level-of-detail. The client then determines based on the metadata which of the implementations offered by the provider are viable for its environment/host application and chooses one implementation, possibly with manual support of the user.
-- **Asset unlocking (optional):** If the provider requires asset unlocking, then relevant unlocking information was already included in the implementation metadata. The client uses this data to make the required unlocking queries to the provider which will then give it access to the "true" download information for the implementation components. If asset unlocking is not used then this data is included directly in the implementation data and this step can be skipped.
-- **Downloading and arranging**: The client uses the download information it obtained (directly with the implementation or via the unlocking queries) together with the other implementation metadata to download the component files and arrange them in a local file system directory or similar storage location.
-- **Local handling**: Finally, the client "handles" the files it downloaded along with aid from the implementation metadata. This "handling" can vary between clients developed for different host applications, but it usually involves importing the downloaded resources into the currently open project/scene or placing the data in a local repository, such as an application's proprietary asset management solution.
-
-The order in which the actions are described here is the order in which they occur in regular use, though certain actions MAY be skipped (as denoted) or repeated.
+- **Component Unlocking (optional):** If the provider requires component unlocking, then the relevant information was already included in the implementation metadata. The client uses this data to inform the user about the upcoming charges and (if requested) performs the required unlocking queries to the provider. With the queries made, the provider will actually allow the download during the next step. If component unlocking is not required by the provider then this step can be skipped entirely.
+- **Downloading and arranging**: The client uses the download information it obtained together with the other implementation metadata to download the component files via HTTP and arrange them in a local file system directory or similar storage location.
+- **Local handling**: Finally, the client "handles" the files it downloaded along with aid from the implementation metadata. This "handling" is again controlled by implementation metadata can vary between clients developed for different host applications, but it usually involves importing the downloaded resources into the currently open project/scene or placing the data in a local repository, such as an application's proprietary asset management solution.
 
 ## 3.2. Initialization
 
@@ -194,9 +194,7 @@ Before attempting to perform any other actions using the credentials entered by 
 The connection status endpoint has two primary uses:
 
 - If available, the provider SHOULD respond with user-specific metadata, such as a username or account details which the client SHOULD display to the user to confirm that they are properly connected to the provider.
-- If the provider implements asset unlocking using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance.
-
-See [7.4 Unlocking related datablocks](#74-unlocking-related-datablocks).
+- If the provider implements component unlocking using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance. See [7.4](#74-unlocking-related-datablocks).
 
 ## 3.4. Browsing assets
 After successful initialization (and possibly authentication) the client is ready to browse assets.
@@ -262,29 +260,29 @@ If more than one implementation is valid for the given client and its host appli
 
 Overall, this process is comparable to the less commonly used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
 
-## 3.6. Asset unlocking (optional)
+## 3.6. Component unlocking (optional)
 
-The unlocking system in AssetFetch works by linking individual components to an "unlocking query".
+Component unlocking allows the provider to require the client to perform a special unlocking query before downloading component files.
 
-When operating *without* asset unlocking, the provider includes download information for every component in every implementation into its original list of suggested implementations.
+When operating *without* component unlocking, there is only one download-related piece of information that the provider MUST define:
 
-When operating *with* asset unlocking, the provider initially withholds the download information that would normally be sent for one or all of the components in one or all of the implementations.
-If it does that with at least one component, it then MUST instead provide:
-- A description of one or multiple unlocking queries
-- A mapping between components and unlocking queries
-- A query to receive the previously withheld download information for every locked component component which the client can execute after the unlocking has happened.
+- The query to download the component file (for every component)
 
-The client SHOULD then present the required unlocking queries (along with the accompanying charges, if any, that the provider has declared will happen to) to the user.
-If the user agrees, the client first performs the unlocking query (or queries) required to unlock all components it wants to download and then queries the provider for the previously withheld real download links, which MAY be ephemeral or otherwise personalized to the user.
+When operating *with* component unlocking, the provider MUST instead include the following information:
 
-This component-level linking gives providers flexibility in how they structure the unlocking process.
+- A list containing one or multiple **unlocking queries**
+- A mapping between the components and the unlocking queries
+- The query to download the component file (for every component)
+
+The client SHOULD then present the required unlocking queries (along with any accompanying charges that the provider has declared) to the user.
+If the user confirms the action, the client MUST first perform the unlocking query (or queries) required to unlock all components it wants to download and only then performs the real download queries.
+
 
 ## 3.7. Downloading
-After choosing a suitable implementation and unlocking all of its datablocks (if required), the client can download the files for every component of the implementation into a newly created dedicated directory on the local workstation on which the client is running.
+After choosing a suitable implementation and unlocking all of the components, the client downloads the files for every component of the implementation into a dedicated storage location.
 At this point the client can - either by itself or through calls to its host application - handle the files that it obtained.
 
 ## 3.8. Handling
-
 The AssetFetch data does not encode a fixed, imperative series of steps for handling an asset.
 Instead, it describes properties of and relationships between components which the client uses to generate an appropriate series of steps for handling the file inside its environment.
 This usually entails multiple steps, such as importing resources into the currently opened project or scene or importing resources into a central repository, like a software-specific local asset library. 
@@ -336,7 +334,7 @@ sequenceDiagram
 
 ### 3.9.2. Complete Version
 
-This diagram shows a more complete interaction, including authentication and asset unlocking.
+This diagram shows a more complete interaction, including authentication and component unlocking.
 It also illustrates how the provider can utilize ephemeral download links hosted on a different platform, like a CDN ("Content Delivery Network") service.
 
 ```mermaid
@@ -389,20 +387,17 @@ sequenceDiagram
 		Provider->>Client: Confirms the unlocking action.
 	end
 
-	loop For every component that <br>had its download-related datablocks withheld
+	loop For every component
 		Client->>Provider: Query: paid.example.com/downloads?asset=<asset id>&component=<component id>
 		Provider->> CDN-Service: Query: storage-api.example.com/generate-temp-dl-link?file=<example.obj>
 		CDN-Service->>Provider: Responds with<br>temporary download link
-		Provider->>Client: Responds with actual download information<br>(temporarily generated)
-	end
-
-	loop For every component
-		Client->>CDN-Service: Initiates HTTP download of component file
+		Provider->>Client: Responds with HTTP redirect to (temporary) download link
+		Client->>CDN-Service: Follows HTTP redirect and initiates HTTP download of component file
 		CDN-Service->>Client: Responds with file
 	end
 
 	Client->>Client: Processes files locally based<br>on implementation metadata<br>(usually by importing them<br>into the current project)
-	Client->>User: Confirms asset import
+	Client->>User: Confirms that import was completed
 	note left of User: User can now utilize<br>the asset in their project.
 	User->>User: Fills out asset query<br>again for next asset, if desired
 ```
@@ -457,7 +452,7 @@ standaloneAssetFetchClient/1.4.2.7
 
 ## 4.4. Variable and Fixed Queries
 
-In AssetFetch, there are several instances where the provider needs to describe a possible HTTP request that a client can make to perform a certain action or obtain data, such as browsing for assets, unlocking components or downloading files.
+In AssetFetch, there are several instances where the provider needs to describe a possible HTTP request that a client can make to perform a certain action or receive new data, such as browsing for assets, unlocking components or downloading files.
 In this context, the specification differentiates between "variable" and "fixed" queries.
 
 ### 4.4.1. Variable Query
@@ -505,10 +500,10 @@ In concrete terms, this means:
 - If a provider receives a query that references a specific resource which does not exist, such as a query for implementations of an asset that the provider does not recognize, it SHOULD respond with code `404 - Not Found`.
 - If the provider can not parse the query data sent by the client properly, it SHOULD respond with code `400 - Bad Request`.
 - If a provider receives a query an any other endpoint than the initialization endpoint without one of the headers it defined as required during the initialization it SHOULD send status code `401 - Unauthorized`. This indicates that the client is unaware of required headers and SHOULD cause the client to contact the initialization endpoint for that provider again in order to receive updated information about required headers.
-- If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to perform a download that has not been unlocked, the provider MAY respond with code `402 - Payment Required` instead.
+- If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to perform a component download that has not been unlocked, the provider MAY respond with code `402 - Payment Required` instead.
 
 If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
-This message SHOULD contain the contents of the `message` and `id` field in the response's [metadata](#521-the-meta-template), if they have content.
+This message SHOULD contain the contents of the `message` and `id` field in the response's metadata (See [5.2.1](#521-the-meta-template)), if they have content.
 
 
 
@@ -525,19 +520,18 @@ This section outlines general information about the HTTP-endpoints required for 
 
 ## 5.1. About Endpoints
 
-The interaction model described in the [General Operation](#3-general-operation) section principally implies that there are three kinds of HTTP(s)-based endpoints that a provider MUST implement:
+The interaction model described in the [General Operation](#3-general-operation) section principally implies that there are three kinds of HTTP(s)-based endpoints that a provider MUST the following kinds of endpoints:
 
-- An initialization endpoint
-- An endpoint for querying assets
-- An endpoint for querying implementations of one specific asset
+- An initialization endpoint (`initialization`).
+- An endpoint for querying assets (`asset_list`).
+- An endpoint for querying implementations of one specific asset (`implementation_list`).
 
 Depending on which features it wants to use, the provider MAY implement:
-- An endpoint for performing a connection status check (MUST be implemented if the provider wants to use user authentication)
-- An endpoint for unlocking resources (MUST be implemented if the provider wants to use asset unlocking)
-- An endpoint for obtaining previously withheld datablocks (MUST be implemented if it wants to use asset unlocking)
+- An endpoint for performing a connection status check (`connection_status`) if the provider wants to use user authentication.
+- An endpoint for unlocking resources (`unlock`) if the provider wants to use component unlocking.
 
 *The specific URIs or sub-paths for these endpoint are not prescribed by AssetFetch.*
-The URI and parameters for every endpoint besides the initialization endpoint are communicated by the provider to the client in the response data to a previously made request.
+The URI and parameters for every endpoint besides the initialization endpoint are communicated by the provider to the client in the response data to a previous request.
 
 ## 5.2. Response data templates
 
@@ -679,10 +673,10 @@ The URI and available parameters for this endpoint are communicated by the serve
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level                      | Datablocks            |
-| -------------------------------------- | --------------------- |
-| MUST, if asset unlocking is being used | `unlock_queries`      |
-| MAY                                    | `response_statistics` |
+| Requirement Level                          | Datablocks            |
+| ------------------------------------------ | --------------------- |
+| MUST, if component unlocking is being used | `unlock_queries`      |
+| MAY                                        | `response_statistics` |
 
 ### 5.5.1. `implementation` Structure
 
@@ -730,36 +724,19 @@ The following datablocks are to be included in the `data` field:
 
 ## 5.6. Endpoint: Unlocking (`unlock`)
 
-| Field  | Format                 | Requirement | Description               |
-| ------ | ---------------------- | ----------- | ------------------------- |
-| `meta` | `meta`                 | MUST        | Metadata, kind: `unlock`. |
-| `data` | `datablock_collection` | MAY         | Datablocks.               |
+| Field  | Format | Requirement | Description               |
+| ------ | ------ | ----------- | ------------------------- |
+| `meta` | `meta` | MUST        | Metadata, kind: `unlock`. |
 
-This endpoint is invoked to perform an "unlocking" (usually meaning a "purchase") of a resource.
-After calling it the client can expect to resolve all previously withheld downloads using the endpoint for unlocked data specified in the `fetch.download_post_unlock` datablock.
+This endpoint is invoked to perform an "unlocking" action (usually meaning a "purchase") of a resource.
+After calling it the client can expect to be able to perform all downloads associated to this unlocking query without being rejected by the provider.
+
 The URI and parameters for this endpoint are communicated through the `unlock_queries` datablock.
 
 This endpoint currently does not use any datablocks.
 Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
 
-## 5.7. Endpoint: Unlocked Data (`unlocked_data`)
-
-| Field  | Format                 | Requirement | Description                     |
-| ------ | ---------------------- | ----------- | ------------------------------- |
-| `meta` | `meta`                 | MUST        | Metadata, kind:`unlocked_data`. |
-| `data` | `datablock_collection` | MUST        | Datablocks.                     |
-
-This endpoint type responds with the previously withheld data for one component, assuming that the client has made all the necessary calls to the unlocking endpoint(s).
-It gets called by the client for every component that had an `fetch.download_post_unlock` datablock assigned to it and returns the "real" `fetch.download` datablock (which may be temporarily generated).
-
-The following datablocks are to be included in the `data` field:
-
-| Requirement Level | Datablocks       |
-| ----------------- | ---------------- |
-| MUST              | `fetch.download` |
-
-
-## 5.8. Endpoint: Connection Status (`connection_status`)
+## 5.7. Endpoint: Connection Status (`connection_status`)
 
 | Field  | Format                 | Requirement | Description                         |
 | ------ | ---------------------- | ----------- | ----------------------------------- |
@@ -770,10 +747,10 @@ The URI and parameters for the balance endpoint are communicated by the provider
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level                                                  | Datablocks       |
-| ------------------------------------------------------------------ | ---------------- |
-| SHOULD, if the provider uses a prepaid system for unlocking assets | `unlock_balance` |
-| MAY                                                                | `user`           |
+| Requirement Level                                                      | Datablocks       |
+| ---------------------------------------------------------------------- | ---------------- |
+| SHOULD, if the provider uses a prepaid system for unlocking components | `unlock_balance` |
+| MAY                                                                    | `user`           |
 
 
 
@@ -1036,7 +1013,7 @@ If the provider does not have insight into the dimensions of the thumbnail that 
 
 ## 7.4. Unlocking-related datablocks
 
-These datablocks are used if the provider is utilizing the asset unlocking system in AssetFetch. 
+These datablocks are used if the provider is utilizing the component unlocking system in AssetFetch. 
 
 ### 7.4.1. `unlock_balance`
 Information about the user's current account balance.
@@ -1055,18 +1032,19 @@ This datablock is **an array** consisting of `unlock_query` objects.
 
 #### 7.4.2.1. `unlock_query` structure
 
-| Field                | Format            | Requirement                    | Description                                                                                                                                                                                    |
-| -------------------- | ----------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                 | string            | MUST                           | This is the id by which `fetch.download_post_unlock` datablocks will reference this query.                                                                                                     |
-| `unlocked`           | boolean           | MUST                           | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
-| `price`              | number            | MUST, only if `unlocked=False` | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
-| `query`              | `fixed_query`     | MUST, only if `unlocked=False` | Query to perform to make the purchase.                                                                                                                                                         |
-| `child_queries`      | Array of `string` | MAY                            | A list containing the ids of other queries that can also be considered "unlocked" if this query has been executed.                                                                             |
-| `query_fallback_uri` | string            | MAY                            | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
+| Field                | Format            | Requirement                                  | Description                                                                                                                                                                                    |
+| -------------------- | ----------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                 | string            | MUST                                         | This is the id by which `fetch.download`-datablocks and the `child_query_ids` field (see below) a will reference this query.                                                                   |
+| `unlocked`           | boolean           | MUST                                         | Indicates whether the subject of this datablock is already unlocked (because the user has already made this query and the associated purchase in the past ) or still locked.                   |
+| `price`              | number            | MUST if `unlocked=False`, MAY otherwise      | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
+| `query`              | `fixed_query`     | MUST if `unlocked=False`, MUST NOT otherwise | Query to actually unlock the requested resource ("make the purchase").                                                                                                                         |
+| `child_query_ids`    | Array of `string` | MAY                                          | A list containing the `id` values of other queries that the client MUST also be considered "unlocked" if this query has been executed.                                                         |
+| `query_fallback_uri` | string            | MAY                                          | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
 
 
 ## 7.5. Format-related datablocks
 
+Format-related datablocks communicate details about the data in individual component files.
 
 ### 7.5.1. `format`
 This is the default format datablock for all file formats that do not have their own dedicated `format.*` datablock in AssetFetch.
@@ -1118,25 +1096,17 @@ These datablocks describe how a client can gain access to a component file.
 
 ### 7.6.1. `fetch.download`
 
-This datablock indicates that this is a file which can be downloaded directly using the provided query.
+This datablock describes how a component file can be downloaded via HTTP.
 
-| Field | Format        | Requirement | Description                                 |
-| ----- | ------------- | ----------- | ------------------------------------------- |
-| query | `fixed_query` | MUST        | The query to use.                           |
-| sha1  | string        | MAY         | A sha1-hash to allow for data verification. |
+If an `unlock_query_id` is defined, then the client MUST execute the referenced unlock query before attempting to perform the download, unless the query is already marked as unlocked.
 
-### 7.6.2. `fetch.download_post_unlock`
-
-This datablock links the component to one of the unlocking queries defined in the `unlock_queries` datablock on the implementation list.
-It indicates that when the referenced unlock query has been completed, the *real* `fetch.download` datablock can be received by performing the fixed query in `unlocked_data_query`
-
-| Field                 | Format        | Requirement | Description                                                                                                                                                                                                                                    |
-| --------------------- | ------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `unlock_query_id`     | string        | MUST        | The id of the unlocking query in the `unlock_queries` datablock. This indicates that the query defined there MUST be run before attempting to obtain the remaining datablocks (with the download information) using the `unlocked_data_query`. |
-| `unlocked_data_query` | `fixed_query` | MUST        | The query to fetch the previously withheld `fetch.download` datablock for this component if the unlocking was successful.                                                                                                                      |
+| Field             | Format        | Requirement | Description                                                                                 |
+| ----------------- | ------------- | ----------- | ------------------------------------------------------------------------------------------- |
+| `unlock_query_id` | string        | MAY         | The id of the unlocking query in the `unlock_queries` datablock required for this download. |
+| `download_query`  | `fixed_query` | MUST        | The query to download the file.                                                             |
 
 
-### 7.6.3. `fetch.from_archive`
+### 7.6.2. `fetch.from_archive`
 This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
 More about the handling in the [import and handling section](#8-implementation-analysis-and-handling).
 
@@ -1262,12 +1232,11 @@ When receiving several implementations for the same asset from a provider, the c
 2. If multiple implementations are deemed acceptable, choose one to *actually* import.
 3. Run the import, which entails:
    1. Dedicate a space in its local storage to the asset (this is almost certainly a directory but could theoretically also be another means of storage in a proprietary database system).
-   2. Performing any required unlocking queries using the information in the `unlock_queries`, `file_fetch.download_post_unlock` and other datablocks.
-   3. Fetch all files for all components using the instructions in their `file_fetch.*` datablocks.
+   2. Perform all required unlocking queries based on the information in the `unlock_queries` and `file_fetch.download` datablocks.
+   3. Fetch and arrange all files for all components using the instructions in their `file_fetch.*` datablocks.
    4. Handle the component files using the instructions in the `file_handle`, `format.*` and other datablocks.
 
 Client implementors SHOULD consider whether these steps are fitting to their environment and make deviations, if necessary.
-The client MAY choose create an intermediary plan to allow the user to preview the import process (steps taken, files downloaded, etc.) before it is performed.
 
 ## 8.2. Implementation analysis
 
@@ -1278,7 +1247,7 @@ It MAY represent this as a binary choice or a more gradual representation.
 Possible factors for this decision are:
 
 - The file types used in the implementation, as indicated by the `extension` field in the `file_handle` datablock.
-- The use of more advanced AssetFetch features such as archive handling or asset unlocking.
+- The use of more advanced AssetFetch features such as archive handling or component unlocking.
 - Format-specific indicators in the `format.*` datablock which indicate that the given file is incompatible with the client/host application. 
 
 ## 8.3. Implementation import
@@ -1294,9 +1263,9 @@ The directory SHOULD be empty at the start of the component handling process.
 
 ### 8.3.2. Performing unlock queries
 
-If the implementation contains components with a `file_fetch.download_post_unlock` datablock,
+If the implementation contains components with a `file_fetch.download` datablock that references unlocking queries,
 then the client MUST perform the unlock query referenced in that datablock before it can proceed.
-Otherwise the resources may not be fully unlocked and the provider will likely refuse to hand over the files.
+Otherwise the resources may not be fully unlocked and the provider will likely deny access.
 
 ### 8.3.3. Handling component files
 
