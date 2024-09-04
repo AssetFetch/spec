@@ -1002,7 +1002,7 @@ An object that MUST conform to this format:
 | Field  | Format | Requirement | Description                    |
 | ------ | ------ | ----------- | ------------------------------ |
 | `alt`  | string | SHOULD      | An "alt" String for the image. |
-| `uris` | object | MUST        | See structure described below. |
+| `uris` | object | MUST        | See structure outlined below.  |
 
 #### 7.3.8.1. `uris` Structure
 
@@ -1145,6 +1145,10 @@ It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
 ### 7.7.2. `store.archive`
 
+This datablock indicates that this component represents an archive, containing other component files.
+More about the handling in the [import and handling section](#8-implementation-analysis-and-handling).
+
+
 | Field                  | Format  | Requirement                       | Description                                                                                                                       |
 | ---------------------- | ------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `bytes_compressed`     | integer | MAY                               | The length of the archive in bytes.                                                                                               |
@@ -1168,11 +1172,15 @@ It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
 These datablocks describe which "role" a specific component should play in the asset implementation.
 
-### 7.8.1. `role.native`
-This datablock indicates that this file should be handled by the host application's native import functionality.
+### 7.8.1. `role`
+This datablock indicates that this file should be handled by the host application's native import functionality using information from the `format.*` datablock, if available.
 The full description of component handling can be found in the [component handling section](#833-handling-component-files).
 
 This datablock contains no fields is therefore represented by the empty object `{}`.
+
+| Field    | Format  | Requirement | Description                                                                       |
+| -------- | ------- | ----------- | --------------------------------------------------------------------------------- |
+| `active` | boolean | MUST        | Describes whether or not this component should be handled actively by the client. |
 
 ### 7.8.2. `role.loose_environment_map`
 The presence of this datablock on a component indicates that it is an environment map.
@@ -1236,9 +1244,9 @@ When receiving several implementations for the same asset from a provider, the c
 2. If multiple implementations are deemed acceptable, choose one to *actually* import.
 3. Run the import, which entails:
    1. Dedicate a space in its local storage to the asset (this is almost certainly a directory but could theoretically also be another means of storage in a proprietary database system).
-   2. Perform all required unlocking queries based on the information in the `unlock_queries` and `file_fetch.download` datablocks.
-   3. Fetch and arrange all files for all components using the instructions in their `file_fetch.*` datablocks.
-   4. Handle the component files using the instructions in the `file_handle`, `format.*` and other datablocks.
+   2. Perform all required unlocking queries based on the information in the `unlock_queries` and `fetch.download` datablocks.
+   3. Fetch and arrange all files for all components using the instructions in their `fetch.*` datablocks.
+   4. Handle the component files using the instructions in the `role.*`, `format.*` and other datablocks.
 
 Client implementors SHOULD consider whether these steps are fitting to their environment and make deviations, if necessary.
 
@@ -1250,7 +1258,7 @@ It MAY represent this as a binary choice or a more gradual representation.
 
 Possible factors for this decision are:
 
-- The file types used in the implementation, as indicated by the `extension` field in the `file_handle` datablock.
+- The file types used in the implementation, as indicated by the `extension` field in the `format` datablock.
 - The use of more advanced AssetFetch features such as archive handling or component unlocking.
 - Format-specific indicators in the `format.*` datablock which indicate that the given file is incompatible with the client/host application. 
 
