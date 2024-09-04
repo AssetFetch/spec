@@ -751,10 +751,10 @@ The URI and parameters for the balance endpoint are communicated by the provider
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level                                                      | Datablocks       |
-| ---------------------------------------------------------------------- | ---------------- |
-| SHOULD, if the provider uses a prepaid system for unlocking components | `unlock_balance` |
-| MAY                                                                    | `user`           |
+| Requirement Level                             | Datablocks       |
+| --------------------------------------------- | ---------------- |
+| SHOULD, if the provider uses a prepaid system | `unlock_balance` |
+| MAY                                           | `user`           |
 
 
 
@@ -913,7 +913,7 @@ It can be used to communicate the total number of results in a query where not a
 
 | Field                | Format | Requirement | Description                                                                                                                                                                                            |
 | -------------------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `result_count_total` | int    | MUST        | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
+| `result_count_total` | int    | MAY         | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
 
 
 ## 7.3. Display related datablocks
