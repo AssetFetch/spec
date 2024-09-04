@@ -663,7 +663,7 @@ The following datablocks are to be included in the `data` field:
 ## 5.5. Endpoint: Implementation List (`implementation_list`)
 
 This endpoint returns one or several implementations for one specific asset.
-The URI and available parameters for this endpoint are communicated by the server to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
+The URI and available parameters for this endpoint are communicated by the provider to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
 
 | Field             | Format                    | Requirement | Description                                              |
 | ----------------- | ------------------------- | ----------- | -------------------------------------------------------- |
@@ -673,10 +673,10 @@ The URI and available parameters for this endpoint are communicated by the serve
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level                          | Datablocks            |
-| ------------------------------------------ | --------------------- |
-| MUST, if component unlocking is being used | `unlock_queries`      |
-| MAY                                        | `response_statistics` |
+| Requirement Level                          | Datablocks       |
+| ------------------------------------------ | ---------------- |
+| MUST, if component unlocking is being used | `unlock_queries` |
+
 
 ### 5.5.1. `implementation` Structure
 
