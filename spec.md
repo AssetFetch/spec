@@ -733,8 +733,12 @@ After calling it the client can expect to be able to perform all downloads assoc
 
 The URI and parameters for this endpoint are communicated through the `unlock_queries` datablock.
 
-This endpoint currently does not use any datablocks.
-Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
+The HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
+The provider MAY use a `text` datablock to communicate further details about the completed locking process.
+
+| Requirement Level | Datablocks |
+| ----------------- | ---------- |
+| MAY               | `text`     |
 
 ## 5.7. Endpoint: Connection Status (`connection_status`)
 
