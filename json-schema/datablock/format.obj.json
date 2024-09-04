@@ -7,8 +7,23 @@
 		"up_axis": {
 			"type": "string",
 			"enum": [
+				"+x",
+				"-x",
 				"+y",
-				"+z"
+				"-y",
+				"+z",
+				"-z"
+			]
+		},
+		"front_axis": {
+			"type": "string",
+			"enum": [
+				"+x",
+				"-x",
+				"+y",
+				"-y",
+				"+z",
+				"-z"
 			]
 		},
 		"use_mtl": {

@@ -6,20 +6,32 @@
 	"type": "object",
 	"properties": {
 		"color_accent": {
-			"type": "string",
+			"type": [
+				"string",
+				"null"
+			],
 			"pattern": "[0-9a-f]{6}"
 		},
 		"logo_square_uri": {
-			"type": "string",
-			"format":"uri"
+			"type": [
+				"string",
+				"null"
+			],
+			"format": "uri"
 		},
-		"logo_wide_uri":{
-			"type":"string",
-			"format":"uri"
+		"logo_wide_uri": {
+			"type": [
+				"string",
+				"null"
+			],
+			"format": "uri"
 		},
-		"banner_uri":{
-			"type":"string",
-			"format":"uri"
+		"banner_uri": {
+			"type": [
+				"string",
+				"null"
+			],
+			"format": "uri"
 		}
 	},
 	"required": []
