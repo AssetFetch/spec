@@ -1206,7 +1206,7 @@ It indicates which role the component should play in the material.
 
 ### 7.9.1. `link.loose_material`
 
-When applied to a component, it indicates that this component uses one or multiple materials defined using `process.loose_material` datablocks.
+When applied to a component, it indicates that this component uses one or multiple materials defined using `role.loose_material_map` datablocks.
 
 | Field           | Format | Requirement | Description                                            |
 | --------------- | ------ | ----------- | ------------------------------------------------------ |
