@@ -1240,7 +1240,7 @@ Building on the description of the general operation in section [3](#3-general-o
 When receiving the metadata of several implementations of an asset from a provider, the client SHOULD perform the following steps:
 
 1. Analyze the implementations and decide if there is one (or multiple) that it can handle and choose one to *actually* import.
-2. Perform all required unlocking queries based on the information in the `unlock_queries` datablock and references in the `file_fetch.download` datablocks.
+2. Perform all required unlocking queries based on the information in the `unlock_queries` datablock and references in the `fetch.download` datablocks.
 3. Allocating local storage for the component files.
 4. Fetch and store all files for all components using the instructions in their `store.*` datablocks.
 5. Handle the component files using the instructions in their `role.*`, `format.*` and other datablocks. This also includes special relationships between components defined in the metadata.
