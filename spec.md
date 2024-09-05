@@ -635,7 +635,7 @@ The following datablocks are to be included in the `data` field:
 | ----------- | ----------------------------------- |
 | MAY         | `next_query`, `response_statistics` |
 
-The `assets` field MUST NOT contain more than 100 items for one response.
+The `assets` field MUST NOT contain more than 100 asset objects for one response.
 If the provider finds more assets than 100 assets which match the query it SHOULD use the `next_query` datablock to define a fixed query that the client can use to fetch more results.
 
 ### 5.4.1. `asset` Structure
@@ -653,17 +653,17 @@ Clients MAY use the id as a display title, but SHOULD prefer the `title` field i
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement | Datablocks                                                                          |
-| ----------- | ----------------------------------------------------------------------------------- |
-| MUST        | `implementation_list_query`                                                         |
-| SHOULD      | `preview_image_thumbnail`, `text`                                                   |
-| MAY         | `preview_image_supplemental`, `license`, `authors`, `dimensions.*`,`web_references` |
+| Requirement | Datablocks                                                                        |
+| ----------- | --------------------------------------------------------------------------------- |
+| MUST        | `implementation_list_query`                                                       |
+| SHOULD      | `preview_image_thumbnail`, `text`                                                 |
+| MAY         | `preview_image_supplemental`, `license`, `authors`, `dimensions`,`web_references` |
 
 
 ## 5.5. Endpoint: Implementation List (`implementation_list`)
 
 This endpoint returns one or several implementations for one specific asset.
-The URI and available parameters for this endpoint are communicated by the server to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
+The URI and available parameters for this endpoint are communicated by the provider to the client using the `implementation_list_query` datablock on the corresponding asset in the asset list endpoint.
 
 | Field             | Format                    | Requirement | Description                                              |
 | ----------------- | ------------------------- | ----------- | -------------------------------------------------------- |
@@ -673,10 +673,10 @@ The URI and available parameters for this endpoint are communicated by the serve
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level                          | Datablocks            |
-| ------------------------------------------ | --------------------- |
-| MUST, if component unlocking is being used | `unlock_queries`      |
-| MAY                                        | `response_statistics` |
+| Requirement Level                          | Datablocks       |
+| ------------------------------------------ | ---------------- |
+| MUST, if component unlocking is being used | `unlock_queries` |
+
 
 ### 5.5.1. `implementation` Structure
 
@@ -693,7 +693,7 @@ The id may be reused for an implementation of a *different* asset.
 Clients MAY use this id when storing and organizing files on disk.
 Clients MAY use the id as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
 
-The following datablocks are to be included in the `data` field:
+The following datablocks are to be included in the `data` field of the response:
 
 | Requirement Level | Datablocks |
 | ----------------- | ---------- |
@@ -712,12 +712,12 @@ The `id` field MUST be unique among all components inside one implementation, bu
 Clients MAY use this id when storing and organizing files on disk.
 Clients MAY use this field as a display title, but SHOULD prefer the `title` field in the asset's `text` datablock, if available.
 
-The following datablocks are to be included in the `data` field:
+The following datablocks are to be included in the `data` field of every component:
 
-| Requirement Level | Datablocks                                                 |
-| ----------------- | ---------------------------------------------------------- |
-| MUST              | `file_info`,`file_handle`, `fetch.*`                       |
-| MAY               | `environment_map`, `loose_material.*`, `mtlx_apply`,`text` |
+| Requirement Level | Datablocks                                            |
+| ----------------- | ----------------------------------------------------- |
+| MUST              | `fetch.*`, `role` or `role.*`, `format` or `format.*` |
+| MAY               | `link.*`,`text`                                       |
 
 
 
@@ -733,8 +733,12 @@ After calling it the client can expect to be able to perform all downloads assoc
 
 The URI and parameters for this endpoint are communicated through the `unlock_queries` datablock.
 
-This endpoint currently does not use any datablocks.
-Only the HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
+The HTTP status code and potentially the data in the `meta` field are used to evaluate the success of the request.
+The provider MAY use a `text` datablock to communicate further details about the completed locking process.
+
+| Requirement Level | Datablocks |
+| ----------------- | ---------- |
+| MAY               | `text`     |
 
 ## 5.7. Endpoint: Connection Status (`connection_status`)
 
@@ -747,10 +751,10 @@ The URI and parameters for the balance endpoint are communicated by the provider
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level                                                      | Datablocks       |
-| ---------------------------------------------------------------------- | ---------------- |
-| SHOULD, if the provider uses a prepaid system for unlocking components | `unlock_balance` |
-| MAY                                                                    | `user`           |
+| Requirement Level                             | Datablocks       |
+| --------------------------------------------- | ---------------- |
+| SHOULD, if the provider uses a prepaid system | `unlock_balance` |
+| MAY                                           | `user`           |
 
 
 
@@ -909,7 +913,7 @@ It can be used to communicate the total number of results in a query where not a
 
 | Field                | Format | Requirement | Description                                                                                                                                                                                            |
 | -------------------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `result_count_total` | int    | MUST        | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
+| `result_count_total` | int    | MAY         | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
 
 
 ## 7.3. Display related datablocks
@@ -998,7 +1002,7 @@ An object that MUST conform to this format:
 | Field  | Format | Requirement | Description                    |
 | ------ | ------ | ----------- | ------------------------------ |
 | `alt`  | string | SHOULD      | An "alt" String for the image. |
-| `uris` | object | MUST        | See structure described below. |
+| `uris` | object | MUST        | See structure outlined below.  |
 
 #### 7.3.8.1. `uris` Structure
 
@@ -1113,7 +1117,7 @@ More about the handling in the [import and handling section](#8-implementation-a
 | Field                  | Format | Requirement | Description                                                                                                                                                                                                                                                                                        |
 | ---------------------- | ------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `archive_component_id` | string | MUST        | The id of the component representing the archive that this component is contained in.                                                                                                                                                                                                              |
-| `component_path`       | string | MUST        | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`). |
+| `component_sub_path`   | string | MUST        | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`). |
 
 ## 7.7. Storage-related datablocks
 
@@ -1141,6 +1145,10 @@ It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
 ### 7.7.2. `store.archive`
 
+This datablock indicates that this component represents an archive, containing other component files.
+More about the handling in the [import and handling section](#8-implementation-analysis-and-handling).
+
+
 | Field                  | Format  | Requirement                       | Description                                                                                                                       |
 | ---------------------- | ------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `bytes_compressed`     | integer | MAY                               | The length of the archive in bytes.                                                                                               |
@@ -1164,11 +1172,15 @@ It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
 These datablocks describe which "role" a specific component should play in the asset implementation.
 
-### 7.8.1. `role.native`
-This datablock indicates that this file should be handled by the host application's native import functionality.
+### 7.8.1. `role`
+This datablock indicates that this file should be handled by the host application's native import functionality using information from the `format.*` datablock, if available.
 The full description of component handling can be found in the [component handling section](#833-handling-component-files).
 
 This datablock contains no fields is therefore represented by the empty object `{}`.
+
+| Field    | Format  | Requirement | Description                                                                       |
+| -------- | ------- | ----------- | --------------------------------------------------------------------------------- |
+| `active` | boolean | MUST        | Describes whether or not this component should be handled actively by the client. |
 
 ### 7.8.2. `role.loose_environment_map`
 The presence of this datablock on a component indicates that it is an environment map.
@@ -1194,7 +1206,7 @@ It indicates which role the component should play in the material.
 
 ### 7.9.1. `link.loose_material`
 
-When applied to a component, it indicates that this component uses one or multiple materials defined using `process.loose_material` datablocks.
+When applied to a component, it indicates that this component uses one or multiple materials defined using `role.loose_material_map` datablocks.
 
 | Field           | Format | Requirement | Description                                            |
 | --------------- | ------ | ----------- | ------------------------------------------------------ |
@@ -1228,7 +1240,7 @@ Building on the description of the general operation in section [3](#3-general-o
 When receiving the metadata of several implementations of an asset from a provider, the client SHOULD perform the following steps:
 
 1. Analyze the implementations and decide if there is one (or multiple) that it can handle and choose one to *actually* import.
-2. Perform all required unlocking queries based on the information in the `unlock_queries` datablock and references in the `file_fetch.download` datablocks.
+2. Perform all required unlocking queries based on the information in the `unlock_queries` datablock and references in the `fetch.download` datablocks.
 3. Allocating local storage for the component files.
 4. Fetch and store all files for all components using the instructions in their `store.*` datablocks.
 5. Handle the component files using the instructions in their `role.*`, `format.*` and other datablocks. This also includes special relationships between components defined in the metadata.
