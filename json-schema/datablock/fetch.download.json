@@ -1,5 +1,5 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"title": "Fetch Datablock",
 	"$id": "af.datablock.fetch.download",
 	"description": "This datablock contains the fixed query for downloading a component file as part of an asset implementation.",

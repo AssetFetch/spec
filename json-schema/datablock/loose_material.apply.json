@@ -1,5 +1,5 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"title": "Loose Material Application Datablock",
 	"$id": "af.datablock.loose_material.apply",
 	"description": "This datablock describes how to apply a loose material to the current component.",

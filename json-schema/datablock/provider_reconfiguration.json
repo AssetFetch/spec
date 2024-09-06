@@ -1,5 +1,5 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"title": "Provider Configuration Datablock",
 	"$id": "af.datablock.provider_reconfiguration",
 	"description": "This datablock can be sent by the provider to reconfigure which headers the client should send to the provider.",

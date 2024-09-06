@@ -1,5 +1,5 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"title": "Unlock Queries Datablock",
 	"$id": "af.datablock.unlock_queries",
 	"description": "This datablock describes the unlocking queries a specific asset.",
