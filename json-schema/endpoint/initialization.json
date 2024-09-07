@@ -1,5 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Endpoint: initialization",
 	"$id": "af.endpoint.initialization",
 	"description": "This is the initialization endpoint which the client first connects with.",
 	"type": "object",
@@ -7,8 +8,8 @@
 		"meta": {
 			"$ref": "../template/meta.json"
 		},
-		"id":{
-			"type":"string",
+		"id": {
+			"type": "string",
 			"pattern": "[a-z0-9-\\.]"
 		},
 		"data": {
@@ -32,6 +33,9 @@
 				},
 				"license": {
 					"$ref": "../datablock/license.json"
+				},
+				"authors": {
+					"$ref": "../datablock/authors.json"
 				}
 			},
 			"required": [

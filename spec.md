@@ -714,10 +714,10 @@ Clients MAY use this field as a display title, but SHOULD prefer the `title` fie
 
 The following datablocks are to be included in the `data` field of every component:
 
-| Requirement Level | Datablocks                                            |
-| ----------------- | ----------------------------------------------------- |
-| MUST              | `fetch.*`, `role` or `role.*`, `format` or `format.*` |
-| MAY               | `link.*`,`text`                                       |
+| Requirement Level | Datablocks                                      |
+| ----------------- | ----------------------------------------------- |
+| MUST              | `fetch.*`, `role`/`role.*`, `format`/`format.*` |
+| MAY               | `link.*`,`text`                                 |
 
 
 
@@ -754,7 +754,7 @@ The following datablocks are to be included in the `data` field:
 | Requirement Level                             | Datablocks       |
 | --------------------------------------------- | ---------------- |
 | SHOULD, if the provider uses a prepaid system | `unlock_balance` |
-| MAY                                           | `user`           |
+| MAY                                           | `user`, `provider_reconfiguration`      |
 
 
 
@@ -1168,9 +1168,11 @@ More about the handling in the [import and handling section](#8-implementation-a
 
 #### 7.7.2.1. `local_directory_path` rules
 
-The `local_directory_path` MUST end with a slash ("trailing slash") and MUST NOT start with a slash 
-(unless it targets the root of the implementation directory in which case the `local_path` is simply `/`).
-It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
+The following rules apply to the `local_directory_path`:
+- It MUST end with a slash ("trailing slash")
+- It MUST NOT start with a slash (unless it targets the root of the implementation directory in which case the `local_directory_path` is simply `/`).
+- It MUST not contain backslashes (`\`) as directory separators
+- It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
 **Examples:**
 

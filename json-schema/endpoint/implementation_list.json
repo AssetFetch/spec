@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Implementation List Endpoint",
+	"title": "Endpoint: implementation_list",
 	"$id": "af.endpoint.implementation_list",
 	"description": "This endpoint gets the list of possible implementations for a specific asset.",
 	"type": "object",
@@ -10,18 +10,12 @@
 		},
 		"data": {
 			"type": "object",
+			"additionalProperties": false,
 			"properties": {
-				"next_query": {
-					"$ref": "../datablock/next_query.json"
-				},
-				"response_statistics": {
-					"$ref": "../datablock/response_statistics.json"
-				},
 				"unlock_queries": {
 					"$ref": "../datablock/unlock_queries.json"
 				}
-			},
-			"required": []
+			}
 		},
 		"implementations": {
 			"type": "array",
@@ -53,117 +47,104 @@
 									"type": "object",
 									"additionalProperties": false,
 									"properties": {
-										"file_fetch.from_archive": {
-											"$ref": "../datablock/file_fetch.from_archive.json"
+										"fetch.from_archive": {
+											"$ref": "../datablock/fetch.from_archive.json"
 										},
-										"file_fetch.download": {
-											"$ref": "../datablock/file_fetch.download.json"
+										"fetch.download": {
+											"$ref": "../datablock/fetch.download.json"
 										},
-										"file_fetch.download_post_unlock": {
-											"$ref": "../datablock/file_fetch.download_post_unlock.json"
+										"role.loose_material_map": {
+											"$ref": "../datablock/role.loose_material_map.json"
 										},
-										"file_info": {
-											"$ref": "../datablock/file_info.json"
+										"role.loose_environment_map": {
+											"$ref": "../datablock/role.loose_environment_map.json"
 										},
-										"file_handle": {
-											"$ref": "../datablock/file_handle.json"
+										"role": {
+											"$ref": "../datablock/role.json"
 										},
-										"loose_environment": {
-											"$ref": "../datablock/loose_environment.json"
-										},
-										"loose_material.apply": {
-											"$ref": "../datablock/loose_material.apply.json"
-										},
-										"loose_material.define": {
-											"$ref": "../datablock/loose_material.define.json"
-										},
-										"mtlx_apply": {
-											"$ref": "../datablock/mtlx_apply.json"
-										},
-										"format.blend": {
-											"$ref": "../datablock/format.blend.json"
+										"format": {
+											"$ref": "../datablock/format.json"
 										},
 										"format.obj": {
 											"$ref": "../datablock/format.obj.json"
 										},
-										"format.usd": {
-											"$ref": "../datablock/format.usd.json"
+										"format.blend": {
+											"$ref": "../datablock/format.blend.json"
+										},
+										"link.loose_material": {
+											"$ref": "../datablock/link.loose_material.json"
+										},
+										"link.mtlx_material": {
+											"$ref": "../datablock/link.mtlx_material.json"
+										},
+										"text": {
+											"$ref": "../datablock/text.json"
 										}
 									},
-									"required": [
-										"file_info",
-										"file_handle"
-									],
-									"oneOf": [
-										{
-											"required": [
-												"file_fetch.from_archive"
-											]
-										},
-										{
-											"required": [
-												"file_fetch.download"
-											]
-										},
-										{
-											"required": [
-												"file_fetch.download_post_unlock"
-											]
-										}
-									],
-									"$comment": "The 'allOf' section ensures that no two datablocks with the same prefix are used.",
 									"allOf": [
 										{
-											"if": {
-												"anyOf": [
-													{
-														"required": [
-															"format.obj"
-														]
-													},
-													{
-														"required": [
-															"format.blend"
-														]
-													},
-													{
-														"required": [
-															"format.usd"
-														]
-													}
-												]
-											},
-											"then": {
-												"oneOf": [
-													{
-														"required": [
-															"format.obj"
-														]
-													},
-													{
-														"required": [
-															"format.blend"
-														]
-													},
-													{
-														"required": [
-															"format.usd"
-														]
-													}
-												]
-											}
+											"oneOf": [
+												{
+													"required": [
+														"file_fetch.from_archive"
+													]
+												},
+												{
+													"required": [
+														"file_fetch.download"
+													]
+												}
+											]
+										},
+										{
+											"oneOf": [
+												{
+													"required": [
+														"role"
+													]
+												},
+												{
+													"required": [
+														"role.loose_environment_map"
+													]
+												},
+												{
+													"required": [
+														"role.loose_material_map"
+													]
+												}
+											]
+										},
+										{
+											"oneOf": [
+												{
+													"required": [
+														"format"
+													]
+												},
+												{
+													"required": [
+														"format.obj"
+													]
+												},
+												{
+													"required": [
+														"format.blend"
+													]
+												}
+											]
 										},
 										{
 											"if": {
 												"anyOf": [
 													{
 														"required": [
-															"loose_material.apply"
+															"link.loose_material"
 														]
 													},
 													{
 														"required": [
-															"loose_material.define"
+															"link.mtlx_material"
 														]
 													}
 												]
@@ -172,12 +153,12 @@
 												"oneOf": [
 													{
 														"required": [
-															"loose_material.apply"
+															"link.loose_material"
 														]
 													},
 													{
 														"required": [
-															"loose_material.define"
+															"link.mtlx_material"
 														]
 													}
 												]

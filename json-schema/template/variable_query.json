@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Variable Query Template",
+	"title": "Template:Variable Query",
 	"$id": "af.template.variable_query",
 	"description": "This template describes a variable query that is configurable by the user.",
 	"type": "object",
@@ -56,7 +56,10 @@
 											"type": "string"
 										}
 									},
-									"required": ["value","title"]
+									"required": [
+										"value",
+										"title"
+									]
 								}
 							}
 						]
@@ -65,7 +68,7 @@
 				"if": {
 					"properties": {
 						"type": {
-							"const":"select"
+							"const": "select"
 						}
 					}
 				},

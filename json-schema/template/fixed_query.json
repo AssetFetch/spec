@@ -1,7 +1,7 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Fixed Query Template",
-	"$id":"af.template.fixed_query",
+	"title": "template: Fixed Query",
+	"$id": "af.template.fixed_query",
 	"description": "This template represents a fixed query.",
 	"type": "object",
 	"properties": {
@@ -11,10 +11,16 @@
 		},
 		"method": {
 			"type": "string",
-			"enum": ["get", "post"]
+			"enum": [
+				"get",
+				"post"
+			]
 		},
 		"payload": {
-			"type": ["object","null"],
+			"type": [
+				"object",
+				"null"
+			],
 			"additionalProperties": {
 				"type": "string"
 			}
