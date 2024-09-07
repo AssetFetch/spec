@@ -1,11 +1,10 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Unlock Queries Datablock",
+	"title": "Datablock: unlock_queries",
 	"$id": "af.datablock.unlock_queries",
-	"description": "This datablock describes the unlocking queries a specific asset.",
+	"description": "Contains the query or queries required to unlock all or some of the components in this implementation list.",
 	"type": "array",
 	"items": {
-		"$comment": "",
 		"type": "object",
 		"additionalProperties": false,
 		"properties": {
@@ -21,7 +20,7 @@
 			"query": {
 				"$ref": "../template/fixed_query.json"
 			},
-			"child_queries": {
+			"child_query_ids": {
 				"type": "array",
 				"items": {
 					"type": "string"

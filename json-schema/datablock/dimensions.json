@@ -1,8 +1,8 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Dimensions Datablock",
-	"$id": "af.datablock.dimensions.2d",
-	"description": "This datablock describes physical dimensions for 2D assets.",
+	"title": "Datablock: dimensions",
+	"$id": "af.datablock.dimensions",
+	"description": "Contains general information about the physical dimensions of an asset.",
 	"type": "object",
 	"properties": {
 		"width_m": {
@@ -24,5 +24,6 @@
 			]
 		}
 	},
-	"required": []
+	"required": [],
+	"additionalProperties": false
 }

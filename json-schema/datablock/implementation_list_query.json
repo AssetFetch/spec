@@ -1,7 +1,7 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Implementation List Query Datablock",
-	"$id": "af.datablock.implementation_list_query.json",
-	"description": "This datablock is contains the query to list the implementations for an asset.",
-	"$ref":"../template/variable_query.json"
+	"title": "Datablock: implemementation_list_query",
+	"$id": "af.datablock.implementation_list_query",
+	"description": "Describes the variable query for fetching the list of available implementations for an asset from a provider.",
+	"$ref": "../template/variable_query.json"
 }

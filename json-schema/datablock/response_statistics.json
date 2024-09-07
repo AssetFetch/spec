@@ -1,13 +1,14 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Next Query Datablock",
+	"title": "Datablock: response_statistics",
 	"$id": "af.datablock.response_statistics",
-	"description": "This datablock can be used by the provider to indicate the total number of results in a query.",
-	"type":"object",
-    "properties": {
-        "result_count_total":{
-            "type":"integer",
-            "minimum": 0
-        }
-    }
+	"description": "Contains statistics about the current response.",
+	"type": "object",
+	"properties": {
+		"result_count_total": {
+			"type": "integer",
+			"minimum": 0
+		}
+	},
+	"additionalProperties": false
 }

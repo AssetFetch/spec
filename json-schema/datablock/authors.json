@@ -1,24 +1,33 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Authors Datablock",
+	"title": "AF Datablock: authors",
 	"$id": "af.datablock.authors",
-	"description": "This datablock contains information about the authors of a provider or an individual asset.",
-	"type":"array",
+	"description": "Is used communicate the author(s) of a particular asset.",
+	"type": "array",
+	"additionalProperties":false,
 	"items": {
-		"type":"object",
+		"type": "object",
 		"additionalProperties": false,
 		"properties": {
-			"name":{
-				"type":"string"
+			"name": {
+				"type": "string"
 			},
-			"uri":{
-				"type":["string","null"],
+			"uri": {
+				"type": [
+					"string",
+					"null"
+				],
 				"format": "uri"
 			},
-			"role":{
-				"type":["string","null"]
+			"role": {
+				"type": [
+					"string",
+					"null"
+				]
 			}
 		},
-		"required": ["name"]
+		"required": [
+			"name"
+		]
 	}
 }

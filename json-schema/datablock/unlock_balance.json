@@ -1,20 +1,20 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Unlocking Balance Datablock",
+	"title": "Datablock: unlock_balance",
 	"$id": "af.datablock.unlock_balance",
-	"description": "This datablock contains information about the user's account balance.",
+	"description": "Information about the user's current account balance.",
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {
-		"balance_unit":{
-			"type":"string"
+		"balance_unit": {
+			"type": "string"
 		},
-		"balance":{
-			"type":"number"
+		"balance": {
+			"type": "number"
 		},
-		"balance_refill_uri":{
-			"type":"string",
-			"format":"uri"
+		"balance_refill_uri": {
+			"type": "string",
+			"format": "uri"
 		}
 	},
 	"required": [

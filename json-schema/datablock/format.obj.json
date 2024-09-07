@@ -1,6 +1,6 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": ".obj File Datablock",
+	"title": "Datablock: format.obj",
 	"$id": "af.datablock.format.obj",
 	"type": "object",
 	"properties": {
@@ -25,10 +25,8 @@
 				"+z",
 				"-z"
 			]
-		},
-		"use_mtl": {
-			"type": "boolean"
 		}
 	},
+	"additionalProperties": false,
 	"required": []
 }

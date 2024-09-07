@@ -1,0 +1,19 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Datablock: format",
+	"$id": "af.datablock.format",
+	"description": "This is the default format datablock for all file formats that do not have their own dedicated `format.*` datablock.",
+	"type": "object",
+	"properties": {
+		"extension": {
+			"type": "string"
+		},
+		"mediatype": {
+			"type": "string"
+		}
+	},
+	"required": [
+		"extension"
+	],
+	"additionalProperties": false
+}

@@ -1,18 +1,19 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Preview Image (Supplemental) Datablock",
+	"title": "Datablock: preview_image_supplemental",
 	"$id": "af.datablock.preview_image_supplemental",
-	"description": "This datablock describes supplemental preview images for an asset.",
+	"description": "Contains a list of preview images associated to an asset.",
 	"type": "array",
 	"items": {
 		"type": "object",
+		"additionalProperties": false,
 		"properties": {
 			"alt": {
 				"type": "string"
 			},
 			"uri": {
 				"type": "string",
-				"format":"uri"
+				"format": "uri"
 			}
 		},
 		"required": [

@@ -1,8 +1,8 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Loose Material Application Datablock",
-	"$id": "af.datablock.loose_material.apply",
-	"description": "This datablock describes how to apply a loose material to the current component.",
+	"title": "Datablock: link.loose_material",
+	"$id": "af.datablock.link.loose_material",
+	"description": "Indicates that this component uses one or multiple materials defined using `role.loose_material_map` datablocks.",
 	"type": "array",
 	"additionalItems": false,
 	"items": {
@@ -11,12 +11,6 @@
 		"properties": {
 			"material_name": {
 				"type": "string"
-			},
-			"apply_selectively_to": {
-				"type": [
-					"string",
-					"null"
-				]
 			}
 		}
 	},

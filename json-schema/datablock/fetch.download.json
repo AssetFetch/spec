@@ -1,7 +1,18 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Fetch Datablock",
+	"title": "Datablock: fetch.download",
 	"$id": "af.datablock.fetch.download",
-	"description": "This datablock contains the fixed query for downloading a component file as part of an asset implementation.",
-    "$ref":"../template/fixed_query.json"
+	"description": "Describes how a component file can be downloaded via HTTP.",
+	"properties": {
+		"unlock_query_id": {
+			"type": [
+				"string",
+				"null"
+			]
+		},
+		"download_query": {
+			"$ref": "../template/fixed_query.json"
+		}
+	},
+	"additionalProperties": false
 }

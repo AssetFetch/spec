@@ -1,8 +1,8 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Branding Datablock",
+	"title": "AF Datablock: branding",
 	"$id": "af.datablock.branding",
-	"description": "This datablock contains branding information about a provider.",
+	"description": "Contains brand information about the provider, MAY be used by the client to customize the user interface.",
 	"type": "object",
 	"properties": {
 		"color_accent": {
@@ -34,5 +34,6 @@
 			"format": "uri"
 		}
 	},
-	"required": []
+	"required": [],
+	"additionalProperties": false
 }

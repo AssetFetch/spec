@@ -1,8 +1,8 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Text Datablock",
+	"title": "Datablock: text",
 	"$id": "af.datablock.text",
-	"description": "This datablock contains basic text information.",
+	"description": "Contains general text information to be displayed to the user.",
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {
@@ -10,7 +10,7 @@
 			"type": "string"
 		},
 		"description": {
-			"type":"string"
+			"type": "string"
 		}
 	},
 	"required": [

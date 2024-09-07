@@ -1,0 +1,24 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Datablock: store.file",
+	"$id": "af.datablock.store.file",
+	"description": "Contains information about how/where to store a component file locally.",
+	"type": "object",
+	"properties": {
+		"local_file_path": {
+			"type": "string",
+			"pattern": "^[^\\.|\/|\\]((?!\\.\\.\/|\\).)*[^\\.|\/|\\]$"
+		},
+		"bytes": {
+			"type": [
+				"string",
+				"null"
+			]
+		}
+	},
+	"required": [
+		"local_file_path",
+		"bytes"
+	],
+	"additionalProperties": false
+}
