@@ -1200,7 +1200,6 @@ It indicates which role the component should play in the material.
 | --------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `material_name` | string | MUST        |                                                                                                                                           |
 | `map`           | string | MUST        | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
-| `colorspace`    | string | MAY         | One of `srgb`, `linear`                                                                                                                   |
 
 ## 7.9. Linking-related datablocks
 
