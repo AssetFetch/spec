@@ -751,10 +751,10 @@ The URI and parameters for the balance endpoint are communicated by the provider
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level                             | Datablocks       |
-| --------------------------------------------- | ---------------- |
-| SHOULD, if the provider uses a prepaid system | `unlock_balance` |
-| MAY                                           | `user`, `provider_reconfiguration`      |
+| Requirement Level                             | Datablocks                         |
+| --------------------------------------------- | ---------------------------------- |
+| SHOULD, if the provider uses a prepaid system | `unlock_balance`                   |
+| MAY                                           | `user`, `provider_reconfiguration` |
 
 
 
@@ -782,7 +782,6 @@ The resulting regular expression for all datablock names is `^[a-z0-9_]+(\.[a-z0
 ## 6.2. Datablock value templates
 This section describes additional data types that can be used within other datablocks.
 They exist to eliminate the need to re-specify the same data structure in two different datablock definitions.
-<!-- TODO: Do any DBs use foly a template? *The templates can not be used directly as datablocks under their template name* though some datablock completely inherit their structure under a new name.*-->
 
 ### 6.2.1. `variable_query`
 This template describes an HTTP query whose parameters are controllable by the user.
