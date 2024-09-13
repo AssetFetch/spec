@@ -16,7 +16,8 @@
 			"type": [
 				"string",
 				"null"
-			]
+			],
+			"format": "uri"
 		}
 	},
 	"required": []
