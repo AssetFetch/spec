@@ -1137,7 +1137,7 @@ Contains information about how/where to store a component file locally.
 
 #### 7.7.1.1. `local_file_path` rules
 
-The `local_file_path` MUST include the full name that the file should take in the destination.
+The `local_file_path` is the sub-path in the implementation directory and MUST include the full name that the file should take.
 This brings with it several rules:
 - It MUST NOT end with a "trailing slash".
 - It MUST NOT start with a "leading slash".

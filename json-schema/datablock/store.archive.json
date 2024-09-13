@@ -7,7 +7,7 @@
 	"properties": {
 		"local_directory_path": {
 			"type": "string",
-			"pattern": "^\\/$|^[^\\.|\\/|\\\\]((?!\\.\\.\\/|\\\\).)*\\/$"
+			"pattern": "^\\\/$|^[^\\.|\\\/|\\\\]((?!\\.\\.\\\/|\\\\).)*\\\/$"
 		},
 		"bytes_compressed": {
 			"type": [
