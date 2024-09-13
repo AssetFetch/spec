@@ -4,6 +4,7 @@
 	"$id": "af.template.fixed_query",
 	"description": "This template represents a fixed query.",
 	"type": "object",
+	"additionalProperties": false,
 	"properties": {
 		"uri": {
 			"type": "string",
