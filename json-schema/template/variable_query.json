@@ -4,6 +4,7 @@
 	"$id": "af.template.variable_query",
 	"description": "This template describes a variable HTTP query that is configurable by the user.",
 	"type": "object",
+	"additionalProperties": false,
 	"properties": {
 		"uri": {
 			"type": "string",

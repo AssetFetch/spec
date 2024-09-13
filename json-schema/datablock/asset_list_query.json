@@ -3,6 +3,5 @@
 	"title": "Datablock: asset_list_query",
 	"$id": "af.datablock.asset_list_query",
 	"description": "Describes the variable query for fetching the list of available assets from a provider.",
-	"$ref": "../template/variable_query.json",
-	"additionalProperties": false
+	"$ref": "../template/variable_query.json"
 }
