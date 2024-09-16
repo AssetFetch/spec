@@ -1,0 +1,44 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Datablock: store.archive",
+	"$id": "af.datablock.store.archive",
+	"description": "This datablock indicates that this component represents an archive, containing other component files.",
+	"type": "object",
+	"properties": {
+		"local_directory_path": {
+			"type": "string",
+			"pattern": "^\\\/$|^[^\\.|\\\/|\\\\]((?!\\.\\.\\\/|\\\\).)*\\\/$"
+		},
+		"bytes_compressed": {
+			"type": [
+				"number",
+				"null"
+			]
+		},
+		"bytes_extracted": {
+			"type": [
+				"number",
+				"null"
+			]
+		},
+		"extract_fully": {
+			"type": "boolean"
+		}
+	},
+	"required": [
+		"extract_fully"
+	],
+	"if": {
+		"properties": {
+			"extract_fully": {
+				"const": true
+			}
+		}
+	},
+	"then": {
+		"required": [
+			"local_directory_path"
+		]
+	},
+	"additionalProperties": false
+}

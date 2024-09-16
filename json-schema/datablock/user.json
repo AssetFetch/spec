@@ -1,19 +1,28 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "User Datablock",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Datablock: user",
 	"$id": "af.datablock.user",
-	"description": "This datablock describes the current user.",
+	"description": "This datablock describes the current user, as seen by the provider.",
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {
 		"display_name": {
-			"type": "string"
+			"type": [
+				"string",
+				"null"
+			]
 		},
 		"display_tier": {
-			"type": "string"
+			"type": [
+				"string",
+				"null"
+			]
 		},
 		"display_icon_uri": {
-			"type": "string",
+			"type": [
+				"string",
+				"null"
+			],
 			"format": "uri"
 		}
 	},

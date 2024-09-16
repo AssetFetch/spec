@@ -1,7 +1,0 @@
-{
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "File Fetch Datablock",
-	"$id": "af.datablock.file_fetch.download",
-	"description": "This datablock contains the fixed query for downloading a component file as part of an asset implementation.",
-    "$ref":"../template/fixed_query.json"
-}

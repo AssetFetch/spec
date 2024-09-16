@@ -1,0 +1,18 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Datablock: fetch.download",
+	"$id": "af.datablock.fetch.download",
+	"description": "Describes how a component file can be downloaded via HTTP.",
+	"properties": {
+		"unlock_query_id": {
+			"type": [
+				"string",
+				"null"
+			]
+		},
+		"download_query": {
+			"$ref": "../template/fixed_query.json"
+		}
+	},
+	"additionalProperties": false
+}

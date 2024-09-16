@@ -1,22 +1,22 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "Asset List Endpoint",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Endpoint: asset_list",
 	"$id": "af.endpoint.asset_list",
-	"description": "This endpoint can be used to query assets.",
+	"description": "This endpoint is used to query assets.",
 	"type": "object",
 	"properties": {
 		"meta": {
-			"$ref":"../template/meta.json"
+			"$ref": "../template/meta.json"
 		},
 		"data": {
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
 				"next_query": {
-					"$ref":"../datablock/next_query.json"
+					"$ref": "../datablock/next_query.json"
 				},
 				"response_statistics": {
-					"$ref":"../datablock/response_statistics.json"
+					"$ref": "../datablock/response_statistics.json"
 				}
 			}
 		},
@@ -26,7 +26,10 @@
 			"items": {
 				"type": "object",
 				"additionalProperties": false,
-				"required": ["id","data"],
+				"required": [
+					"id",
+					"data"
+				],
 				"properties": {
 					"id": {
 						"type": "string",
@@ -36,69 +39,34 @@
 						"type": "object",
 						"properties": {
 							"implementation_list_query": {
-								"$ref":"../datablock/implementation_list_query.json"
+								"$ref": "../datablock/implementation_list_query.json"
 							},
 							"text": {
-								"$ref":"../datablock/text.json"
+								"$ref": "../datablock/text.json"
 							},
-							"dimensions.3d": {
-								"$ref":"../datablock/dimensions.3d.json"
-							},
-							"dimensions.2d": {
-								"$ref":"../datablock/dimensions.2d.json"
+							"dimensions": {
+								"$ref": "../datablock/dimensions.3d.json"
 							},
 							"preview_image_supplemental": {
-								"$ref":"../datablock/preview_image_supplemental.json"
+								"$ref": "../datablock/preview_image_supplemental.json"
 							},
 							"preview_image_thumbnail": {
-								"$ref":"../datablock/preview_image_thumbnail.json"
+								"$ref": "../datablock/preview_image_thumbnail.json"
 							},
 							"web_references": {
-								"$ref":"../datablock/web_references.json"
+								"$ref": "../datablock/web_references.json"
 							},
 							"license": {
-								"$ref":"../datablock/license.json"
+								"$ref": "../datablock/license.json"
 							},
 							"authors": {
-								"$ref":"../datablock/authors.json"
+								"$ref": "../datablock/authors.json"
 							}
 						},
 						"required": [
 							"implementation_list_query"
 						],
-						"$comment": "The 'allOf' section ensures that no two datablocks with the same prefix are used.",
-						"allOf": [
-							{
-								"if": {
-									"anyOf": [
-										{
-											"required": [
-												"dimensions.2d"
-											]
-										},
-										{
-											"required": [
-												"dimensions.3d"
-											]
-										}
-									]
-								},
-								"then": {
-									"oneOf": [
-										{
-											"required": [
-												"dimensions.2d"
-											]
-										},
-										{
-											"required": [
-												"dimensions.3d"
-											]
-										}
-									]
-								}
-							}
-						]
+						"$comment": "The 'allOf' section ensures that no two datablocks with the same prefix are used."
 					}
 				}
 			}

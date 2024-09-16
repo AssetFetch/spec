@@ -714,10 +714,10 @@ Clients MAY use this field as a display title, but SHOULD prefer the `title` fie
 
 The following datablocks are to be included in the `data` field of every component:
 
-| Requirement Level | Datablocks                                            |
-| ----------------- | ----------------------------------------------------- |
-| MUST              | `fetch.*`, `role` or `role.*`, `format` or `format.*` |
-| MAY               | `link.*`,`text`                                       |
+| Requirement Level | Datablocks                                      |
+| ----------------- | ----------------------------------------------- |
+| MUST              | `fetch.*`, `role`/`role.*`, `format`/`format.*` |
+| MAY               | `link.*`,`text`                                 |
 
 
 
@@ -751,10 +751,10 @@ The URI and parameters for the balance endpoint are communicated by the provider
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement Level                             | Datablocks       |
-| --------------------------------------------- | ---------------- |
-| SHOULD, if the provider uses a prepaid system | `unlock_balance` |
-| MAY                                           | `user`           |
+| Requirement Level                             | Datablocks                         |
+| --------------------------------------------- | ---------------------------------- |
+| SHOULD, if the provider uses a prepaid system | `unlock_balance`                   |
+| MAY                                           | `user`, `provider_reconfiguration` |
 
 
 
@@ -782,7 +782,6 @@ The resulting regular expression for all datablock names is `^[a-z0-9_]+(\.[a-z0
 ## 6.2. Datablock value templates
 This section describes additional data types that can be used within other datablocks.
 They exist to eliminate the need to re-specify the same data structure in two different datablock definitions.
-<!-- TODO: Do any DBs use foly a template? *The templates can not be used directly as datablocks under their template name* though some datablock completely inherit their structure under a new name.*-->
 
 ### 6.2.1. `variable_query`
 This template describes an HTTP query whose parameters are controllable by the user.
@@ -801,7 +800,7 @@ A parameter describes the attributes of one parameter for the query and how the 
 | --------- | ----------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `type`    | string            | MUST                           | One of `text`, `boolean`, `select`, `fixed`                                                                                                                                                                          |
 | `id`      | string            | MUST                           | The id of the HTTP parameter. It MUST be unique among the parameters of one variable query. The client MUST use this value as a the key when sending a response using this parameter.                                |
-| `title`   | string            | MAY                            | The title that the client SHOULD display to the user to represent this parameter.                                                                                                                                    |
+| `title`   | string            | SHOULD                         | The title that the client SHOULD display to the user to represent this parameter.                                                                                                                                    |
 | `default` | string            | MAY                            | The default value for this parameter. It MUST be one of the `value` fields outlined in `choices` if type `select` is bing used. It becomes the only possible value for this parameter if type `fixed` is being used. |
 | `choices` | array of `choice` | MUST, if `select` type is used | This field contains all possible choices when the `select` type is used. In that case it MUST contain at least one `choice` object, as outlined below.                                                               |
 
@@ -839,16 +838,16 @@ This section displays all datablocks that are used in AssetFetch.
 ## 7.1. Configuration and authentication-related datablocks
 
 ### 7.1.1. `provider_configuration`
-Headers that the provider expects to receive from the client on every subsequent request.
+Describes which headers the provider expects to receive from the client on every subsequent request.
 
 This datablock has the following structure:
 
-| Field                          | Format            | Requirement | Description                                                                                                       |
-| ------------------------------ | ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
-| `headers`                      | Array of `header` | MUST        | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request.     |
-| `connection_status_query`      | `fixed_query`     | MUST        | Query to use for checking whether the provided headers are valid und for obtaining connection status information. |
-| `header_acquisition_uri`       | string            | MAY         | A URI that the client MAY offer to open in the user's web browser to help them obtain the header values.          |
-| `header_acquisition_uri_title` | string            | MAY         | Title for the `acquisition_uri`.                                                                                  |
+| Field                          | Format            | Requirement | Description                                                                                                                              |
+| ------------------------------ | ----------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `headers`                      | Array of `header` | MUST        | List of headers that the client MAY or MUST (depending on configuration) send to the provider on any request.                            |
+| `connection_status_query`      | `fixed_query`     | MUST        | Query to use for checking whether the provided headers are valid und for obtaining connection status information.                        |
+| `header_acquisition_uri`       | string            | MAY         | A URI that the client MAY offer to open in the user's web browser to help them obtain the header values, for example from their website. |
+| `header_acquisition_uri_title` | string            | MAY         | Title for the `acquisition_uri`.                                                                                                         |
 
 
 #### 7.1.1.1. `header` structure
@@ -869,9 +868,9 @@ This datablock has the following structure:
 This datablock allows the provider to communicate to the client that a new set of headers that it MUST sent along with every request instead of those entered by the user until a new initialization is performed.
 The client MUST fully replace the values defined using the requirements from the original `provider_configuration` datablock with the new values defined in this datablock.
 
-| Field     | Format | Requirement | Description                                                                                                                                             |
-| --------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `headers` | Object | MUST        | An object whose properties MUST all be strings. The keys indicate the new header names, the property values represent the new header values to be used. |
+| Field     | Format | Requirement | Description                                                                                                               |
+| --------- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `headers` | Object | MUST        | An object whose properties indicate the new header names, the property values represent the new header values to be used. |
 
 
 These new headers effectively act like cookies used on web sites.
@@ -881,13 +880,14 @@ Clients MAY require the user to confirm the new header values before starting to
 
 ### 7.1.3. `user`
 
-This datablock allows the provider to transmit information about the user to the client, usually to allow the client to show the data to the user for confirmation that they are properly connected to the provider.
+This datablock describes the current user, as seen by the provider.
+The client SHOULD show the data to the user for confirmation that they are properly connected to the provider.
 
-| Field              | Format | Requirement | Description                                                                                                            |
-| ------------------ | ------ | ----------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `display_name`     | string | MAY         | The name of the user to display.                                                                                       |
-| `display_tier`     | string | MAY         | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.                 |
-| `display_icon_uri` | string | MAY         | URI to an image with an aspect ratio of 1:1, for example a profile picture or icon representing the subscription tier. |
+| Field              | Format | Requirement | Description                                                                                                                                                                       |
+| ------------------ | ------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `display_name`     | string | SHOULD      | The name of the user to display.                                                                                                                                                  |
+| `display_tier`     | string | MAY         | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.                                                                            |
+| `display_icon_uri` | string | MAY         | URI to an image with an aspect ratio of 1:1, for example a profile picture or icon representing the subscription tier. Image SHOULD be of media type `image/jpeg` or `image/png`. |
 
 ## 7.2. Browsing-related datablocks
 
@@ -908,7 +908,7 @@ Follows the `fixed_query` template.
 
 ### 7.2.4. `response_statistics`
 
-This datablock contains statistics about the current response.
+Contains statistics about the current response.
 It can be used to communicate the total number of results in a query where not all results can be communicated in one response and are instead deferred using `next_query`.
 
 | Field                | Format | Requirement | Description                                                                                                                                                                                            |
@@ -921,7 +921,8 @@ It can be used to communicate the total number of results in a query where not a
 These datablocks relate to how assets and their details are displayed to the user.
 
 ### 7.3.1. `text`
-General text information to be displayed to the user.
+Contains general text information to be displayed to the user.
+Can be applied to many different resource types.
 
 | Field         | Format | Requirement | Description                                    |
 | ------------- | ------ | ----------- | ---------------------------------------------- |
@@ -941,7 +942,7 @@ An array of objects each of which MUST follow this format:
 | `icon_uri` | string | MAY         | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
 
 ### 7.3.3. `branding`
-Brand information about the provider.
+Contains brand information about the provider, MAY be used by the client to customize the user interface.
 
 | Field             | Format | Requirement | Description                                                                                                                   |
 | ----------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -961,9 +962,9 @@ When attached to an asset, it means that the license information only applies to
 
 ### 7.3.5. `authors`
 
-This datablock can be used to communicate the author(s) of a particular asset.
+Is used communicate the author(s) of a particular asset.
 
-Array of objects that MUST have this structure:
+**Array of objects** with this structure:
 
 | Field  | Format | Requirement | Description                                                     |
 | ------ | ------ | ----------- | --------------------------------------------------------------- |
@@ -972,30 +973,32 @@ Array of objects that MUST have this structure:
 | `role` | string | MAY         | The role that the author has had in the creation of this asset. |
 
 ### 7.3.6. `dimensions`
-Contains general information about the physical dimensions of a three-dimensional asset. This is primarily intended for displaying to users, not for actually scaling meshes or textures.
+Contains general information about the physical dimensions of an asset.
+This is primarily intended for displaying to users, not for actually scaling meshes or textures.
 
 When using this datablock to describe two-dimensional assets, such as textures, providers MUST use the `width_m` and `height_m` fields and only add `depth_m` when dealing with three-dimensional data.
 
-An object that MUST conform to this format:
-
-| Field      | Format | Requirement | Description                    |
-| ---------- | ------ | ----------- | ------------------------------ |
-| `width_m`  | float  | MAY         | Width of the referenced asset  |
-| `height_m` | float  | MAY         | Height of the referenced asset |
-| `depth_m`  | float  | MAY         | Depth of the referenced asset  |
+| Field      | Format | Requirement | Description                     |
+| ---------- | ------ | ----------- | ------------------------------- |
+| `width_m`  | float  | SHOULD      | Width of the referenced asset.  |
+| `height_m` | float  | SHOULD      | Height of the referenced asset. |
+| `depth_m`  | float  | MAY         | Depth of the referenced asset.  |
 
 ### 7.3.7. `preview_image_supplemental`
-Contains a list of preview images with `uri`s and `alt`-Strings associated to the asset.
+Contains a list of preview images associated to an asset.
 
 An **array** of objects that conform to the following structure:
 
-| Field | Format | Requirement | Description                                                                                                   |
-| ----- | ------ | ----------- | ------------------------------------------------------------------------------------------------------------- |
-| `alt` | string | SHOULD      | An "alt" String for the image.                                                                                |
-| `uri` | string | MUST        | URL to an image accessible via HTTP GET. The image's media type SHOULD be one of `image/png` or `image/jpeg`. |
+| Field | Format | Requirement | Description                              |
+| ----- | ------ | ----------- | ---------------------------------------- |
+| `alt` | string | SHOULD      | An "alt" String for the image.           |
+| `uri` | string | MUST        | URL to an image accessible via HTTP GET. |
+
+The media type of the images SHOULD be one of `image/png` or `image/jpeg`.
 
 ### 7.3.8. `preview_image_thumbnail`
-Contains information about a thumbnail for an asset. The thumbnail can be provided in multiple resolutions.
+Contains information about a thumbnail image for an asset.
+The thumbnail can be provided in multiple resolutions.
 
 An object that MUST conform to this format:
 
@@ -1030,7 +1033,7 @@ Information about the user's current account balance.
 
 ### 7.4.2. `unlock_queries`
 
-This datablock contains the query or queries required to unlock all or some of the components in this implementation list.
+Contains the query or queries required to unlock all or some of the components in this implementation list.
 
 This datablock is **an array** consisting of `unlock_query` objects.
 
@@ -1074,8 +1077,8 @@ This information is intended to help the client understand the file.
 
 | Field      | Format            | Requirement | Description                                                                                                       |
 | ---------- | ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
-| `version`  | string            | MAY         | Blender Version in the format `Major.Minor.Patch` or `Major.Minor` or `Major`                                     |
-| `is_asset` | boolean           | MAY         | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
+| `version`  | string            | SHOULD      | Blender Version in the format `Major.Minor.Patch` or `Major.Minor` or `Major`                                     |
+| `is_asset` | boolean           | SHOULD      | `true` if the blend file contains object(s) marked as an asset for Blender's own Asset Manager. (default=`false`) |
 | `targets`  | array of `target` | MAY         | Array containing the blender structures inside the file that are relevant to the asset.                           |
 
 #### 7.5.2.1. `target` Structure
@@ -1100,7 +1103,7 @@ These datablocks describe how a client can gain access to a component file.
 
 ### 7.6.1. `fetch.download`
 
-This datablock describes how a component file can be downloaded via HTTP.
+Describes how a component file can be downloaded via HTTP.
 
 If an `unlock_query_id` is defined, then the client MUST execute the referenced unlock query before attempting to perform the download, unless the query is already marked as unlocked.
 
@@ -1125,6 +1128,8 @@ These datablocks describe the arrangement that the component files should take i
 
 ### 7.7.1. `store.file`
 
+Contains information about how/where to store a component file locally.
+
 | Field             | Format  | Requirement | Description                                     |
 | ----------------- | ------- | ----------- | ----------------------------------------------- |
 | `bytes`           | integer | MAY         | The length of the file in bytes.                |
@@ -1132,15 +1137,19 @@ These datablocks describe the arrangement that the component files should take i
 
 #### 7.7.1.1. `local_file_path` rules
 
-The `local_file_path` MUST include the full name that the file should take in the destination.
-It MUST NOT start with a "leading slash".
-It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
+The `local_file_path` is the sub-path in the implementation directory and MUST include the full name that the file should take.
+This brings with it several rules:
+- It MUST NOT end with a "trailing slash".
+- It MUST NOT start with a "leading slash".
+- It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
+- It MUST NOT use the backslash (`\`) as its directory separator (use `/` instead).
+
 
 **Examples:**
 
 `example.jpg` and `sub/dir/example.jpg` are valid local file paths.
 
-`/example.jpg`, `./example.jpg`, `sub/dir/` and `/sub/dir/example.jpg` are NOT valid local file paths.
+`/example.jpg`, `./example.jpg`, `sub/dir/`, `/sub/dir/example.jpg`, `sub\dir\example.jpg` and `sub/dir/../test.jpg` are NOT valid local file paths.
 
 
 ### 7.7.2. `store.archive`
@@ -1158,9 +1167,11 @@ More about the handling in the [import and handling section](#8-implementation-a
 
 #### 7.7.2.1. `local_directory_path` rules
 
-The `local_directory_path` MUST end with a slash ("trailing slash") and MUST NOT start with a slash 
-(unless it targets the root of the implementation directory in which case the `local_path` is simply `/`).
-It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
+The following rules apply to the `local_directory_path`:
+- It MUST end with a slash ("trailing slash")
+- It MUST NOT start with a slash (unless it targets the root of the implementation directory in which case the `local_directory_path` is simply `/`).
+- It MUST not contain backslashes (`\`) as directory separators
+- It MUST NOT contain relative path references (`./` or `../`) anywhere within it.
 
 **Examples:**
 
@@ -1183,7 +1194,7 @@ This datablock contains no fields is therefore represented by the empty object `
 | `active` | boolean | MUST        | Describes whether or not this component should be handled actively by the client. |
 
 ### 7.8.2. `role.loose_environment_map`
-The presence of this datablock on a component indicates that it is an environment map.
+Marks a component as an environment map.
 This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR).
 An object that MUST conform to this format:
 
@@ -1193,32 +1204,33 @@ An object that MUST conform to this format:
 
 ### 7.8.3. `role.loose_material_map`
 
-This datablock is applied to a component that is part of a loose material as a material map.
-It indicates which role the component should play in the material.
+Indicates that this component is part of a loose material as a material map.
 
 | Field           | Format | Requirement | Description                                                                                                                               |
 | --------------- | ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `material_name` | string | MUST        |                                                                                                                                           |
+| `material_name` | string | MUST        | Name of the material.                                                                                                                     |
 | `map`           | string | MUST        | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
-| `colorspace`    | string | MAY         | One of `srgb`, `linear`                                                                                                                   |
 
 ## 7.9. Linking-related datablocks
 
+These datablocks are used to describe connections between different components that are not expressed through the files themselves.
+
 ### 7.9.1. `link.loose_material`
 
-When applied to a component, it indicates that this component uses one or multiple materials defined using `role.loose_material_map` datablocks.
+Indicates that this component uses one or multiple materials defined using `role.loose_material_map` datablocks.
 
-| Field           | Format | Requirement | Description                                            |
-| --------------- | ------ | ----------- | ------------------------------------------------------ |
-| `material_name` | string | MUST        | Name of the material used in the definition datablocks |
+| Field           | Format | Requirement | Description                                                            |
+| --------------- | ------ | ----------- | ---------------------------------------------------------------------- |
+| `material_name` | string | MUST        | Name of the material used in the `role.loose_material_map` datablocks. |
 
 ### 7.9.2. `link.mtlx_material`
-When applied to a component, it indicates that this component makes use of a material defined in mtlx document represented by another component.
 
-| Field               | Format | Required | Description                                                                               |
-| ------------------- | ------ | -------- | ----------------------------------------------------------------------------------------- |
-| `mtlx_component_id` | string | yes      | Id of the component that represents the mtlx file.                                        |
-| `mtlx_material`     | string | no       | Optional reference for which material to use from the mtlx file, if it contains multiple. |
+Indicates that this component makes use of a material defined in a mtlx document represented by another component.
+
+| Field               | Format | Requirement | Description                                                                               |
+| ------------------- | ------ | ----------- | ----------------------------------------------------------------------------------------- |
+| `mtlx_component_id` | string | MUST        | Id of the component that represents the mtlx file.                                        |
+| `mtlx_material`     | string | MAY         | Optional reference for which material to use from the mtlx file, if it contains multiple. |
 
 
 

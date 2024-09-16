@@ -1,17 +1,18 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "Provider Configuration Datablock",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Datablock: provider_reconfiguration",
 	"$id": "af.datablock.provider_reconfiguration",
 	"description": "This datablock can be sent by the provider to reconfigure which headers the client should send to the provider.",
 	"type": "object",
 	"properties": {
 		"headers": {
-			"type":"object",
+			"type": "object",
 			"additionalProperties": {
-				"type":"string"
+				"type": "string"
 			}
 		}
 	},
+	"additionalProperties": false,
 	"required": [
 		"headers",
 		"connection_status_query"

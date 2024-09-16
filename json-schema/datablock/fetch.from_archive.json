@@ -1,0 +1,20 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Datablock: fetch.from_archive",
+	"$id": "af.datablock.fetch.from_archive",
+	"description": "This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.",
+	"type": "object",
+	"properties": {
+		"archive_component_id": {
+			"type": "string"
+		},
+		"component_sub_path": {
+			"type": "string"
+		}
+	},
+	"required": [
+		"archive_component_id",
+		"component_sub_path"
+	],
+	"additionalProperties": false
+}

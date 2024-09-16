@@ -1,0 +1,29 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Datablock: dimensions",
+	"$id": "af.datablock.dimensions",
+	"description": "Contains general information about the physical dimensions of an asset.",
+	"type": "object",
+	"properties": {
+		"width_m": {
+			"type": [
+				"number",
+				"null"
+			]
+		},
+		"height_m": {
+			"type": [
+				"number",
+				"null"
+			]
+		},
+		"depth_m": {
+			"type": [
+				"number",
+				"null"
+			]
+		}
+	},
+	"required": [],
+	"additionalProperties": false
+}

@@ -1,0 +1,19 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Datablock: link.mtlx_material",
+	"$id": "af.datablock.link.mtlx_material",
+	"description": "Indicates that this component makes use of a material defined in a mtlx document represented by another component.",
+	"type": "object",
+	"properties": {
+		"mtlx_component_id": {
+			"type": "string"
+		},
+		"mtlx_material": {
+			"type": "string"
+		}
+	},
+	"required": [
+		"mtlx_component"
+	],
+	"additionalProperties": false
+}

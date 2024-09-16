@@ -1,7 +1,7 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "Next Query Datablock",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Datablock: next_query",
 	"$id": "af.datablock.next_query",
 	"description": "This datablock describes how to fetch more results for the current query.",
-	"$ref":"../template/variable_query.json"
+	"$ref": "../template/fixed_query.json"
 }

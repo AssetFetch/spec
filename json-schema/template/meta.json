@@ -1,21 +1,32 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"$id":"af.template.meta",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Template: Meta",
+	"$id": "af.template.meta",
 	"description": "This template contains metadata for every endpoint.",
 	"type": "object",
 	"properties": {
 		"response_id": {
-		  "type": "string"
+			"type": [
+				"string",
+				"null"
+			]
 		},
 		"version": {
-		  "type":"string"
+			"type": "string",
+			"pattern": "[0-9]\\.[0-9]"
 		},
 		"kind": {
-		  "type": "string"
+			"type": "string"
 		},
 		"message": {
-		  "type": "string"
-		}
-	},
-	"required": ["kind","version"]
+			"type": [
+				"string",
+				"null"
+			]
+		},
+		"required": [
+			"kind",
+			"version"
+		]
+	}
 }

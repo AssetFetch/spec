@@ -1,19 +1,32 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": ".obj File Datablock",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Datablock: format.obj",
 	"$id": "af.datablock.format.obj",
 	"type": "object",
 	"properties": {
 		"up_axis": {
 			"type": "string",
 			"enum": [
+				"+x",
+				"-x",
 				"+y",
-				"+z"
+				"-y",
+				"+z",
+				"-z"
 			]
 		},
-		"use_mtl": {
-			"type": "boolean"
+		"front_axis": {
+			"type": "string",
+			"enum": [
+				"+x",
+				"-x",
+				"+y",
+				"-y",
+				"+z",
+				"-z"
+			]
 		}
 	},
+	"additionalProperties": false,
 	"required": []
 }

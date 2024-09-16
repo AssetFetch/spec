@@ -1,18 +1,19 @@
 {
-	"$schema": "http://json-schema.org/draft-07/schema#",
-	"title": "Preview Image (Thumbnail) Datablock",
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Datablock: preview_image_thumbnail",
 	"$id": "af.datablock.preview_image_thumbnail",
-	"description": "This datablock describes the main thumbnail image (and its possible resolutions).",
+	"description": "Contains information about a thumbnail image for an asset.",
 	"type": "object",
+	"additionalProperties": false,
 	"properties": {
-		"alt":{
-			"type":"string"
+		"alt": {
+			"type": "string"
 		},
-		"uris":{
+		"uris": {
 			"properties": {},
 			"patternProperties": {
-				"[0-9]+":{
-					"type":"string",
+				"[0-9]+": {
+					"type": "string",
 					"format": "uri"
 				}
 			},
