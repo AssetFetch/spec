@@ -1197,6 +1197,7 @@ The following rules apply to the `local_directory_path`:
 ### 7.7.3. `role.loose_environment_map`
 Marks a component as an environment map.
 This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR).
+
 An object that MUST conform to this format:
 
 | Field              | Format | Requirement                       | Description                             |
@@ -1221,6 +1222,8 @@ These datablocks are used to describe connections between different components t
 
 Indicates that this component uses one or multiple materials defined using `role.loose_material_map` datablocks.
 
+An object that MUST conform to this format:
+
 | Field           | Format | Requirement | Description                                                            |
 | --------------- | ------ | ----------- | ---------------------------------------------------------------------- |
 | `material_name` | string | MUST        | Name of the material used in the `role.loose_material_map` datablocks. |
@@ -1228,6 +1231,8 @@ Indicates that this component uses one or multiple materials defined using `role
 ### 7.8.2. `link.mtlx_material`
 
 Indicates that this component makes use of a material defined in a mtlx document represented by another component.
+
+An object that MUST conform to this format:
 
 | Field               | Format | Requirement | Description                                                                               |
 | ------------------- | ------ | ----------- | ----------------------------------------------------------------------------------------- |
