@@ -4,6 +4,7 @@
 	"$id": "af.endpoint.initialization",
 	"description": "This is the initialization endpoint which the client first connects with.",
 	"type": "object",
+	"additionalProperties": false,
 	"properties": {
 		"meta": {
 			"$ref": "../template/meta.json",

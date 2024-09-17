@@ -4,6 +4,7 @@
 	"$id": "af.endpoint.connection_status",
 	"description": "This endpoint can be used to gather data about the current connection status.",
 	"type": "object",
+	"additionalProperties": false,
 	"properties": {
 		"meta": {
 			"$ref": "../template/meta.json",

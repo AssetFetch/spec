@@ -54,7 +54,7 @@
 								"$ref": "../datablock/text.json"
 							},
 							"dimensions": {
-								"$ref": "../datablock/dimensions.3d.json"
+								"$ref": "../datablock/dimensions.json"
 							},
 							"preview_image_supplemental": {
 								"$ref": "../datablock/preview_image_supplemental.json"

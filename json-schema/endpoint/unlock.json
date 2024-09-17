@@ -4,6 +4,7 @@
 	"$id": "af.endpoint.unlock",
 	"description": "This is an endpoint for unlocking components.",
 	"type": "object",
+	"additionalProperties":false,
 	"properties": {
 		"meta": {
 			"$ref": "../template/meta.json",

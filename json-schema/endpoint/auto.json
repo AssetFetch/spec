@@ -2,7 +2,8 @@
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"title": "Endpoint: (automatic)",
 	"$id": "af.endpoint.auto",
-	"description": "This schema automatically detects the AF endpoint used in the given response JSON.",
+	"description": "This schema validates against all possible AF endpoint types at once.",
+	"$comment": "The 'oneOf' section ensures that the right schema is fulfilled.",
 	"oneOf": [
 		{
 			"$ref": "./asset_list.json"
