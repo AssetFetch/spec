@@ -967,11 +967,11 @@ Is used communicate the author(s) of a particular asset.
 
 **Array of objects** with this structure:
 
-| Field  | Format | Requirement | Description                                                     |
-| ------ | ------ | ----------- | --------------------------------------------------------------- |
-| `name` | string | MUST        | Name of the author.                                             |
-| `uri`  | string | MAY         | A URI for this author, for example a profile link.              |
-| `role` | string | MAY         | The role that the author has had in the creation of this asset. |
+| Field  | Format | Requirement | Description                                                                   |
+| ------ | ------ | ----------- | ----------------------------------------------------------------------------- |
+| `name` | string | MUST        | Name of the author.                                                           |
+| `uri`  | string | MAY         | A URI for this author, for example a profile, portfolio or social media link. |
+| `role` | string | MAY         | The role that the author has had in the creation of this asset.               |
 
 ### 7.3.6. `dimensions`
 Contains general information about the physical dimensions of an asset.
