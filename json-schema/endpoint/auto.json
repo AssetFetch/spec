@@ -1,0 +1,23 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Endpoint: (automatic)",
+	"$id": "af.endpoint.auto",
+	"description": "This schema automatically detects the AF endpoint used in the given response JSON.",
+	"oneOf": [
+		{
+			"$ref": "./asset_list.json"
+		},
+		{
+			"$ref": "./connection_status.json"
+		},
+		{
+			"$ref": "./implementation_list.json"
+		},
+		{
+			"$ref": "./initialization.json"
+		},
+		{
+			"$ref": "./unlock.json"
+		}
+	]
+}

@@ -6,7 +6,16 @@
 	"type": "object",
 	"properties": {
 		"meta": {
-			"$ref": "../template/meta.json"
+			"$ref": "../template/meta.json",
+			"properties": {
+				"meta": {
+					"properties": {
+						"kind": {
+							"const": "connection_status"
+						}
+					}
+				}
+			}
 		},
 		"data": {
 			"type": "object",
