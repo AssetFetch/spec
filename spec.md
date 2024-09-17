@@ -1159,12 +1159,12 @@ This datablock indicates that this component represents an archive, containing o
 More about the handling in the [import and handling section](#8-implementation-analysis-and-handling).
 
 
-| Field                  | Format  | Requirement                       | Description                                                                                                                       |
-| ---------------------- | ------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `bytes_compressed`     | integer | MAY                               | The length of the archive in bytes.                                                                                               |
-| `bytes_extracted`      | integer | MAY                               | The length of the archive in bytes (uncompressed).                                                                                |
-| `extract_fully`        | boolean | MUST                              | Indicates whether or not the entire archive should be fully extracted into the local implementation directory. TODO add reference |
-| `local_directory_path` | string  | MUST, only if `unpack_fully=true` | Local (sub-)path where the file MUST be placed by the client.                                                                     |
+| Field                  | Format  | Requirement                        | Description                                                                                                                       |
+| ---------------------- | ------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `bytes_compressed`     | integer | MAY                                | The length of the archive in bytes.                                                                                               |
+| `bytes_extracted`      | integer | MAY                                | The length of the archive in bytes (uncompressed).                                                                                |
+| `extract_fully`        | boolean | MUST                               | Indicates whether or not the entire archive should be fully extracted into the local implementation directory. TODO add reference |
+| `local_directory_path` | string  | MUST, only if `extract_fully=true` | Local (sub-)path where the file MUST be placed by the client.                                                                     |
 
 #### 7.7.2.1. `local_directory_path` rules
 
