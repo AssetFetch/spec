@@ -1103,7 +1103,7 @@ Information about files with the extension `.obj`.
 | `front_axis` | string | MAY         | Indicates which axis should be treated as the "front". MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`. |
 
 
-## 7.6. Fetching-related datablocks
+## 7.6. Fetching- and Storage-related datablocks
 
 These datablocks describe how a client can gain access to a component file.
 
@@ -1128,20 +1128,18 @@ More about the handling in the [import and handling section](#8-implementation-a
 | `archive_component_id` | string | MUST        | The id of the component representing the archive that this component is contained in.                                                                                                                                                                                                              |
 | `component_sub_path`   | string | MUST        | The location of the file inside the referenced archive. This MUST be the path to the file starting at the root of its archive. It MUST NOT start with a leading slash and MUST include the full name of the file inside the archive. It MUST NOT contain relative path references (`./` or `../`). |
 
-## 7.7. Storage-related datablocks
 
-These datablocks describe the arrangement that the component files should take in local storage.
 
-### 7.7.1. `store.file`
+### 7.6.3. `store`
 
-Contains information about how/where to store a component file locally.
+Contains information about how/where to store a component file locally in the implementation directory (see [2.7.2](#272-implementation-directory) and [8.4](#84-choosing-a-local-directory)).
 
 | Field             | Format  | Requirement | Description                                     |
 | ----------------- | ------- | ----------- | ----------------------------------------------- |
 | `bytes`           | integer | MAY         | The length of the file in bytes.                |
 | `local_file_path` | string  | MUST        | Local sub-path in the implementation directory. |
 
-#### 7.7.1.1. `local_file_path` rules
+#### 7.6.3.1. `local_file_path` rules
 
 The `local_file_path` is the sub-path in the implementation directory and MUST include the full name that the file should take.
 This brings with it several rules:
@@ -1158,18 +1156,29 @@ This brings with it several rules:
 `/example.jpg`, `./example.jpg`, `sub/dir/`, `/sub/dir/example.jpg`, `sub\dir\example.jpg` and `sub/dir/../test.jpg` are NOT valid local file paths.
 
 
-### 7.7.2. `store.archive`
+## 7.7. Role/Processing-related datablocks
+
+These datablocks describe which "role" a specific component should play in the asset implementation.
+
+### 7.7.1. `role.native`
+This datablock indicates that this file should be handled by the host application's native import functionality using information from the `format.*` datablock, if available.
+The full description of component handling can be found in the [component handling section](#833-handling-component-files).
+
+Currently, this datablock contains no fields and MUST therefore represented by the empty object `{}`.
+
+### 7.7.2. `role.archive`
 
 This datablock indicates that this component represents an archive, containing other component files.
 More about the handling in the [import and handling section](#8-implementation-analysis-and-handling).
 
+If a component has this datablock, then the client SHOULD delete it from the local implementation directory after the import process has been completed.
 
-| Field                  | Format  | Requirement                        | Description                                                                                                                       |
-| ---------------------- | ------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `bytes_compressed`     | integer | MAY                                | The length of the archive in bytes.                                                                                               |
-| `bytes_extracted`      | integer | MAY                                | The length of the archive in bytes (uncompressed).                                                                                |
-| `extract_fully`        | boolean | MUST                               | Indicates whether or not the entire archive should be fully extracted into the local implementation directory. TODO add reference |
-| `local_directory_path` | string  | MUST, only if `extract_fully=true` | Local (sub-)path where the file MUST be placed by the client.                                                                     |
+An object that MUST conform to this format:
+
+| Field                  | Format  | Requirement                        | Description                                                                                                    |
+| ---------------------- | ------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `extract_fully`        | boolean | MUST                               | Indicates whether or not the entire archive should be fully extracted into the local implementation directory. |
+| `local_directory_path` | string  | MUST, only if `extract_fully=true` | Local (sub-)path where the file MUST be placed by the client.                                                  |
 
 #### 7.7.2.1. `local_directory_path` rules
 
@@ -1185,17 +1194,7 @@ The following rules apply to the `local_directory_path`:
 
 `contents`,`./contents/`,`./contents`,`my/../../contents` and `../contents` are NOT valid local directory paths.
 
-## 7.8. Role/Processing-related datablocks
-
-These datablocks describe which "role" a specific component should play in the asset implementation.
-
-### 7.8.1. `role.native`
-This datablock indicates that this file should be handled by the host application's native import functionality using information from the `format.*` datablock, if available.
-The full description of component handling can be found in the [component handling section](#833-handling-component-files).
-
-Currently, this datablock contains no fields and MUST therefore represented by the empty object `{}`.
-
-### 7.8.2. `role.loose_environment_map`
+### 7.7.3. `role.loose_environment_map`
 Marks a component as an environment map.
 This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR).
 An object that MUST conform to this format:
@@ -1205,7 +1204,7 @@ An object that MUST conform to this format:
 | `environment_name` | string | MAY                               | A name for the environment.             |
 | `projection`       | string | SHOULD, default=`equirectangular` | One of `equirectangular`, `mirror_ball` |
 
-### 7.8.3. `role.loose_material_map`
+### 7.7.4. `role.loose_material_map`
 
 Indicates that this component is part of a loose material as a material map.
 
@@ -1214,11 +1213,11 @@ Indicates that this component is part of a loose material as a material map.
 | `material_name` | string | MUST        | Name of the material.                                                                                                                     |
 | `map`           | string | MUST        | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
 
-## 7.9. Linking-related datablocks
+## 7.8. Linking-related datablocks
 
 These datablocks are used to describe connections between different components that are not expressed through the files themselves.
 
-### 7.9.1. `link.loose_material`
+### 7.8.1. `link.loose_material`
 
 Indicates that this component uses one or multiple materials defined using `role.loose_material_map` datablocks.
 
@@ -1226,7 +1225,7 @@ Indicates that this component uses one or multiple materials defined using `role
 | --------------- | ------ | ----------- | ---------------------------------------------------------------------- |
 | `material_name` | string | MUST        | Name of the material used in the `role.loose_material_map` datablocks. |
 
-### 7.9.2. `link.mtlx_material`
+### 7.8.2. `link.mtlx_material`
 
 Indicates that this component makes use of a material defined in a mtlx document represented by another component.
 
@@ -1257,7 +1256,7 @@ When receiving the metadata of several implementations of an asset from a provid
 1. Analyze the implementations and decide if there is one (or multiple) that it can handle and choose one to *actually* import.
 2. Perform all required unlocking queries based on the information in the `unlock_queries` datablock and references in the `fetch.download` datablocks.
 3. Allocating local storage for the component files.
-4. Fetch and store all files for all components using the instructions in their `store.*` datablocks.
+4. Fetch and store all files for all components using the instructions in their `store` (and in the case of archives `role.archive`) datablocks.
 5. Handle the component files using the instructions in their `role.*`, `format.*`, `link.*` and other datablocks.
 
 ## 8.2. Implementation analysis
@@ -1295,20 +1294,23 @@ To ensure that these references are still functional after the download, AssetFe
 
 ## 8.5. Downloading and storing files
 
-### 8.5.1. Standard files (with `store.file` datablock)
+### 8.5.1. Storing all component files based on `store` datablock
 
-Inside this directory it SHOULD place every downloaded file in the directory as specified in the `local_file_path` field of the component's `store.file` datablock.
+Inside the implementation directory the client SHOULD place every downloaded file in the directory as specified in the `local_file_path` field of the component's `store` datablock.
 
 If an implementation assigns the same `local_file_path` to two different file components, then the client's behavior is undefined.
 Providers MUST avoid configurations that lead to this outcome.
 
-### 8.5.2. Archive files (with `store.archive` datablock)
+### 8.5.2. Interacting with archives (components with `role.archive` datablock)
 
-When working with archives, the behavior is dictated by the `extract_fully` field in the `store.archive` datablock.
+Components may carry a `fetch.from_archive` datablock which indicates that they need to be extracted from an archive.
+In that case the client SHOULD extract the file from the referenced archive (based on the `component_sub_path` in the `fetch.from_archive` datablock) and store it as described in its `store` datablock (as described above).
+
+When working with archives, additional behavior is defined by the `extract_fully` field in the `role.archive` datablock.
 
 #### 8.5.2.1. Handling for `extract_fully=true`
 
-The client MUST unpack the full contents of the archive root into the implementation directory using the `local_directory_path` in the `store.archive` datablock as the sub-path.
+The client MUST unpack the full contents of the archive root into the implementation directory using the `local_directory_path` in the `role.archive` datablock as the sub-path.
 
 All files extracted by this which are not referenced explicitly by a component MUST be treated as passive files (see [2.7.1](#271-component-activeness)).
 
@@ -1316,8 +1318,11 @@ Overlapping or conflicting `local_directory_path` values have undefined behavior
 
 #### 8.5.2.2. Handling for `extract_fully=false`
 
-In this case, the client SHOULD store the archive in a temporary location first and unpack only those files that are referenced by other components in their respective `fetch.from_archive` datablock.
+In this case, the client SHOULD unpack only those files that are referenced by other components in their respective `fetch.from_archive` datablocks.
 
+#### 8.5.2.3. Deleting archives
+
+If a component has the `role.archive` datablock then it is assumed to be ephemeral, meaning that the client SHOULD delete it from the local implementation directory after all component files have been extracted from it. 
 
 ## 8.6. Handling component files
 
