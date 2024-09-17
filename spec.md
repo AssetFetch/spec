@@ -97,7 +97,7 @@ This exact choice - or rather the collection of files with metadata that is a re
 - A BLEND file containing a character model, its rig and all its textures (again with a specific resolution) all packed into it is considered one implementation.
 - A UASSET file containing the same character set up for Unreal Engine instead of Blender is considered a different implementation of the same character asset.
 
-### 2.7.2. Implementation Directory
+### 2.6.1. Implementation Directory
 Every asset implementation has its own directory in which all component files for it are stored by the client after downloading them.
 This is referred to as the "implementation directory".
 A new one is created for every asset implementation that the client downloads.
