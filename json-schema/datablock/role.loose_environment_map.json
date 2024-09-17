@@ -6,15 +6,21 @@
 	"type": "object",
 	"additionalProperties": false,
 	"properties": {
+		"environment_name": {
+			"type": [
+				"string",
+				"null"
+			]
+		},
 		"projection": {
-			"type": "string",
+			"type": [
+				"string",
+				"null"
+			],
 			"enum": [
 				"equirectangular",
 				"mirror_ball"
 			]
 		}
-	},
-	"required": [
-		"projection"
-	]
+	}
 }

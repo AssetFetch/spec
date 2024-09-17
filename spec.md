@@ -1198,9 +1198,10 @@ Marks a component as an environment map.
 This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR).
 An object that MUST conform to this format:
 
-| Field        | Format | Requirement                       | Description                             |
-| ------------ | ------ | --------------------------------- | --------------------------------------- |
-| `projection` | string | SHOULD, default=`equirectangular` | One of `equirectangular`, `mirror_ball` |
+| Field              | Format | Requirement                       | Description                             |
+| ------------------ | ------ | --------------------------------- | --------------------------------------- |
+| `environment_name` | string | MAY                               | A name for the environment.             |
+| `projection`       | string | SHOULD, default=`equirectangular` | One of `equirectangular`, `mirror_ball` |
 
 ### 7.8.3. `role.loose_material_map`
 
