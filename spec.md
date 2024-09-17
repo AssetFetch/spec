@@ -719,11 +719,11 @@ Clients MAY use this field as a display title, but SHOULD prefer the `title` fie
 
 The following datablocks are to be included in the `data` field of every component:
 
-| Requirement Level                                          | Datablocks                     |
-| ---------------------------------------------------------- | ------------------------------ |
-| MUST (on every component)                                  | `fetch.*`, `format`/`format.*` |
-| SHOULD (on at least one component in every implementation) | `role.*`                       |
-| MAY                                                        | `link.*`,`text`                |
+| Requirement Level                                          | Datablocks                              |
+| ---------------------------------------------------------- | --------------------------------------- |
+| MUST (on every component)                                  | `store`, `fetch.*`, `format`/`format.*` |
+| SHOULD (on at least one component in every implementation) | `role.*`                                |
+| MAY                                                        | `link.*`,`text`                         |
 
 
 
