@@ -714,10 +714,11 @@ Clients MAY use this field as a display title, but SHOULD prefer the `title` fie
 
 The following datablocks are to be included in the `data` field of every component:
 
-| Requirement Level | Datablocks                                      |
-| ----------------- | ----------------------------------------------- |
-| MUST              | `fetch.*`, `role`/`role.*`, `format`/`format.*` |
-| MAY               | `link.*`,`text`                                 |
+| Requirement Level                                          | Datablocks                     |
+| ---------------------------------------------------------- | ------------------------------ |
+| MUST (on every component)                                  | `fetch.*`, `format`/`format.*` |
+| SHOULD (on at least one component in every implementation) | `role.*`                       |
+| MAY                                                        | `link.*`,`text`                |
 
 
 
@@ -1183,15 +1184,11 @@ The following rules apply to the `local_directory_path`:
 
 These datablocks describe which "role" a specific component should play in the asset implementation.
 
-### 7.8.1. `role`
+### 7.8.1. `role.native`
 This datablock indicates that this file should be handled by the host application's native import functionality using information from the `format.*` datablock, if available.
 The full description of component handling can be found in the [component handling section](#833-handling-component-files).
 
-This datablock contains no fields is therefore represented by the empty object `{}`.
-
-| Field    | Format  | Requirement | Description                                                                       |
-| -------- | ------- | ----------- | --------------------------------------------------------------------------------- |
-| `active` | boolean | MUST        | Describes whether or not this component should be handled actively by the client. |
+Currently, this datablock contains no fields and MUST therefore represented by the empty object `{}`.
 
 ### 7.8.2. `role.loose_environment_map`
 Marks a component as an environment map.
@@ -1256,7 +1253,7 @@ When receiving the metadata of several implementations of an asset from a provid
 2. Perform all required unlocking queries based on the information in the `unlock_queries` datablock and references in the `fetch.download` datablocks.
 3. Allocating local storage for the component files.
 4. Fetch and store all files for all components using the instructions in their `store.*` datablocks.
-5. Handle the component files using the instructions in their `role.*`, `format.*` and other datablocks. This also includes special relationships between components defined in the metadata.
+5. Handle the component files using the instructions in their `role.*`, `format.*`, `link.*` and other datablocks.
 
 ## 8.2. Implementation analysis
 
@@ -1322,14 +1319,16 @@ In this case, the client SHOULD store the archive in a temporary location first 
 After downloading all component files and arranging them on disk, the client can begin to handle/import the files.
 The behavior of a component is largely controlled by its `role.*` datablock.
 
-### 8.6.1. Handling based on the default role datablock (`role`)
+### 8.6.1. Handling for components without a  `role.*` datablock
 
-If the `active` property is set to `true`, make an attempt to load this file through the host application's native import feature for this file format.
-
-If the `active` property is set to `false`, do not handle the file directly, only store it (see [8.3.2](#832-downloading-and-storing-component-files)) so that other components can reference it.
+Do not handle the file directly, only store it (see [8.3.2](#832-downloading-and-storing-component-files)) so that other components can reference it.
 Also see [2.7.1](#271-component-activeness) for the definition and examples of component activeness.
 
-### 8.6.2. Handling a loose material map (`role.loose_material_map`)
+### 8.6.2. Handling based on the native role datablock (`role.native`)
+
+Make an attempt to load this file through the host application's native import feature for this file's format, as indicated by the `format.*` datablock.
+
+### 8.6.3. Handling a loose material map (`role.loose_material_map`)
 
 Many file formats for 3D content - both vendor-specific as well as open - offer native support for referencing external texture files.
 Providers SHOULD use these "native" material formats whenever possible and send the relevant texture files along as passive files, as described above.
@@ -1338,7 +1337,7 @@ The `role.loose_material_map` is designed for cases in which this is not possibl
 It provides a basic material system where multiple components define the maps of a PBR material.
 The client SHOULD handle these components by creating a new material in its host application and adding the PBR map to it in a way that represents common practice for the given host application.
 
-### 8.6.3. Handling a loose environment map (`role.loose_environment_map`)
+### 8.6.4. Handling a loose environment map (`role.loose_environment_map`)
 
 Environments for image-based lighting face a similar challenge as PBR materials as it is common practice to only provide a singular image file without any further information.
 

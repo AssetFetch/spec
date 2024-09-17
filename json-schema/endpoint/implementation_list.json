@@ -59,8 +59,8 @@
 										"role.loose_environment_map": {
 											"$ref": "../datablock/role.loose_environment_map.json"
 										},
-										"role": {
-											"$ref": "../datablock/role.json"
+										"role.native": {
+											"$ref": "../datablock/role.native.json"
 										},
 										"format": {
 											"$ref": "../datablock/format.json"
@@ -96,25 +96,7 @@
 												}
 											]
 										},
-										{
-											"oneOf": [
-												{
-													"required": [
-														"role"
-													]
-												},
-												{
-													"required": [
-														"role.loose_environment_map"
-													]
-												},
-												{
-													"required": [
-														"role.loose_material_map"
-													]
-												}
-											]
-										},
+										
 										{
 											"oneOf": [
 												{
@@ -159,6 +141,46 @@
 													{
 														"required": [
 															"link.mtlx_material"
+														]
+													}
+												]
+											}
+										},
+										{
+											"if": {
+												"anyOf": [
+													{
+														"required": [
+															"role.native"
+														]
+													},
+													{
+														"required": [
+															"role.loose_environment_map"
+														]
+													},
+													{
+														"required":[
+															"role.loose_material_map"
+														]
+													}
+												]
+											},
+											"then": {
+												"oneOf": [
+													{
+														"required": [
+															"role.native"
+														]
+													},
+													{
+														"required": [
+															"role.loose_environment_map"
+														]
+													},
+													{
+														"required":[
+															"role.loose_material_map"
 														]
 													}
 												]
