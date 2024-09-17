@@ -1055,7 +1055,7 @@ This datablock is **an array** consisting of `unlock_query` objects.
 Format-related datablocks communicate details about the data in individual component files.
 
 ### 7.5.1. `format`
-This is the default format datablock for all file formats that do not have their own dedicated `format.*` datablock in AssetFetch.
+This is the default format datablock for all file formats that do not have their own dedicated `format.*` datablock.
 
 | Field       | Format | Requirement | Description                                       |
 | ----------- | ------ | ----------- | ------------------------------------------------- |
@@ -1065,7 +1065,7 @@ This is the default format datablock for all file formats that do not have their
 #### 7.5.1.1. `extension` rules
 
 The `extension` field MUST include a leading dot (`.obj` would be correct,`obj` would not be correct), and, if necessary to fully communicate the format,
-SHOULD include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
+MUST include multiple dots for properly expressing certain "combined" file formats (eg. `.tar.gz` for a gzipped tar-archive).
 
 #### 7.5.1.2. `mediatype` rules
 
