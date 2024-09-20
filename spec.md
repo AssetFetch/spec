@@ -722,7 +722,7 @@ The following datablocks are to be included in the `data` field of every compone
 | Requirement Level                                          | Datablocks                              |
 | ---------------------------------------------------------- | --------------------------------------- |
 | MUST (on every component)                                  | `store`, `fetch.*`, `format`/`format.*` |
-| SHOULD (on at least one component in every implementation) | `role.*`                                |
+| SHOULD (on at least one component in every implementation) | `handle.*`                              |
 | MAY                                                        | `link.*`,`text`                         |
 
 
@@ -1156,17 +1156,17 @@ This brings with it several rules:
 `/example.jpg`, `./example.jpg`, `sub/dir/`, `/sub/dir/example.jpg`, `sub\dir\example.jpg` and `sub/dir/../test.jpg` are NOT valid local file paths.
 
 
-## 7.7. Role/Processing-related datablocks
+## 7.7. Handling/Processing-related datablocks
 
-These datablocks describe which "role" a specific component should play in the asset implementation.
+These datablocks describe the way in which a specific component should be processed when importing an asset implementation.
 
-### 7.7.1. `role.native`
+### 7.7.1. `handle.native`
 This datablock indicates that this file should be handled by the host application's native import functionality using information from the `format.*` datablock, if available.
 The full description of component handling can be found in the [component handling section](#833-handling-component-files).
 
 Currently, this datablock contains no fields and MUST therefore represented by the empty object `{}`.
 
-### 7.7.2. `role.archive`
+### 7.7.2. `handle.archive`
 
 This datablock indicates that this component represents an archive, containing other component files.
 More about the handling in the [import and handling section](#8-implementation-analysis-and-handling).
@@ -1194,7 +1194,7 @@ The following rules apply to the `local_directory_path`:
 
 `contents`,`./contents/`,`./contents`,`my/../../contents` and `../contents` are NOT valid local directory paths.
 
-### 7.7.3. `role.loose_environment_map`
+### 7.7.3. `handle.loose_environment_map`
 Marks a component as an environment map.
 This datablock only needs to be applied if the component is a "bare file", like (HDR or EXR).
 
@@ -1205,7 +1205,7 @@ An object that MUST conform to this format:
 | `environment_name` | string | MAY                               | A name for the environment.             |
 | `projection`       | string | SHOULD, default=`equirectangular` | One of `equirectangular`, `mirror_ball` |
 
-### 7.7.4. `role.loose_material_map`
+### 7.7.4. `handle.loose_material_map`
 
 Indicates that this component is part of a loose material as a material map.
 
@@ -1220,13 +1220,13 @@ These datablocks are used to describe connections between different components t
 
 ### 7.8.1. `link.loose_material`
 
-Indicates that this component uses one or multiple materials defined using `role.loose_material_map` datablocks.
+Indicates that this component uses one or multiple materials defined using `handle.loose_material_map` datablocks.
 
 An object that MUST conform to this format:
 
-| Field           | Format | Requirement | Description                                                            |
-| --------------- | ------ | ----------- | ---------------------------------------------------------------------- |
-| `material_name` | string | MUST        | Name of the material used in the `role.loose_material_map` datablocks. |
+| Field           | Format | Requirement | Description                                                              |
+| --------------- | ------ | ----------- | ------------------------------------------------------------------------ |
+| `material_name` | string | MUST        | Name of the material used in the `handle.loose_material_map` datablocks. |
 
 ### 7.8.2. `link.mtlx_material`
 
@@ -1261,8 +1261,8 @@ When receiving the metadata of several implementations of an asset from a provid
 1. Analyze the implementations and decide if there is one (or multiple) that it can handle and choose one to *actually* import.
 2. Perform all required unlocking queries based on the information in the `unlock_queries` datablock and references in the `fetch.download` datablocks.
 3. Allocating local storage for the component files.
-4. Fetch and store all files for all components using the instructions in their `store` (and in the case of archives `role.archive`) datablocks.
-5. Handle the component files using the instructions in their `role.*`, `format.*`, `link.*` and other datablocks.
+4. Fetch and store all files for all components using the instructions in their `store` (and in the case of archives `handle.archive`) datablocks.
+5. Handle the component files using the instructions in their `handle.*`, `format.*`, `link.*` and other datablocks.
 
 ## 8.2. Implementation analysis
 
@@ -1306,16 +1306,16 @@ Inside the implementation directory the client SHOULD place every downloaded fil
 If an implementation assigns the same `local_file_path` to two different file components, then the client's behavior is undefined.
 Providers MUST avoid configurations that lead to this outcome.
 
-### 8.5.2. Interacting with archives (components with `role.archive` datablock)
+### 8.5.2. Interacting with archives (components with `handle.archive` datablock)
 
-Components may carry a `fetch.from_archive` datablock which indicates that they need to be extracted from an archive.
-In that case the client SHOULD extract the file from the referenced archive (based on the `component_sub_path` in the `fetch.from_archive` datablock) and store it as described in its `store` datablock (as described above).
+Some components may carry a `fetch.from_archive` datablock which indicates that they need to be extracted from an archive.
+In that case the client SHOULD extract the file from the referenced archive based on the `component_sub_path` in the `fetch.from_archive` datablock and store it as described in its `store` datablock (as described above).
 
-When working with archives, additional behavior is defined by the `extract_fully` field in the `role.archive` datablock.
+When working with archives, additional behavior is defined by the `extract_fully` field in the `handle.archive` datablock.
 
 #### 8.5.2.1. Handling for `extract_fully=true`
 
-The client MUST unpack the full contents of the archive root into the implementation directory using the `local_directory_path` in the `role.archive` datablock as the sub-path.
+The client MUST unpack the full contents of the archive root into the implementation directory using the `local_directory_path` in the `handle.archive` datablock as the sub-path.
 
 All files extracted by this which are not referenced explicitly by a component MUST be treated as passive files (see [2.7.1](#271-component-activeness)).
 
@@ -1327,36 +1327,37 @@ In this case, the client SHOULD unpack only those files that are referenced by o
 
 #### 8.5.2.3. Deleting archives
 
-If a component has the `role.archive` datablock then it is assumed to be ephemeral, meaning that the client SHOULD delete it from the local implementation directory after all component files have been extracted from it. 
+If a component has the `handle.archive` datablock then it is assumed to be ephemeral, meaning that the client SHOULD delete it from the local implementation directory after all component files have been extracted from it. 
 
 ## 8.6. Handling component files
 
 After downloading all component files and arranging them on disk, the client can begin to handle/import the files.
-The behavior of a component is largely controlled by its `role.*` datablock.
+The behavior of a component is largely controlled by its `handle.*` datablock.
 
-### 8.6.1. Handling for components without a  `role.*` datablock
+### 8.6.1. Handling for components without a  `handle.*` datablock
 
+The absence of a `handle.*` datablock indicates that a component file is passive.
 Do not handle the file directly, only store it (see [8.3.2](#832-downloading-and-storing-component-files)) so that other components can reference it.
 Also see [2.7.1](#271-component-activeness) for the definition and examples of component activeness.
 
-### 8.6.2. Handling based on the native role datablock (`role.native`)
+### 8.6.2. Handling based on the native handling datablock (`handle.native`)
 
 Make an attempt to load this file through the host application's native import feature for this file's format, as indicated by the `format.*` datablock.
 
-### 8.6.3. Handling a loose material map (`role.loose_material_map`)
+### 8.6.3. Handling a loose material map (`handle.loose_material_map`)
 
 Many file formats for 3D content - both vendor-specific as well as open - offer native support for referencing external texture files.
 Providers SHOULD use these "native" material formats whenever possible and send the relevant texture files along as passive files, as described above.
-The `role.loose_material_map` is designed for cases in which this is not possible or practical.
+The `handle.loose_material_map` is designed for cases in which this is not possible or practical.
 
 It provides a basic material system where multiple components define the maps of a PBR material.
 The client SHOULD handle these components by creating a new material in its host application and adding the PBR map to it in a way that represents common practice for the given host application.
 
-### 8.6.4. Handling a loose environment map (`role.loose_environment_map`)
+### 8.6.4. Handling a loose environment map (`handle.loose_environment_map`)
 
 Environments for image-based lighting face a similar challenge as PBR materials as it is common practice to only provide a singular image file without any further information.
 
-This the `role.loose_environment_map` datablock indicates that this component is one such environment map with a specific projection, meaning that it should be imported as an environment or something similar within the context of the host application.
+This the `handle.loose_environment_map` datablock indicates that this component is one such environment map with a specific projection, meaning that it should be imported as an environment or something similar within the context of the host application.
 
 ## 8.7. Handling component-links
 
@@ -1371,7 +1372,7 @@ This allows the use of `.mtlx` files with mesh file formats that do not have the
 When encountering such a link, the client SHOULD apply the referenced material from the MTLX file to the entire mesh.
 
 ### 8.7.2. Handling loose material links (`link.loose_material`)
-This datablock allows references from a component representing a mesh to a loose material described through `role.loose_material_map` datablocks on multiple other components.
+This datablock allows references from a component representing a mesh to a loose material described through `handle.loose_material_map` datablocks on multiple other components.
 
 When encountering such a link, the client SHOULD apply the referenced material to the entire mesh.
 

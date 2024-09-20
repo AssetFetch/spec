@@ -1,7 +1,7 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Datablock: role.archive",
-	"$id": "af.datablock.role.archive",
+	"title": "Datablock: handle.archive",
+	"$id": "af.datablock.handle.archive",
 	"description": "This datablock indicates that this component represents an archive, containing other component files.",
 	"type": "object",
 	"properties": {
