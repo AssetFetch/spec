@@ -1,7 +1,7 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Datablock: store.file",
-	"$id": "af.datablock.store.file",
+	"title": "Datablock: store",
+	"$id": "af.datablock.store",
 	"description": "Contains information about how/where to store a component file locally.",
 	"type": "object",
 	"properties": {
