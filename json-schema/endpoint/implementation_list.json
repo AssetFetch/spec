@@ -53,14 +53,17 @@
 										"fetch.download": {
 											"$ref": "../datablock/fetch.download.json"
 										},
-										"role.loose_material_map": {
-											"$ref": "../datablock/role.loose_material_map.json"
+										"handle.loose_material_map": {
+											"$ref": "../datablock/handle.loose_material_map.json"
 										},
-										"role.loose_environment_map": {
-											"$ref": "../datablock/role.loose_environment_map.json"
+										"handle.loose_environment_map": {
+											"$ref": "../datablock/handle.loose_environment_map.json"
 										},
-										"role": {
-											"$ref": "../datablock/role.json"
+										"handle.native": {
+											"$ref": "../datablock/handle.native.json"
+										},
+										"handle.archive": {
+											"$ref": "../datablock/handle.archive.json"
 										},
 										"format": {
 											"$ref": "../datablock/format.json"
@@ -79,9 +82,17 @@
 										},
 										"text": {
 											"$ref": "../datablock/text.json"
+										},
+										"store": {
+											"$ref": "../datablock/store.json"
 										}
 									},
 									"allOf": [
+										{
+											"required": [
+												"store"
+											]
+										},
 										{
 											"oneOf": [
 												{
@@ -92,25 +103,6 @@
 												{
 													"required": [
 														"file_fetch.download"
-													]
-												}
-											]
-										},
-										{
-											"oneOf": [
-												{
-													"required": [
-														"role"
-													]
-												},
-												{
-													"required": [
-														"role.loose_environment_map"
-													]
-												},
-												{
-													"required": [
-														"role.loose_material_map"
 													]
 												}
 											]
@@ -163,6 +155,30 @@
 													}
 												]
 											}
+										},
+										{
+											"oneOf": [
+												{
+													"required": [
+														"handle.native"
+													]
+												},
+												{
+													"required": [
+														"handle.archive"
+													]
+												},
+												{
+													"required": [
+														"handle.loose_environment_map"
+													]
+												},
+												{
+													"required": [
+														"handle.loose_material_map"
+													]
+												}
+											]
 										}
 									]
 								}

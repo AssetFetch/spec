@@ -1,25 +1,13 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "Datablock: store.archive",
-	"$id": "af.datablock.store.archive",
+	"title": "Datablock: handle.archive",
+	"$id": "af.datablock.handle.archive",
 	"description": "This datablock indicates that this component represents an archive, containing other component files.",
 	"type": "object",
 	"properties": {
 		"local_directory_path": {
 			"type": "string",
 			"pattern": "^\\\/$|^[^\\.|\\\/|\\\\]((?!\\.\\.\\\/|\\\\).)*\\\/$"
-		},
-		"bytes_compressed": {
-			"type": [
-				"number",
-				"null"
-			]
-		},
-		"bytes_extracted": {
-			"type": [
-				"number",
-				"null"
-			]
 		},
 		"extract_fully": {
 			"type": "boolean"
