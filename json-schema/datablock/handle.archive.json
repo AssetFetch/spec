@@ -6,7 +6,10 @@
 	"type": "object",
 	"properties": {
 		"local_directory_path": {
-			"type": "string",
+			"type": [
+				"string",
+				"null"
+			],
 			"pattern": "^\\\/$|^[^\\.|\\\/|\\\\]((?!\\.\\.\\\/|\\\\).)*\\\/$"
 		},
 		"extract_fully": {
@@ -24,6 +27,11 @@
 		}
 	},
 	"then": {
+		"properties": {
+			"local_directory_path": {
+				"type": "string"
+			}
+		},
 		"required": [
 			"local_directory_path"
 		]
