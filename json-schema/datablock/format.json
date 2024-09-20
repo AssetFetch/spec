@@ -9,7 +9,10 @@
 			"type": "string"
 		},
 		"mediatype": {
-			"type": "string"
+			"type": [
+				"string",
+				"null"
+			]
 		}
 	},
 	"required": [
