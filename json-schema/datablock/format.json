@@ -6,7 +6,8 @@
 	"type": "object",
 	"properties": {
 		"extension": {
-			"type": "string"
+			"type": "string",
+			"pattern": "^\\..*"
 		},
 		"mediatype": {
 			"type": [
