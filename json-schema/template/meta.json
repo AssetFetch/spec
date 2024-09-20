@@ -4,6 +4,7 @@
 	"$id": "af.template.meta",
 	"description": "This template contains metadata for every endpoint.",
 	"type": "object",
+	"additionalProperties": false,
 	"properties": {
 		"response_id": {
 			"type": [
@@ -17,7 +18,7 @@
 		},
 		"kind": {
 			"type": "string",
-			"enum":[
+			"enum": [
 				"asset_list",
 				"connection_status",
 				"implementation_list",
