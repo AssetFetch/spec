@@ -4,6 +4,7 @@
 	"$id": "af.template.meta",
 	"description": "This template contains metadata for every endpoint.",
 	"type": "object",
+	"additionalProperties": false,
 	"properties": {
 		"response_id": {
 			"type": [
@@ -13,10 +14,17 @@
 		},
 		"version": {
 			"type": "string",
-			"pattern": "[0-9]\\.[0-9]"
+			"pattern": "[0-9]+\\.[0-9]+"
 		},
 		"kind": {
-			"type": "string"
+			"type": "string",
+			"enum": [
+				"asset_list",
+				"connection_status",
+				"implementation_list",
+				"initialization",
+				"unlock"
+			]
 		},
 		"message": {
 			"type": [

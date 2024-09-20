@@ -4,9 +4,19 @@
 	"$id": "af.endpoint.implementation_list",
 	"description": "This endpoint gets the list of possible implementations for a specific asset.",
 	"type": "object",
+	"additionalProperties": false,
 	"properties": {
 		"meta": {
-			"$ref": "../template/meta.json"
+			"$ref": "../template/meta.json",
+			"properties": {
+				"meta": {
+					"properties": {
+						"kind": {
+							"const": "implementation_list"
+						}
+					}
+				}
+			}
 		},
 		"data": {
 			"type": "object",
@@ -97,12 +107,12 @@
 											"oneOf": [
 												{
 													"required": [
-														"file_fetch.from_archive"
+														"fetch.from_archive"
 													]
 												},
 												{
 													"required": [
-														"file_fetch.download"
+														"fetch.download"
 													]
 												}
 											]
