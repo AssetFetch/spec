@@ -167,28 +167,54 @@
 											}
 										},
 										{
-											"oneOf": [
-												{
-													"required": [
-														"handle.native"
-													]
-												},
-												{
-													"required": [
-														"handle.archive"
-													]
-												},
-												{
-													"required": [
-														"handle.loose_environment_map"
-													]
-												},
-												{
-													"required": [
-														"handle.loose_material_map"
-													]
-												}
-											]
+											"if": {
+												"anyOf": [
+													{
+														"required": [
+															"handle.native"
+														]
+													},
+													{
+														"required": [
+															"handle.archive"
+														]
+													},
+													{
+														"required": [
+															"handle.loose_environment_map"
+														]
+													},
+													{
+														"required": [
+															"handle.loose_material_map"
+														]
+													}
+												]
+											},
+											"then": {
+												"oneOf": [
+													{
+														"required": [
+															"handle.native"
+														]
+													},
+													{
+														"required": [
+															"handle.archive"
+														]
+													},
+													{
+														"required": [
+															"handle.loose_environment_map"
+														]
+													},
+													{
+														"required": [
+															"handle.loose_material_map"
+														]
+													}
+												]
+											}
 										}
 									]
 								}
