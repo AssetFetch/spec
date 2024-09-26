@@ -1388,10 +1388,10 @@ During the initialization step providers can mark headers as sensitive.
 Clients SHOULD find an appropriate solution for storing these sensitive headers.
 They SHOULD consider storing secret headers through native operation system APIs for credential management.
 
-## 9.2. Avoiding Relative Paths in `local_path`
+## 9.2. Avoiding Relative Paths in local path fields
 Datablocks of the `fetch.*` family specify a local sub-path for every component that needs to be appended to a local path chosen by the client in order to assemble the correct file structure for this asset.
-The `local_path` MUST NOT contain relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`"local_path":"../../../../example.txt"`).
-Clients MUST take cate to ensure that components with references like `./` or `../` in their local path are rejected.
+A malicious provider might try to insert relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`../../../../example.txt`).
+Clients MUST take care to ensure that components with references like `./` or `../` in their local path are rejected.
 
 ## 9.3. Self-referencial archive components
 The notation in the `fetch.from_archive` datablock allows a provider to (accidentally or deliberately) create loops out of one or multiple archives.
