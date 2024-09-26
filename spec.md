@@ -1232,10 +1232,10 @@ Indicates that this component makes use of a material defined in a mtlx document
 
 An object that MUST conform to this format:
 
-| Field               | Format | Requirement | Description                                                                               |
-| ------------------- | ------ | ----------- | ----------------------------------------------------------------------------------------- |
-| `mtlx_component_id` | string | MUST        | Id of the component that represents the mtlx file.                                        |
-| `mtlx_material`     | string | MAY         | Optional reference for which material to use from the mtlx file, if it contains multiple. |
+| Field               | Format | Requirement | Description                                                                      |
+| ------------------- | ------ | ----------- | -------------------------------------------------------------------------------- |
+| `mtlx_component_id` | string | MUST        | Id of the component that represents the mtlx file.                               |
+| `mtlx_material`     | string | SHOULD      | Reference for which material to use from the mtlx file, if it contains multiple. |
 
 
 
