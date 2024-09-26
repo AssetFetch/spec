@@ -1120,8 +1120,7 @@ If an `unlock_query_id` is defined, then the client MUST execute the referenced 
 
 
 ### 7.6.2. `fetch.from_archive`
-This datablock indicates that this component represents a file from within an archive that needs to be downloaded separately.
-More about the handling in the [import and handling section](#8-implementation-analysis-and-handling).
+This datablock indicates that this component represents a file from within an archive that has already been downloaded separately.
 
 | Field                  | Format | Requirement | Description                                                                                                                                                                                                                                                                                        |
 | ---------------------- | ------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1132,7 +1131,7 @@ More about the handling in the [import and handling section](#8-implementation-a
 
 ### 7.6.3. `store`
 
-Contains information about how/where to store a component file locally in the implementation directory (see [2.7.2](#272-implementation-directory) and [8.4](#84-choosing-a-local-directory)).
+Contains information about how/where to store a component file locally in the implementation directory (see [2.6.1](#261-implementation-directory) and [8.4](#84-choosing-a-local-directory)).
 
 | Field             | Format  | Requirement | Description                                     |
 | ----------------- | ------- | ----------- | ----------------------------------------------- |
@@ -1162,14 +1161,13 @@ These datablocks describe the way in which a specific component should be proces
 
 ### 7.7.1. `handle.native`
 This datablock indicates that this file should be handled by the host application's native import functionality using information from the `format.*` datablock, if available.
-The full description of component handling can be found in the [component handling section](#833-handling-component-files).
+The full description of component handling can be found in [8.6](#86-handling-component-files).
 
 Currently, this datablock contains no fields and MUST therefore represented by the empty object `{}`.
 
 ### 7.7.2. `handle.archive`
 
 This datablock indicates that this component represents an archive, containing other component files.
-More about the handling in the [import and handling section](#8-implementation-analysis-and-handling).
 
 If a component has this datablock, then the client SHOULD delete it from the local implementation directory after the import process has been completed.
 
@@ -1337,7 +1335,7 @@ The behavior of a component is largely controlled by its `handle.*` datablock.
 ### 8.6.1. Handling for components without a  `handle.*` datablock
 
 The absence of a `handle.*` datablock indicates that a component file is passive.
-Do not handle the file directly, only store it (see [8.3.2](#832-downloading-and-storing-component-files)) so that other components can reference it.
+Do not handle the file directly, only store it (see [8.5](#85-downloading-and-storing-files)) so that other components can reference it.
 Also see [2.7.1](#271-component-activeness) for the definition and examples of component activeness.
 
 ### 8.6.2. Handling based on the native handling datablock (`handle.native`)
