@@ -1,6 +1,6 @@
 # 1. Introduction
 
-This document specifies **AssetFetch v0.3**, an HTTP- and JSON-based system for 3D asset discovery, retrieval and handling/import inside of Digital Content Creation (DCC) apps.
+This document specifies **AssetFetch v0.4**, an HTTP- and JSON-based system for 3D asset discovery, retrieval and handling/import inside of Digital Content Creation (DCC) apps.
 The AssetFetch Protocol aims to provide a standardized way for artists to browse libraries of downloadable assets offered by providers *outside* their current production environment or pipeline, such as those of commercial or non-profit 3D asset vendors, marketplaces or other repositories of models, textures or other kinds of assets for digital media production.
 
 ## 1.1. Motivation
