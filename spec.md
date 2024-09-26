@@ -1385,7 +1385,7 @@ This section describes security considerations for implementing AssetFetch.
 
 ## 9.1. Storing sensitive headers
 During the initialization step providers can mark headers as sensitive.
-Clients MUST find an appropriate solution for storing these sensitive headers.
+Clients SHOULD find an appropriate solution for storing these sensitive headers.
 They SHOULD consider storing secret headers through native operation system APIs for credential management.
 
 ## 9.2. Avoiding Relative Paths in `local_path`
