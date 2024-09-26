@@ -1398,9 +1398,3 @@ Clients MUST take cate to ensure that components with references like `./` or `.
 ## 9.3. Self-referencial archive components
 The notation in the `fetch.from_archive` datablock allows a provider to (accidentally or deliberately) create loops out of one or multiple archives.
 The client MUST detect cases in which archive components create loops in order to avoid instability or uncontrolled growth of the implementation directory.
-
-<!-- CDN Link to use FontAwesomeIcons in some of the diagrams -->
-<link
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-  rel="stylesheet"
-/>
