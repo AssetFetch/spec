@@ -1,0 +1,23 @@
+name: Markdown Link Validation
+on: [pull_request]
+jobs:
+  markdown-link-check:
+    name: Markdown Link Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check if spec.md was changed
+        id: check-for-changed-spec
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            spec.md
+      - name: Validate Markdown Links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        if: steps.check-for-changed-spec.outputs.any_changed == 'true'
+        with:
+          use-quiet-mode: "yes"
+          use-verbose-mode: "yes"
+          config-file: "mlc_config.json"
+          file-path: ./spec.md
+          max-depth: 3
