@@ -501,14 +501,18 @@ Every response sent from an AssetFetch provider MUST use HTTP Status codes appro
 
 In concrete terms, this means:
 
-- If a provider managed to successfully process the query then the response code SHOULD be `200 - OK`. Even if the query sent by the client leads to zero results in the context of a search with potentially zero to infinitely many results, the response code SHOULD still be `200 - OK`.
-- If a provider receives a query that references a specific resource which does not exist, such as a query for implementations of an asset that the provider does not recognize, it SHOULD respond with code `404 - Not Found`.
-- If the provider can not parse the query data sent by the client properly, it SHOULD respond with code `400 - Bad Request`.
-- If a provider receives a query an any other endpoint than the initialization endpoint without one of the headers it defined as required during the initialization it SHOULD send status code `401 - Unauthorized`. This indicates that the client is unaware of required headers and SHOULD cause the client to contact the initialization endpoint for that provider again in order to receive updated information about required headers.
-- If a provider receives a query that does have all the requested headers, but the header's values could not be recognized or do not entail the required permissions to perform the requested query, it SHOULD respond with code `403 - Forbidden`. If the rejection of the request is specifically related to monetary requirements - such as the lack of a paid subscription, lack of sufficient account balance or the attempt to perform a component download that has not been unlocked, the provider MAY respond with code `402 - Payment Required` instead.
+| Condition                                                                                                                                                                 | Response Code            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| Query processed successfully (even with zero results in the context of a search)                                                                                          | `200 - OK`               |
+| Provider cannot parse the query data                                                                                                                                      | `400 - Bad Request`      |
+| Query sent without required headers                                                                                                                                       | `401 - Unauthorized`     |
+| Query is rejected due to monetary reasons (e.g., lack of subscription or insufficient balance)                                                                            | `402 - Payment Required` |
+| Query includes all required headers but the values are not valid or do not allow the desired action.                                                                      | `403 - Forbidden`        |
+| Provider receives a query that references a specific resource which does not exist, such as a query for implementations of an asset that the provider does not recognize. | `404 - Not Found`        |
+
 
 If a client receives a response code that indicates an error on any query (`4XX`/`5XX`) it SHOULD pause its operation and display a message regarding this incident to the user.
-This message SHOULD contain the contents of the `message` and `id` field in the response's metadata (See [5.2.1](#521-the-meta-template)), if they have content.
+This message SHOULD contain the contents of the `message` and `response_id` field in the response's metadata (See [5.2.1](#521-the-meta-template)), if they have content.
 
 
 
