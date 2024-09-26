@@ -1052,7 +1052,7 @@ This datablock is **an array** consisting of `unlock_query` objects.
 | `price`              | number            | MUST if `unlocked=False`, MAY otherwise      | The price that the provider will charge the user in the background if they run the `unlock_query`. This price is assumed to be in the currency/unit defined in the `unlock_balance` datablock. |
 | `query`              | `fixed_query`     | MUST if `unlocked=False`, MUST NOT otherwise | Query to actually unlock the requested resource ("make the purchase").                                                                                                                         |
 | `child_query_ids`    | Array of `string` | MAY                                          | A list containing the `id` values of other queries that the client MUST also be considered "unlocked" if this query has been executed.                                                         |
-| `query_fallback_uri` | string            | MAY                                          | An optional URI that the client MAY instead open in the user's web browser in order to let them make the purchase manually.                                                                    |
+| `query_fallback_uri` | string            | MAY                                          | An optional URI for the client to open in the user's web browser in order to let them make the purchase manually if asset unlocking is not fully supported by the client.                      |
 
 
 ## 7.5. Format-related datablocks
