@@ -503,10 +503,10 @@ In concrete terms, this means:
 
 | Condition                                                                                                                                                                 | Response Code            |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| Query processed successfully (even with zero results in the context of a search)                                                                                          | `200 - OK`               |
-| Provider cannot parse the query data                                                                                                                                      | `400 - Bad Request`      |
-| Query sent without required headers                                                                                                                                       | `401 - Unauthorized`     |
-| Query is rejected due to monetary reasons (e.g., lack of subscription or insufficient balance)                                                                            | `402 - Payment Required` |
+| Query processed successfully (even with zero results in the context of a search).                                                                                         | `200 - OK`               |
+| Provider cannot parse the query data.                                                                                                                                     | `400 - Bad Request`      |
+| Query sent without required headers.                                                                                                                                      | `401 - Unauthorized`     |
+| Query is rejected due to monetary reasons (e.g., lack of subscription or insufficient balance)  .                                                                         | `402 - Payment Required` |
 | Query includes all required headers but the values are not valid or do not allow the desired action.                                                                      | `403 - Forbidden`        |
 | Provider receives a query that references a specific resource which does not exist, such as a query for implementations of an asset that the provider does not recognize. | `404 - Not Found`        |
 
