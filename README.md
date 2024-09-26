@@ -9,11 +9,6 @@ The AssetFetch Protocol aims to provide a standardized way for artists to browse
 
 It aims to help in creating an artist experience similar to existing native integrations, such as proprietary import plugins like, with less development overhead in order to increase interoperability between vendors and applications and allow more vendors - especially smaller ones - to offer their assets to artists right in the applications where they need them.
 
-The latest version is *0.3*.
-A draft of version 0.4 can be read in [spec.md](./spec.md).
-Keep in mind that this draft version should not be used for any real implementations.
-Use the [spec published on assetfetch.org](https://assetfetch.org/spec/0.3/) instead.
-
 # Features
 
 - Header-based Authentication using numerous methods and a login-system to show account balance
