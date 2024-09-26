@@ -31,10 +31,10 @@
 				"string",
 				"null"
 			]
-		},
-		"required": [
-			"kind",
-			"version"
-		]
-	}
+		}
+	},
+	"required": [
+		"kind",
+		"version"
+	]
 }
