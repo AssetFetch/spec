@@ -1393,6 +1393,6 @@ Datablocks of the `fetch.*` family specify a local sub-path for every component 
 A malicious provider might try to insert relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`../../../../example.txt`).
 Clients MUST take care to ensure that components with references like `./` or `../` in their local path are rejected.
 
-## 9.3. Self-referencial archive components
+## 9.3. Self-referential archive components
 The notation in the `fetch.from_archive` datablock allows a provider to (accidentally or deliberately) create loops out of one or multiple archives.
 The client MUST detect cases in which archive components create loops in order to avoid instability or uncontrolled growth of the implementation directory.
