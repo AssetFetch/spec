@@ -53,7 +53,4 @@ The recommended environment for editing `spec.md` is Visual Studio Code with the
 
 To maintain proper document structure, the commands "Format Document" and "Markdown-All-In-One: Add/Update section Numbers" should be used.
 
-For checking the integrity of document links, [tcort/markdown-link-check](https://github.com/tcort/markdown-link-check) is recommended, invoked like this:
-```
-docker run -v ${PWD}:/tmp:ro --rm -i ghcr.io/tcort/markdown-link-check:stable /tmp/spec.md
-```
+All PRs are tested for dead markdown links and syntax issues in the JSON schema.
