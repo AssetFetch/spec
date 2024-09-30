@@ -34,7 +34,6 @@
 				"additionalProperties": false,
 				"properties": {
 					"id": {
-						"$comment": "A unique id for this implementation.",
 						"type": "string",
 						"pattern": "[a-zA-Z0-9\\._]+"
 					},
