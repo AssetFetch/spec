@@ -48,7 +48,7 @@
 		"then": {
 			"required": [
 				"price",
-				"unlock_query"
+				"query"
 			]
 		}
 	}
