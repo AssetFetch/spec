@@ -54,7 +54,7 @@
 						]
 					}
 				},
-				"$comment": "This if-clause ensures that the 'choices' array is required if and only if 'select' mode is used.",
+				"$comment": "This if-clause ensures that the 'choices' array is required only if 'select' mode is used.",
 				"if": {
 					"properties": {
 						"type": {

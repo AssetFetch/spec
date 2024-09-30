@@ -74,8 +74,7 @@
 						},
 						"required": [
 							"implementation_list_query"
-						],
-						"$comment": "The 'allOf' section ensures that no two datablocks with the same prefix are used."
+						]
 					}
 				}
 			}
