@@ -14,7 +14,6 @@
 	},
 	"additionalProperties": false,
 	"required": [
-		"headers",
-		"connection_status_query"
+		"headers"
 	]
 }
