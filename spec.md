@@ -1,7 +1,141 @@
-# 1. Introduction
-
 This document specifies **AssetFetch v0.4**, an HTTP- and JSON-based system for 3D asset discovery, retrieval and handling/import inside of Digital Content Creation (DCC) apps.
 The AssetFetch Protocol aims to provide a standardized way for artists to browse libraries of downloadable assets offered by providers *outside* their current production environment or pipeline, such as those of commercial or non-profit 3D asset vendors, marketplaces or other repositories of models, textures or other kinds of assets for digital media production.
+
+- [1. Introduction](#1-introduction)
+	- [1.1. Motivation](#11-motivation)
+	- [1.2. Vision](#12-vision)
+	- [1.3. Goals](#13-goals)
+	- [1.4. Non-Goals](#14-non-goals)
+- [2. Terminology](#2-terminology)
+	- [2.1. Provider](#21-provider)
+	- [2.2. Client](#22-client)
+	- [2.3. Host Application](#23-host-application)
+	- [2.4. User](#24-user)
+	- [2.5. Asset](#25-asset)
+	- [2.6. (Asset-)Implementation](#26-asset-implementation)
+		- [2.6.1. Implementation Directory](#261-implementation-directory)
+	- [2.7. (Implementation-)Component](#27-implementation-component)
+		- [2.7.1. Component "Activeness"](#271-component-activeness)
+	- [2.8. Datablock](#28-datablock)
+	- [2.9. Component Unlocking](#29-component-unlocking)
+- [3. General Operation](#3-general-operation)
+	- [3.1. Overview](#31-overview)
+	- [3.2. Initialization](#32-initialization)
+	- [3.3. Authentication \& Connection Status (optional)](#33-authentication--connection-status-optional)
+	- [3.4. Browsing Assets](#34-browsing-assets)
+		- [3.4.1. Asset Filtering](#341-asset-filtering)
+		- [3.4.2. Asset Selection](#342-asset-selection)
+	- [3.5. Implementation Negotiation](#35-implementation-negotiation)
+		- [3.5.1. Implementation Filtering](#351-implementation-filtering)
+		- [3.5.2. Implementation Selection](#352-implementation-selection)
+	- [3.6. Component Unlocking (optional)](#36-component-unlocking-optional)
+	- [3.7. Downloading](#37-downloading)
+	- [3.8. Handling](#38-handling)
+	- [3.9. Sequence Diagram](#39-sequence-diagram)
+		- [3.9.1. Simple Version](#391-simple-version)
+		- [3.9.2. Complete Version](#392-complete-version)
+- [4. HTTP Communication](#4-http-communication)
+	- [4.1. Request Payloads](#41-request-payloads)
+	- [4.2. Response Payloads](#42-response-payloads)
+	- [4.3. User-Agent](#43-user-agent)
+	- [4.4. Variable and Fixed Queries](#44-variable-and-fixed-queries)
+		- [4.4.1. Variable Query](#441-variable-query)
+			- [4.4.1.1. Variable Query Parameters](#4411-variable-query-parameters)
+		- [4.4.2. Fixed Query](#442-fixed-query)
+	- [4.5. HTTP Codes and Error Handling](#45-http-codes-and-error-handling)
+- [5. Endpoints](#5-endpoints)
+	- [5.1. About Endpoints](#51-about-endpoints)
+	- [5.2. Response Data Templates](#52-response-data-templates)
+		- [5.2.1. The `meta` Template](#521-the-meta-template)
+		- [5.2.2. The `datablock_collection` Template](#522-the-datablock_collection-template)
+			- [5.2.2.1. Example](#5221-example)
+	- [5.3. Endpoint: Initialization (`initialization`)](#53-endpoint-initialization-initialization)
+	- [5.4. Endpoint: Asset List (`asset_list`)](#54-endpoint-asset-list-asset_list)
+		- [5.4.1. `asset` Structure](#541-asset-structure)
+	- [5.5. Endpoint: Implementation List (`implementation_list`)](#55-endpoint-implementation-list-implementation_list)
+		- [5.5.1. `implementation` Structure](#551-implementation-structure)
+		- [5.5.2. `component` Structure](#552-component-structure)
+	- [5.6. Endpoint: Unlocking (`unlock`)](#56-endpoint-unlocking-unlock)
+	- [5.7. Endpoint: Connection Status (`connection_status`)](#57-endpoint-connection-status-connection_status)
+- [6. Datablocks](#6-datablocks)
+	- [6.1. Datablock Names](#61-datablock-names)
+	- [6.2. Datablock Value Templates](#62-datablock-value-templates)
+		- [6.2.1. `variable_query`](#621-variable_query)
+			- [6.2.1.1. `parameter` Structure](#6211-parameter-structure)
+			- [6.2.1.2. `choice` Structure](#6212-choice-structure)
+		- [6.2.2. `fixed_query`](#622-fixed_query)
+- [7. Datablock Index](#7-datablock-index)
+	- [7.1. Configuration and authentication-related datablocks](#71-configuration-and-authentication-related-datablocks)
+		- [7.1.1. `provider_configuration`](#711-provider_configuration)
+			- [7.1.1.1. `header` structure](#7111-header-structure)
+		- [7.1.2. `provider_reconfiguration`](#712-provider_reconfiguration)
+		- [7.1.3. `user`](#713-user)
+	- [7.2. Browsing-related Datablocks](#72-browsing-related-datablocks)
+		- [7.2.1. `asset_list_query`](#721-asset_list_query)
+		- [7.2.2. `implementation_list_query`](#722-implementation_list_query)
+		- [7.2.3. `next_query`](#723-next_query)
+		- [7.2.4. `response_statistics`](#724-response_statistics)
+	- [7.3. Display-related Datablocks](#73-display-related-datablocks)
+		- [7.3.1. `text`](#731-text)
+		- [7.3.2. `web_references`](#732-web_references)
+		- [7.3.3. `branding`](#733-branding)
+		- [7.3.4. `license`](#734-license)
+		- [7.3.5. `authors`](#735-authors)
+		- [7.3.6. `dimensions`](#736-dimensions)
+		- [7.3.7. `preview_image_supplemental`](#737-preview_image_supplemental)
+		- [7.3.8. `preview_image_thumbnail`](#738-preview_image_thumbnail)
+			- [7.3.8.1. `uris` Structure](#7381-uris-structure)
+	- [7.4. Unlocking-related Datablocks](#74-unlocking-related-datablocks)
+		- [7.4.1. `unlock_balance`](#741-unlock_balance)
+		- [7.4.2. `unlock_queries`](#742-unlock_queries)
+			- [7.4.2.1. `unlock_query` structure](#7421-unlock_query-structure)
+	- [7.5. Format-related Datablocks](#75-format-related-datablocks)
+		- [7.5.1. `format`](#751-format)
+			- [7.5.1.1. `extension` rules](#7511-extension-rules)
+			- [7.5.1.2. `mediatype` rules](#7512-mediatype-rules)
+		- [7.5.2. `format.blend`](#752-formatblend)
+			- [7.5.2.1. `target` Structure](#7521-target-structure)
+		- [7.5.3. `format.obj`](#753-formatobj)
+	- [7.6. Fetching- and Storage-related Datablocks](#76-fetching--and-storage-related-datablocks)
+		- [7.6.1. `fetch.download`](#761-fetchdownload)
+		- [7.6.2. `fetch.from_archive`](#762-fetchfrom_archive)
+		- [7.6.3. `store`](#763-store)
+			- [7.6.3.1. `local_file_path` rules](#7631-local_file_path-rules)
+	- [7.7. Handling/Processing-related Datablocks](#77-handlingprocessing-related-datablocks)
+		- [7.7.1. `handle.native`](#771-handlenative)
+		- [7.7.2. `handle.archive`](#772-handlearchive)
+			- [7.7.2.1. `local_directory_path` rules](#7721-local_directory_path-rules)
+		- [7.7.3. `handle.loose_environment_map`](#773-handleloose_environment_map)
+		- [7.7.4. `handle.loose_material_map`](#774-handleloose_material_map)
+	- [7.8. Linking-related Datablocks](#78-linking-related-datablocks)
+		- [7.8.1. `link.loose_material`](#781-linkloose_material)
+		- [7.8.2. `link.mtlx_material`](#782-linkmtlx_material)
+- [8. Working With Asset Implementations](#8-working-with-asset-implementations)
+	- [8.1. Overview](#81-overview)
+	- [8.2. Implementation Analysis](#82-implementation-analysis)
+	- [8.3. Performing Unlock Queries](#83-performing-unlock-queries)
+	- [8.4. Choosing a Local Directory](#84-choosing-a-local-directory)
+	- [8.5. Downloading and Storing Files](#85-downloading-and-storing-files)
+		- [8.5.1. Storing All Component Files Based on `store` Datablock](#851-storing-all-component-files-based-on-store-datablock)
+		- [8.5.2. Interacting With Archives (components with `handle.archive` datablock)](#852-interacting-with-archives-components-with-handlearchive-datablock)
+			- [8.5.2.1. Handling for `extract_fully=true`](#8521-handling-for-extract_fullytrue)
+			- [8.5.2.2. Handling for `extract_fully=false`](#8522-handling-for-extract_fullyfalse)
+			- [8.5.2.3. Deleting Archives](#8523-deleting-archives)
+	- [8.6. Handling Component Files](#86-handling-component-files)
+		- [8.6.1. Handling For Components Without a  `handle.*` Datablock](#861-handling-for-components-without-a--handle-datablock)
+		- [8.6.2. Handling based on the native handling datablock (`handle.native`)](#862-handling-based-on-the-native-handling-datablock-handlenative)
+		- [8.6.3. Handling a Loose Material Map (`handle.loose_material_map`)](#863-handling-a-loose-material-map-handleloose_material_map)
+		- [8.6.4. Handling a Loose Environment Map (`handle.loose_environment_map`)](#864-handling-a-loose-environment-map-handleloose_environment_map)
+	- [8.7. Handling Component Links](#87-handling-component-links)
+		- [8.7.1. Handling MTLX Material Links (`link.mtlx_material`)](#871-handling-mtlx-material-links-linkmtlx_material)
+		- [8.7.2. Handling loose Material Links (`link.loose_material`)](#872-handling-loose-material-links-linkloose_material)
+- [9. Security Considerations](#9-security-considerations)
+	- [9.1. Storing Sensitive Headers](#91-storing-sensitive-headers)
+	- [9.2. Avoiding Relative Paths in Local Path Fields](#92-avoiding-relative-paths-in-local-path-fields)
+	- [9.3. Self-referential Archive Components](#93-self-referential-archive-components)
+
+
+# 1. Introduction
 
 ## 1.1. Motivation
 
@@ -25,7 +159,7 @@ Conversely, large vendors who can afford to develop and continuously maintain na
 
 The AssetFetch system aims to create an artist experience similar to the existing native integrations with less development overhead in order to increase interoperability between vendors and DCC applications to allow more vendors - especially smaller ones - to offer their assets to artists right in the DCC applications where they need them.
 
-## 1.3. Goals of this specification
+## 1.3. Goals
 
 These are the goals of the AssetFetch specification, outlined in this document:
 
@@ -58,7 +192,7 @@ The provider hosts the AssetFetch API as an HTTP(s)-based service.
 ## 2.2. Client
 >A piece of software built to interact with the AssetFetch-API of a provider in order to receive resources from it.
 
-## 2.3. Host application
+## 2.3. Host Application
 >An application into which the client is integrated.
 
 A client can be a standalone application but in most implementation scenarios it will likely be integrated into another host application, like a 3D suite or other DCC application, in the form of a plugin/addon.
@@ -111,8 +245,7 @@ A new one is created for every asset implementation that the client downloads.
 - When working with archives, the archive itself as well as its contents are considered components.
 A ZIP archive with the chair model as an FBX file and its textures as PNG files is represented as one component for the ZIP archive and then one component for each file in it (with some exceptions when using specific archive unpacking configurations).
 
-<!-- TODO: Activeness will likely go in a future update. -->
-### 2.7.1. Component "activeness"
+### 2.7.1. Component "Activeness"
 Not all components of an implementation must be actively processed by the client in order to use them and are instead handled implicitly by the host application.
 
 - When trying to import an implementation consisting of an OBJ-file, an MTL-file and several material maps into a DCC application, then it is generally sufficient to invoke the application's native OBJ import functionality with the OBJ-file as the target.
@@ -132,7 +265,7 @@ Datablocks are flexible and sometimes reusable pieces of metadata that enable th
 - Instructions for parsing or otherwise handling specific data
 - Relationships between resources
 
-## 2.9. Component unlocking 
+## 2.9. Component Unlocking 
 > Performing a query from the client to the provider to request access to a specific component of an implementation.
 > The provider acknowledges the query and then grants access to the requested component(s), possibly along with a side-effect in the provider's back-end system, such as a charging the user for a purchase.
 
@@ -154,7 +287,7 @@ See [3.6](#36-component-unlocking-optional) and [7.4](#74-unlocking-related-data
 
 
 
-# 3. General operation
+# 3. General Operation
 
 This section describes the steps by which AssetFetch operates in general terms.
 The following sections will then describe the exact implementation by defining the exact HTTP parameters and (JSON-) datastructures.
@@ -185,7 +318,7 @@ It and communicates key information for further usage of the provider's AssetFet
 - Whether the provider requires the client to authenticate itself through additional HTTP headers.
 - The endpoint through which assets can be queried and its parameters.
 
-## 3.3. Authentication & Connection status (optional)
+## 3.3. Authentication & Connection Status (optional)
 As mentioned in the previous section, the provider MAY require custom authentication headers, in which case the client MUST send these headers along with every request it performs to that provider, unless the request is directed at the initialization endpoint.
 
 Which headers the client needs to send is communicated by the provider in the initialization data.
@@ -201,10 +334,10 @@ The connection status endpoint has two primary uses:
 - If available, the provider SHOULD respond with user-specific metadata, such as a username or account details which the client SHOULD display to the user to confirm that they are properly connected to the provider.
 - If the provider implements component unlocking using a prepaid balance system, then it SHOULD use this endpoint to communicate the user's remaining account balance. See [7.4](#74-unlocking-related-datablocks).
 
-## 3.4. Browsing assets
+## 3.4. Browsing Assets
 After successful initialization (and possibly authentication) the client is ready to browse assets.
 
-### 3.4.1. Asset filtering
+### 3.4.1. Asset Filtering
 The provider might send a static, unchanging list of available assets, but it MAY also require specific parameters for generating a dynamic asset list.
 In that case, the names and kinds of parameters were defined by the provider during the initialization step.
 Parameters can come in different formats, such as simple text strings or selections from a set of options, similar to what can be represented with a `<form>` tag in HTML.
@@ -215,7 +348,7 @@ Possible examples for parameters for this query are:
 - Sorting options
 - Binary choices, such as limiting the selection to already purchased assets
 
-### 3.4.2. Asset selection
+### 3.4.2. Asset Selection
 After the user enters appropriate parameter values the client can request a list of available assets from the provider and display it to the user.
 What data is communicated is up to the provider, supported fields include:
 
@@ -227,12 +360,12 @@ What data is communicated is up to the provider, supported fields include:
 
 Every asset MUST also include information on how to query the provider for implementations of the asset.
 
-## 3.5. Implementation negotiation
+## 3.5. Implementation Negotiation
 
 In order to actually download an asset, one of its implementations (assuming the provider offers multiple) needs to be chosen.
 This choice is ultimately the result of a "negotiation" process between provider, client and (depending on the client implementation) potentially also the user.
 
-### 3.5.1. Implementation filtering
+### 3.5.1. Implementation Filtering
 
 Similarly to how browsing for asset operates, the provider MAY require specific parameters for choosing an implementation.
 These parameters are included in the metadata for each asset during the previous step.
@@ -245,7 +378,7 @@ Examples for parameters for this query are:
 
 After getting the parameters from the user (if necessary) the client requests the list of available implementations for this asset.
 
-### 3.5.2. Implementation selection
+### 3.5.2. Implementation Selection
 
 The provider responds with a list of possible implementations available for the selected asset and implementation parameters chosen by the user.
 Every entry in this list represents one implementation that matches the user's parameter choices.
@@ -265,7 +398,7 @@ If more than one implementation is valid for the given client and its host appli
 
 Overall, this process is comparable to the less commonly used [agent-driven content negotiation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation#agent-driven_negotiation) in the HTTP standard.
 
-## 3.6. Component unlocking (optional)
+## 3.6. Component Unlocking (optional)
 
 Component unlocking allows the provider to require the client to perform a special unlocking query before downloading component files.
 
@@ -421,7 +554,7 @@ sequenceDiagram
 This section describes general instructions for all HTTP communication described in this specification.
 The term "HTTP communication" also always includes communication via HTTPS instead of plain HTTP.
 
-## 4.1. Request payloads
+## 4.1. Request Payloads
 
 The payload of all HTTP requests from a client to a provider MUST be encoded as [`application/x-www-form-urlencoded`](https://url.spec.whatwg.org/#application/x-www-form-urlencoded), the same format that is used by standard HTML forms.
 
@@ -434,7 +567,7 @@ query=&category=marble
 
 This encoding for request data is already extremely widespread and can therefore usually be handled using standard libraries, both on the provider- and on the client-side.
 
-## 4.2. Response payloads
+## 4.2. Response Payloads
 
 The payload of all HTTP responses from a provider MUST be valid [JSON](https://www.json.org/) and SHOULD use the `Content-Type` header `application/json`.
 The exact structure of the data for individual endpoints and other API resources is specified in the [Endpoint section](#5-endpoints).
@@ -542,12 +675,12 @@ Depending on which features it wants to use, the provider MAY implement:
 *The specific URIs or sub-paths for these endpoint are not prescribed by AssetFetch.*
 The URI and parameters for every endpoint besides the initialization endpoint are communicated by the provider to the client in the response data to a previous request.
 
-## 5.2. Response data templates
+## 5.2. Response Data Templates
 
 This section describes data structures that are used in responses from several or even all endpoints.
 These templates are later referenced during the description of the individual endpoints.
 
-### 5.2.1. The `meta` template
+### 5.2.1. The `meta` Template
 All provider responses on all endpoints MUST carry the `meta` field to communicate key information about the current response.
 
 All instances of this template MUST have the following structure:
@@ -569,7 +702,7 @@ If a request fails, the provider SHOULD use the `message` field to communicate m
 
 Clients SHOULD display the `response_id` and `message` fields to the user if a query was unsuccessful, as indicated by the HTTP status code.
 
-### 5.2.2. The `datablock_collection` template
+### 5.2.2. The `datablock_collection` Template
 
 Nearly every piece of information in AssetFetch is communicated through a datablock, which has a name and a clearly defined structure.
 The datablock collection is a JSON object that uses the datablock's name as a key and its structure as the value.
@@ -777,7 +910,7 @@ The following datablocks are to be included in the `data` field:
 
 # 6. Datablocks
 
-## 6.1. Datablock names
+## 6.1. Datablock Names
 
 Every datablock outlined in this specification has a name that identifies its structure.
 The name is a string composed of lowercase alphanumerical characters, underscores and dots.
@@ -789,7 +922,7 @@ A resource MUST NOT carry two datablocks that share the same base name.
 
 The resulting regular expression for all datablock names is `^[a-z0-9_]+(\.[a-z0-9_]+)?$`.
 
-## 6.2. Datablock value templates
+## 6.2. Datablock Value Templates
 This section describes additional data types that can be used within other datablocks.
 They exist to eliminate the need to re-specify the same data structure in two different datablock definitions.
 
@@ -899,7 +1032,7 @@ The client SHOULD show the data to the user for confirmation that they are prope
 | `display_tier`     | string | MAY         | The name of the plan/tier/subscription/etc. that this user is part of, if applicable for the provider.                                                                            |
 | `display_icon_uri` | string | MAY         | URI to an image with an aspect ratio of 1:1, for example a profile picture or icon representing the subscription tier. Image SHOULD be of media type `image/jpeg` or `image/png`. |
 
-## 7.2. Browsing-related datablocks
+## 7.2. Browsing-related Datablocks
 
 These datablocks all relate to the process of browsing for assets or implementations.
 
@@ -926,7 +1059,7 @@ It can be used to communicate the total number of results in a query where not a
 | `result_count_total` | int    | MAY         | The total number of results. This number should include the total number of results matching the given query, even if not all results are returned due to pagination using the `query_next` datablock. |
 
 
-## 7.3. Display related datablocks
+## 7.3. Display-related Datablocks
 
 These datablocks relate to how assets and their details are displayed to the user.
 
@@ -1028,7 +1161,7 @@ The image's media type SHOULD be one of `image/png` or `image/jpeg`.
 If the provider does not have insight into the dimensions of the thumbnail that it is referring the client to, it SHOULD use use the key `0` for the thumbnail url.
 
 
-## 7.4. Unlocking-related datablocks
+## 7.4. Unlocking-related Datablocks
 
 These datablocks are used if the provider is utilizing the component unlocking system in AssetFetch. 
 
@@ -1059,17 +1192,17 @@ This datablock is **an array** consisting of `unlock_query` objects.
 | `query_fallback_uri` | string            | MAY                                          | An optional URI for the client to open in the user's web browser in order to let them make the purchase manually if asset unlocking is not fully supported by the client.                      |
 
 
-## 7.5. Format-related datablocks
+## 7.5. Format-related Datablocks
 
 Format-related datablocks communicate details about the data in individual component files.
 
 ### 7.5.1. `format`
 This is the default format datablock for all file formats that do not have their own dedicated `format.*` datablock.
 
-| Field       | Format | Requirement | Description                                       |
-| ----------- | ------ | ----------- | ------------------------------------------------- |
-| `extension` | string | MUST        | The file extension.                               |
-| `mediatype` | string | (see below) | The mediatype string for this file, if available. |
+| Field       | Format | Requirement       | Description                                       |
+| ----------- | ------ | ----------------- | ------------------------------------------------- |
+| `extension` | string | MUST              | The file extension.                               |
+| `mediatype` | string | SHOULD, see below | The mediatype string for this file, if available. |
 
 #### 7.5.1.1. `extension` rules
 
@@ -1107,7 +1240,7 @@ Information about files with the extension `.obj`.
 | `front_axis` | string | MAY         | Indicates which axis should be treated as the "front". MUST be one of `+x`,`-x`,`+y`,`-y`,`+z`,`-z`. |
 
 
-## 7.6. Fetching- and Storage-related datablocks
+## 7.6. Fetching- and Storage-related Datablocks
 
 These datablocks describe how a client can gain access to a component file.
 
@@ -1159,7 +1292,7 @@ This brings with it several rules:
 `/example.jpg`, `./example.jpg`, `sub/dir/`, `/sub/dir/example.jpg`, `sub\dir\example.jpg` and `sub/dir/../test.jpg` are NOT valid local file paths.
 
 
-## 7.7. Handling/Processing-related datablocks
+## 7.7. Handling/Processing-related Datablocks
 
 These datablocks describe the way in which a specific component should be processed when importing an asset implementation.
 
@@ -1167,7 +1300,7 @@ These datablocks describe the way in which a specific component should be proces
 This datablock indicates that this file should be handled by the host application's native import functionality using information from the `format.*` datablock, if available.
 The full description of component handling can be found in [8.6](#86-handling-component-files).
 
-Currently, this datablock contains no fields and MUST therefore represented by the empty object `{}`.
+Currently, this datablock contains no fields and MUST therefore represented by the empty object: `{}`.
 
 ### 7.7.2. `handle.archive`
 
@@ -1216,7 +1349,7 @@ Indicates that this component is part of a loose material as a material map.
 | `material_name` | string | MUST        | Name of the material.                                                                                                                     |
 | `map`           | string | MUST        | `albedo` `roughness` `metallic` `diffuse` `glossiness` `specular` `height` `normal+y` `normal-y` `opacity` `ambient_occlusion` `emission` |
 
-## 7.8. Linking-related datablocks
+## 7.8. Linking-related Datablocks
 
 These datablocks are used to describe connections between different components that are not expressed through the files themselves.
 
@@ -1252,7 +1385,7 @@ An object that MUST conform to this format:
 
 
 
-# 8. Working with asset implementations
+# 8. Working With Asset Implementations
 
 ## 8.1. Overview
 
@@ -1266,7 +1399,7 @@ When receiving the metadata of several implementations of an asset from a provid
 4. Fetch and store all files for all components using the instructions in their `store` (and in the case of archives `handle.archive`) datablocks.
 5. Handle the component files using the instructions in their `handle.*`, `format.*`, `link.*` and other datablocks.
 
-## 8.2. Implementation analysis
+## 8.2. Implementation Analysis
 
 When analyzing a set of implementation sent from the provider via the implementation list endpoint (See [5.5](#55-endpoint-implementation-list-implementation_list)), the client SHOULD decide for every implementation whether it is considered "readable".
 
@@ -1281,13 +1414,13 @@ Possible factors for this decision are:
 If at least one of the implementations offered by the provider has been deemed readable, the client can proceed and make an actual import attempt.
 This usually involves interaction with the host application which means that client implementors SHOULD consider the steps outlined in this section only as a rough indicator for how to perform the import.
 
-## 8.3. Performing unlock queries
+## 8.3. Performing Unlock Queries
 
 If the implementation contains components with a `fetch.download` datablock that references unlocking queries,
 then the client MUST perform the unlock query referenced in that datablock before it can proceed.
 Otherwise the resources may not be fully unlocked and the provider will likely deny access.
 
-## 8.4. Choosing a local directory
+## 8.4. Choosing a Local Directory
 
 Individual asset components/files may have implicit relationships to each other that are not directly visible from any of the datablocks such as relative file paths *within* project files (i.e. a model file expecting a texture to be at `./tex.png`).
 To ensure that these references are still functional after the download, AssetFetch specifies certain rules regarding how clients arrange downloaded files in the local file system.
@@ -1299,16 +1432,16 @@ To ensure that these references are still functional after the download, AssetFe
 - It MAY also be dependent on the context in which the client currently runs, for example a subfolder relative to the currently opened project.
 
 
-## 8.5. Downloading and storing files
+## 8.5. Downloading and Storing Files
 
-### 8.5.1. Storing all component files based on `store` datablock
+### 8.5.1. Storing All Component Files Based on `store` Datablock
 
 Inside the implementation directory the client SHOULD place every downloaded file in the directory as specified in the `local_file_path` field of the component's `store` datablock.
 
 If an implementation assigns the same `local_file_path` to two different file components, then the client's behavior is undefined.
 Providers MUST avoid configurations that lead to this outcome.
 
-### 8.5.2. Interacting with archives (components with `handle.archive` datablock)
+### 8.5.2. Interacting With Archives (components with `handle.archive` datablock)
 
 Some components may carry a `fetch.from_archive` datablock which indicates that they need to be extracted from an archive.
 In that case the client SHOULD extract the file from the referenced archive based on the `component_sub_path` in the `fetch.from_archive` datablock and store it as described in its `store` datablock (as described above).
@@ -1327,16 +1460,16 @@ Overlapping or conflicting `local_directory_path` values have undefined behavior
 
 In this case, the client SHOULD unpack only those files that are referenced by other components in their respective `fetch.from_archive` datablocks.
 
-#### 8.5.2.3. Deleting archives
+#### 8.5.2.3. Deleting Archives
 
 If a component has the `handle.archive` datablock then it is assumed to be ephemeral, meaning that the client SHOULD delete it from the local implementation directory after all component files have been extracted from it. 
 
-## 8.6. Handling component files
+## 8.6. Handling Component Files
 
 After downloading all component files and arranging them on disk, the client can begin to handle/import the files.
 The behavior of a component is largely controlled by its `handle.*` datablock.
 
-### 8.6.1. Handling for components without a  `handle.*` datablock
+### 8.6.1. Handling For Components Without a  `handle.*` Datablock
 
 The absence of a `handle.*` datablock indicates that a component file is passive.
 Do not handle the file directly, only store it (see [8.5](#85-downloading-and-storing-files)) so that other components can reference it.
@@ -1346,7 +1479,7 @@ Also see [2.7.1](#271-component-activeness) for the definition and examples of c
 
 Make an attempt to load this file through the host application's native import feature for this file's format, as indicated by the `format.*` datablock.
 
-### 8.6.3. Handling a loose material map (`handle.loose_material_map`)
+### 8.6.3. Handling a Loose Material Map (`handle.loose_material_map`)
 
 Many file formats for 3D content - both vendor-specific as well as open - offer native support for referencing external texture files.
 Providers SHOULD use these "native" material formats whenever possible and send the relevant texture files along as passive files, as described above.
@@ -1355,25 +1488,25 @@ The `handle.loose_material_map` is designed for cases in which this is not possi
 It provides a basic material system where multiple components define the maps of a PBR material.
 The client SHOULD handle these components by creating a new material in its host application and adding the PBR map to it in a way that represents common practice for the given host application.
 
-### 8.6.4. Handling a loose environment map (`handle.loose_environment_map`)
+### 8.6.4. Handling a Loose Environment Map (`handle.loose_environment_map`)
 
 Environments for image-based lighting face a similar challenge as PBR materials as it is common practice to only provide a singular image file without any further information.
 
 This the `handle.loose_environment_map` datablock indicates that this component is one such environment map with a specific projection, meaning that it should be imported as an environment or something similar within the context of the host application.
 
-## 8.7. Handling component-links
+## 8.7. Handling Component Links
 
 After every component has been handled individually, it might also be necessary to consider relationships between components.
 Again, providers SHOULD rely on native links right in the component files to model these relationships (for example through the use of .mtl files when working with .obj models).
 For cases in which this is not possible or practical, the `link.*` family of datablocks is used.
 
-### 8.7.1. Handling MTLX material links (`link.mtlx_material`)
+### 8.7.1. Handling MTLX Material Links (`link.mtlx_material`)
 The `link.mtlx_material` datablock allows references from a component representing a mesh to a component representing an MaterialX (MTLX) file.
 This allows the use of `.mtlx` files with mesh file formats that do not have the native ability to reference MTLX files.
 
 When encountering such a link, the client SHOULD apply the referenced material from the MTLX file to the entire mesh.
 
-### 8.7.2. Handling loose material links (`link.loose_material`)
+### 8.7.2. Handling loose Material Links (`link.loose_material`)
 This datablock allows references from a component representing a mesh to a loose material described through `handle.loose_material_map` datablocks on multiple other components.
 
 When encountering such a link, the client SHOULD apply the referenced material to the entire mesh.
@@ -1387,16 +1520,16 @@ When encountering such a link, the client SHOULD apply the referenced material t
 
 This section describes security considerations for implementing AssetFetch.
 
-## 9.1. Storing sensitive headers
+## 9.1. Storing Sensitive Headers
 During the initialization step providers can mark headers as sensitive.
 Clients SHOULD find an appropriate solution for storing these sensitive headers.
 They SHOULD consider storing secret headers through native operation system APIs for credential management.
 
-## 9.2. Avoiding Relative Paths in local path fields
+## 9.2. Avoiding Relative Paths in Local Path Fields
 Datablocks of the `fetch.*` family specify a local sub-path for every component that needs to be appended to a local path chosen by the client in order to assemble the correct file structure for this asset.
 A malicious provider might try to insert relative references, especially back-references (`..`) as they can allow the provider to place files anywhere on the user's system ( Using a path like`../../../../example.txt`).
 Clients MUST take care to ensure that components with references like `./` or `../` in their local path are rejected.
 
-## 9.3. Self-referential archive components
+## 9.3. Self-referential Archive Components
 The notation in the `fetch.from_archive` datablock allows a provider to (accidentally or deliberately) create loops out of one or multiple archives.
 The client MUST detect cases in which archive components create loops in order to avoid instability or uncontrolled growth of the implementation directory.
