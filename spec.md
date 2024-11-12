@@ -445,29 +445,49 @@ sequenceDiagram
 	end
 
     User->>Client: Requests connection to free.example.com/init
+    activate Client
 	Client->>Provider: Query: free.example.com/init
-	Provider->>Client: Response: Initialization data
-	
+    activate Provider
+	Provider-->Client: Response: Initialization data
+    deactivate Provider
+    
 	Client->>Provider: Query: free.example.com/assets
+    activate Provider
 	note right of Client: The asset query URI<br>was included in the<br>initialization data
 	Provider->>Provider: Searches its database for assets<br>based on query parameters
-	Provider->>Client: Response: List of assets
-	Client->>User: Presents asset list
+	Provider-->Client: Response: List of assets
+    deactivate Provider
+    
+	Client-->User: Presents asset list
+    deactivate Client
 	User->>Client: Selects asset from list
+    activate Client
+    
 	Client->>Provider: Query: free.example.com/implementations?asset=<asset id>
+    activate Provider
 	note right of Client: The implementations query URI and parameters<br>were included in the asset data
 	Provider->>Provider: Loads implementations<br>for this asset from its database
-	Provider->>Client: Returns list of possible implementations
+	Provider-->Client: Returns list of possible implementations
+    deactivate Provider
+    
 	Client->>Client: Validates proposed implementations and<br>selects those that it can handle<br>(based on metadata<br> about file formats and relationships)
-	Client->>User: Presents implementation(s)<br>and asks for confirmation
+	Client-->User: Presents implementation(s)<br>and asks for confirmation
+	deactivate Client
 	User->>Client: Confirms asset import
+
 	loop For every component in implementation
+        activate Client
 		Client->>Provider: Initiates HTTP download of component file
-		Provider->>Client: Transmits file
+        activate Provider
+		Provider-->Client: Transmits file
+        deactivate Provider
 	end
+	deactivate Client
+
 	Client->>Client: Processes files locally based<br>on implementation metadata<br>(usually by importing them<br>into the current project)
-	Client->>User: Shows confirmation message
+	Client-->User: Shows confirmation message
 	note left of User: User can now utilize<br>the asset in their project.
+
 ```
 
 ### 3.9.2. Complete Version
