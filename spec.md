@@ -445,29 +445,49 @@ sequenceDiagram
 	end
 
     User->>Client: Requests connection to free.example.com/init
+    activate Client
 	Client->>Provider: Query: free.example.com/init
-	Provider->>Client: Response: Initialization data
-	
+    activate Provider
+	Provider-->Client: Response: Initialization data
+    deactivate Provider
+    
 	Client->>Provider: Query: free.example.com/assets
+    activate Provider
 	note right of Client: The asset query URI<br>was included in the<br>initialization data
 	Provider->>Provider: Searches its database for assets<br>based on query parameters
-	Provider->>Client: Response: List of assets
-	Client->>User: Presents asset list
+	Provider-->Client: Response: List of assets
+    deactivate Provider
+    
+	Client-->User: Presents asset list
+    deactivate Client
 	User->>Client: Selects asset from list
+    activate Client
+    
 	Client->>Provider: Query: free.example.com/implementations?asset=<asset id>
+    activate Provider
 	note right of Client: The implementations query URI and parameters<br>were included in the asset data
 	Provider->>Provider: Loads implementations<br>for this asset from its database
-	Provider->>Client: Returns list of possible implementations
+	Provider-->Client: Returns list of possible implementations
+    deactivate Provider
+    
 	Client->>Client: Validates proposed implementations and<br>selects those that it can handle<br>(based on metadata<br> about file formats and relationships)
-	Client->>User: Presents implementation(s)<br>and asks for confirmation
+	Client-->User: Presents implementation(s)<br>and asks for confirmation
+	deactivate Client
 	User->>Client: Confirms asset import
+
 	loop For every component in implementation
+        activate Client
 		Client->>Provider: Initiates HTTP download of component file
-		Provider->>Client: Transmits file
+        activate Provider
+		Provider-->Client: Transmits file
+        deactivate Provider
 	end
+	deactivate Client
+
 	Client->>Client: Processes files locally based<br>on implementation metadata<br>(usually by importing them<br>into the current project)
-	Client->>User: Shows confirmation message
+	Client-->User: Shows confirmation message
 	note left of User: User can now utilize<br>the asset in their project.
+
 ```
 
 ### 3.9.2. Complete Version
@@ -487,51 +507,51 @@ sequenceDiagram
 		participant CDN-Service
 	end
 
-    User->>Client: Requests connection to paid.example.com/init
+    User->>+Client: Requests connection to paid.example.com/init
 	note left of User: The provider URI might be<br>bookmarked in the client,<br>if it supports that.
-    Client->>Provider: Query: paid.example.com/init
-	Provider->>Client: Response: Initialization data, containing requirement for authentication
-	Client->>User: Presents required headers<br>as a GUI/form
+    Client->>+Provider: Query: paid.example.com/init
+	Provider->>-Client: Response: Initialization data, containing requirement for authentication
+	Client->>+User: Presents required headers<br>as a GUI/form
 	note left of User: Some data <br>might be cached by the<br> client and does not need<br>to be re-entered. 
 	User->>User: Fills out required header values
 	User->>Client: Confirms inputs of provider data.
 
-	Client->>Provider: Query: paid.example.com/status
-	Provider->>Client: Responds with status data<br>(Login confirmation, username, account balance, ...)
+	Client->>+Provider: Query: paid.example.com/status
+	Provider->>-Client: Responds with status data<br>(Login confirmation, username, account balance, ...)
 
 	User->>User: Fills out asset query<br>as defined by provider<br>(tags, categories, ...)
-	User->>Client: Confirms choices and requests asset list
-	Client->>Provider: Query: paid.example.com/assets?q=<search term>
+	User->>+Client: Confirms choices and requests asset list
+	Client->>+Provider: Query: paid.example.com/assets?q=<search term>
 	note right of Client: The asset query URI<br>was included in the<br>initialization data
 	Provider->>Provider: Searches its database for assets<br>based on query parameters
-	Provider->>Client: Response: List of assets
+	Provider->>-Client: Response: List of assets
 	Client->>User: Presents asset list
-	User->>Client: Selects asset from list
+	User->>+Client: Selects asset from list
 
-	Client->>User: Presents available parameters<br>for querying implementations<br>as GUI/form
+	Client->>-User: Presents available parameters<br>for querying implementations<br>as GUI/form
 	User->>User: Fills out implementations query<br>(texture resolution,LOD,...)
-	User->>Client: Confirms choices and<br>requests implementations
-	Client->>Provider: Query: paid.example.com/implementations?asset=<asset id>&resolution=<resolution>
+	User->>+Client: Confirms choices and<br>requests implementations
+	Client->>+Provider: Query: paid.example.com/implementations?asset=<asset id>&resolution=<resolution>
 	note right of Client: The implementations query URI<br>was included in the asset data
 	Provider->>Provider: Loads implementations<br>for this asset from its database,<br>based on query
-	Provider->>Client: Returns list of possible implementations<br>*without download information*
+	Provider->>-Client: Returns list of possible implementations<br>*without download information*
 	Client->>Client: Validates proposed implementations and<br>selects those that it can handle<br>(based on metadata<br> about file formats and relationships)
-	Client->>User: Presents implementation(s)<br>and asks for confirmation
+	Client->>+User: Presents implementation(s)<br>and asks for confirmation
 	User->>User: Reviews suggested implementation(s)<br>(*price*,files, download size, etc.)
-	User->>Client: Confirms asset import
+	User->>+Client: Confirms asset import
 
 	loop Possibly multiple times, depending on granularity of <br>provider's unlocking model
-		Client->>Provider: Query: paid.example.com/unlock?asset=<asset id>&component=<component id>
-		Provider->>Client: Confirms the unlocking action.
+		Client->>+Provider: Query: paid.example.com/unlock?asset=<asset id>&component=<component id>
+		Provider->>-Client: Confirms the unlocking action.
 	end
 
 	loop For every component
-		Client->>Provider: Query: paid.example.com/downloads?asset=<asset id>&component=<component id>
-		Provider->> CDN-Service: Query: storage-api.example.com/generate-temp-dl-link?file=<example.obj>
-		CDN-Service->>Provider: Responds with<br>temporary download link
-		Provider->>Client: Responds with HTTP redirect to (temporary) download link
-		Client->>CDN-Service: Follows HTTP redirect and initiates HTTP download of component file
-		CDN-Service->>Client: Responds with file
+		Client->>+Provider: Query: paid.example.com/downloads?asset=<asset id>&component=<component id>
+		Provider->>+ CDN-Service: Query: storage-api.example.com/generate-temp-dl-link?file=<example.obj>
+		CDN-Service->>-Provider: Responds with<br>temporary download link
+		Provider->>-Client: Responds with HTTP redirect to (temporary) download link
+		Client->>+CDN-Service: Follows HTTP redirect and initiates HTTP download of component file
+		CDN-Service->>-Client: Responds with file
 	end
 
 	Client->>Client: Processes files locally based<br>on implementation metadata<br>(usually by importing them<br>into the current project)
