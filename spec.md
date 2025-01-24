@@ -1164,7 +1164,7 @@ If the provider does not have insight into the dimensions of the thumbnail that 
 ### 7.3.9. `keywords`
 Contains keywords or tags that the client MAY use for local asset organization.
 
-This datablock is **an array** consisting of `string`s.
+This datablock is **an array** consisting of type `string`.
 
 ## 7.4. Unlocking-related Datablocks
 
