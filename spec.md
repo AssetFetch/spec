@@ -85,6 +85,7 @@ The AssetFetch Protocol aims to provide a standardized way for artists to browse
 		- [7.3.7. `preview_image_supplemental`](#737-preview_image_supplemental)
 		- [7.3.8. `preview_image_thumbnail`](#738-preview_image_thumbnail)
 			- [7.3.8.1. `uris` Structure](#7381-uris-structure)
+		- [7.3.9. `keywords`](#739-keywords)
 	- [7.4. Unlocking-related Datablocks](#74-unlocking-related-datablocks)
 		- [7.4.1. `unlock_balance`](#741-unlock_balance)
 		- [7.4.2. `unlock_queries`](#742-unlock_queries)
@@ -795,11 +796,11 @@ Clients MAY use the id as a display title, but SHOULD prefer the `title` field i
 
 The following datablocks are to be included in the `data` field:
 
-| Requirement | Datablocks                                                                        |
-| ----------- | --------------------------------------------------------------------------------- |
-| MUST        | `implementation_list_query`                                                       |
-| SHOULD      | `preview_image_thumbnail`, `text`                                                 |
-| MAY         | `preview_image_supplemental`, `license`, `authors`, `dimensions`,`web_references` |
+| Requirement | Datablocks                                                                                   |
+| ----------- | -------------------------------------------------------------------------------------------- |
+| MUST        | `implementation_list_query`                                                                  |
+| SHOULD      | `preview_image_thumbnail`, `text`                                                            |
+| MAY         | `preview_image_supplemental`, `license`, `authors`, `dimensions`,`web_references`,`keywords` |
 
 
 ## 5.5. Endpoint: Implementation List (`implementation_list`)
@@ -1160,6 +1161,10 @@ If the image is not a square, its key SHOULD be set based on the pixel count of 
 The image's media type SHOULD be one of `image/png` or `image/jpeg`.
 If the provider does not have insight into the dimensions of the thumbnail that it is referring the client to, it SHOULD use use the key `0` for the thumbnail url.
 
+### 7.3.9. `keywords`
+Contains keywords or tags that the client MAY use for local asset organization.
+
+This datablock is **an array** consisting of type `string`.
 
 ## 7.4. Unlocking-related Datablocks
 

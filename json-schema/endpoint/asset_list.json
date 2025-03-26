@@ -70,6 +70,9 @@
 							},
 							"authors": {
 								"$ref": "../datablock/authors.json"
+							},
+							"keywords": {
+								"$ref": "../datablock/keywords.json"
 							}
 						},
 						"required": [

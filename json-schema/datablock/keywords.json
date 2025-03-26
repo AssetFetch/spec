@@ -1,0 +1,10 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"title": "Datablock: keywords",
+	"$id": "af.datablock.keywords",
+	"description": "Contains keywords or tags that the client MAY use for local asset organization.",
+	"type": "array",
+	"items": {
+		"type": "string"
+	}
+}
